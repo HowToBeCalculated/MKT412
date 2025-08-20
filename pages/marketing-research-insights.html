@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Digital Marketing Dashboard — Sample (Standalone)</title>
+  <style>
+    body{margin:0;font-family:sans-serif;background:#0f1220;color:#e8ecff}
+    .card{background:#161a2a;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:16px;margin:16px}
+    h3{margin-top:0}
+    .chart{position:relative;height:280px}
+    @media(max-width:980px){.chart{height:240px}}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <main>
+  <div class="card">
+    <h3>Revenue & Spend Trend</h3>
+    <div class="chart"><canvas id="revSpend"></canvas></div>
+  </div>
+  <div class="card">
+    <h3>Traffic & Conversion Rate</h3>
+    <div class="chart"><canvas id="trafficCvr"></canvas></div>
+  </div>
+  <div class="card">
+    <h3>Channel Mix — Revenue</h3>
+    <div class="chart"><canvas id="channelRevenue"></canvas></div>
+  </div>
+  <div class="card">
+    <h3>ROAS by Channel</h3>
+    <div class="chart"><canvas id="roasChannel"></canvas></div>
+  </div>
+
+  <script>
+    const labels = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug"];
+    const rand = () => Math.round(Math.random()*1000+200);
+
+    new Chart(document.getElementById('revSpend'),{
+      type:'line',
+      data:{labels,datasets:[{label:'Revenue',data:labels.map(rand)},{label:'Spend',data:labels.map(rand)}]},
+      options:{responsive:true,maintainAspectRatio:false}
+    });
+
+    new Chart(document.getElementById('trafficCvr'),{
+      data:{labels,datasets:[{type:'bar',label:'Sessions',data:labels.map(rand)},{type:'line',label:'CVR %',data:labels.map(()=>Math.random()*10)}]},
+      options:{responsive:true,maintainAspectRatio:false}
+    });
+
+    new Chart(document.getElementById('channelRevenue'),{
+      type:'doughnut',
+      data:{labels:["Paid Search","Organic","Social","Email"],datasets:[{data:[rand(),rand(),rand(),rand()]}]},
+      options:{responsive:true,maintainAspectRatio:false}
+    });
+
+    new Chart(document.getElementById('roasChannel'),{
+      type:'bar',
+      data:{labels:["Paid Search","Organic","Social","Email"],datasets:[{label:'ROAS',data:[1.2,3.4,2.1,4.2]}]},
+      options:{responsive:true,maintainAspectRatio:false}
+    });
+  </script>
+  <script>
+  (function(){
+    // Seeded RNG for reproducible mock data
+    function mulberry32(a){return function(){let t=a+=0x6D2B79F5; t=Math.imul(t^(t>>>15),1|t); t^=t+Math.imul(t^(t>>>7),61|t); return ((t^(t>>>14))>>>0)/4294967296;}}
+    const rand = mulberry32(42);
+
+    const months = ['2025-01','2025-02','2025-03','2025-04','2025-05','2025-06','2025-07','2025-08'];
+    const channels = ['Paid Search','Organic','Paid Social','Email','Display','Referral'];
+
+    // Build mock per-month, per-channel metrics
+    const data = months.map((m, mi)=>{
+      const monthFactor = 0.9 + 0.2*Math.sin((mi/12)*Math.PI*2 + 0.5);
+      const ch = {};
+      channels.forEach((c, ci)=>{
+        const base = 1 + ci*0.08;
+        const scale = base*monthFactor;
+        const impressions = Math.round(800000*scale*(0.7 + rand()*0.6));
+        const ctr = 0.008 + (c==='Paid Search'?0.012:0) + (c==='Email'?0.025:0) + (rand()*0.003);
+        const clicks = Math.round(impressions*ctr);
+        const sessions = Math.round(clicks*(0.86 + rand()*0.08));
+        const cpc = 1.2 + (c==='Paid Search'?0.9: (c==='Paid Social'?0.6: (c==='Display'?0.35:0))) + rand()*0.4;
+        const spend = (c==='Organic'||c==='Referral')? 0 : clicks*cpc;
+        const cvr = 0.008 + (c==='Email'?0.022:0) + (c==='Organic'?0.006:0) + (c==='Paid Search'?0.004:0) + rand()*0.004;
+        const conversions = Math.max(0, Math.round(sessions*cvr));
+        const aov = 95 + (c==='Paid Search'?45:0) + (c==='Email'?20:0) + rand()*40;
+        const revenue = Math.round(conversions*aov);
+        ch[c] = {impressions, clicks, sessions, spend, conversions, revenue};
+      });
+      return {month:m, channels: ch};
+    });
+
+    function totals(metric){
+      return months.map((_, i)=> channels.reduce((acc,c)=> acc + (data[i].channels[c][metric]||0), 0));
+    }
+
+    // Aggregate arrays for the 4 charts
+    const labels = months;
+    const revenue = totals('revenue');
+    const spend = totals('spend');
+    const sessions = totals('sessions');
+    const conversions = totals('conversions');
+    const cvrPct = sessions.map((s,i)=> s ? (conversions[i]/s*100) : 0);
+
+    const chRevenue = channels.map(c=> data.reduce((a,rec)=> a + rec.channels[c].revenue, 0));
+    const chSpend = channels.map(c=> data.reduce((a,rec)=> a + rec.channels[c].spend, 0));
+    const roasByChannel = channels.map((c,idx)=> chRevenue[idx] / Math.max(1, chSpend[idx]));
+
+    // Draw charts (ensure canvases exist)
+    const ctx1 = document.getElementById('revSpend');
+    const ctx2 = document.getElementById('trafficCvr');
+    const ctx3 = document.getElementById('channelRevenue');
+    const ctx4 = document.getElementById('roasChannel');
+
+    if(!(ctx1 && ctx2 && ctx3 && ctx4)) return;
+
+    const charts = [];
+
+    charts.push(new Chart(ctx1, {
+      type:'line',
+      data:{ labels, datasets:[
+        {label:'Revenue', data:revenue, yAxisID:'y1', tension:.35},
+        {label:'Spend', data:spend, yAxisID:'y2', tension:.35}
+      ]},
+      options:{ resizeDelay:150, maintainAspectRatio:false, responsive:true,
+        plugins:{legend:{labels:{color:'#cfd4ff'}}},
+        scales:{
+          x:{ticks:{color:'#a9b0cf'}},
+          y1:{position:'left', ticks:{color:'#a9b0cf', callback:v=>'$'+Math.round(v/1000)+'k'}, grid:{color:'rgba(255,255,255,.06)'}},
+          y2:{position:'right', ticks:{color:'#a9b0cf', callback:v=>'$'+Math.round(v/1000)+'k'}, grid:{display:false}}
+        }
+      }
+    }));
+
+    charts.push(new Chart(ctx2, {
+      data:{ labels, datasets:[
+        {type:'bar', label:'Sessions', data:sessions, yAxisID:'y', order:2},
+        {type:'line', label:'CVR %', data:cvrPct, yAxisID:'y1', order:1}
+      ]},
+      options:{ resizeDelay:150, maintainAspectRatio:false, responsive:true,
+        plugins:{legend:{labels:{color:'#cfd4ff'}}},
+        scales:{
+          y:{ticks:{color:'#a9b0cf', callback:v=> (v/1000)+'k'}},
+          y1:{position:'right', ticks:{color:'#a9b0cf', callback:v=> v+'%'}},
+          x:{ticks:{color:'#a9b0cf'}}
+        }
+      }
+    }));
+
+    charts.push(new Chart(ctx3, {
+      type:'doughnut',
+      data:{ labels:channels, datasets:[{ data: chRevenue }] },
+      options:{ resizeDelay:150, maintainAspectRatio:false, plugins:{legend:{position:'right', labels:{color:'#cfd4ff'}}}}
+    }));
+
+    charts.push(new Chart(ctx4, {
+      type:'bar',
+      data:{ labels:channels, datasets:[{label:'ROAS (x)', data: roasByChannel}] },
+      options:{ resizeDelay:150, maintainAspectRatio:false,
+        plugins:{legend:{display:false}},
+        scales:{ y:{ticks:{color:'#a9b0cf'}, grid:{color:'rgba(255,255,255,.06)'}}, x:{ticks:{color:'#a9b0cf'}} }
+      }
+    }));
+  })();
+  </script>
+  </main>
+</body>
+</html>
