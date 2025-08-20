@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MKT 412 - Bryant University Marketing Hub</title>
+    <!-- Link to Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Link to Inter font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+        /* custom bryant dark grey/black (from image background) */
+        .bg-bryant-dark { background-color: #1a1a1a; }
+        .text-bryant-dark { color: #1a1a1a; }
+        .border-bryant-dark { border-color: #1a1a1a; }
+
+        /* custom bryant gold/orange (from image button) */
+        .bg-bryant-accent { background-color: #e6a700; /* a richer, slightly more orange gold */ }
+        .text-bryant-accent { color: #e6a700; }
+        .border-bryant-accent { border-color: #e6a700; }
+
+        /* general button/card hover effect */
+        .card-hover:hover {
+            transform: translatey(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.4); /* stronger shadow for dark theme */
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-12 px-4">
+
+    <!-- header section -->
+    <header class="w-full max-w-5xl bg-bryant-dark shadow-xl rounded-2xl p-8 mb-10 text-center border-t-8 border-bryant-accent">
+        <h1 class="text-5xl font-extrabold text-white mb-4">MKT 412: Marketing Policy and Problems</h1>
+        <p class="text-xl text-gray-300 leading-relaxed">
+            Welcome, Marketing students! Explore interactive tools and real-world marketing applications.
+        </p>
+        <p class="text-lg text-gray-400 mt-2">
+            Leveraging AI for smarter marketing decisions.
+        </p>
+    </header>
+
+    <!-- Main Content Section - Pages Directory -->
+    <main class="w-full max-w-5xl bg-bryant-dark shadow-xl rounded-2xl p-10">
+        <h2 class="text-4xl font-bold text-white mb-8 text-center">Interactive Learning Modules:</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+            <!-- Card: New Product Simulator -->
+            <a href="pages/new-product-simulator.html" class="block">
+                <div class="card-hover bg-gray-800 text-white p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border-b-4 border-bryant-accent">
+                    <h3 class="text-2xl font-bold mb-3">Product Launch Simulator</h3>
+                    <p class="text-gray-300">Simulate market responses to new product introductions and optimize strategies.</p>
+                </div>
+            </a>
+
+            <!-- Card: Customer Segmentation Dashboard -->
+            <a href="pages/customer-segmentation.html" class="block hidden">
+                <div class="card-hover bg-gray-800 text-white p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border-b-4 border-bryant-accent">
+                    <h3 class="text-2xl font-bold mb-3">Customer Segmentation Dashboard</h3>
+                    <p class="text-gray-300">Visualize customer groups and target audiences with interactive data displays.</p>
+                </div>
+            </a>
+
+            <!-- Card: Sentiment Analysis Explorer -->
+            <a href="pages/sentiment-analysis-explorer.html" class="block hidden">
+                <div class="card-hover bg-gray-800 text-white p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border-b-4 border-bryant-accent">
+                    <h3 class="text-2xl font-bold mb-3">Sentiment Analysis Explorer</h3>
+                    <p class="text-gray-300">Dive into customer feedback and understand public perception instantly.</p>
+                </div>
+            </a>
+
+            <!-- Card: Ad Campaign Optimizer -->
+            <a href="pages/ad-campaign-optimizer.html" class="block hidden">
+                <div class="card-hover bg-gray-800 text-white p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border-b-4 border-bryant-accent">
+                    <h3 class="text-2xl font-bold mb-3">Ad Campaign Optimizer</h3>
+                    <p class="text-gray-300">Experiment with ad budget allocation and channel effectiveness.</p>
+                </div>
+            </a>
+
+            <!-- Card: Market Research Insights -->
+            <a href="pages/market-research-insights.html" class="block hidden">
+                <div class="card-hover bg-gray-800 text-white p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border-b-4 border-bryant-accent">
+                    <h3 class="text-2xl font-bold mb-3">Market Research Insights</h3>
+                    <p class="text-gray-300">Explore tools for competitive analysis and trend forecasting.</p>
+                </div>
+            </a>
+
+            <!-- Card: Chatbot Personalization -->
+            <a href="pages/chatbot-personalization.html" class="block hidden">
+                <div class="card-hover bg-gray-800 text-white p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border-b-4 border-bryant-accent">
+                    <h3 class="text-2xl font-bold mb-3">Chatbot Personalization</h3>
+                    <p class="text-gray-300">Learn how AI enhances customer interaction through conversational interfaces.</p>
+                </div>
+            </a>
+
+            <!-- Add more <a> and <div> elements here for each new HTML file you create in the 'pages' folder -->
+
+        </div>
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="w-full max-w-5xl mt-12 text-center text-gray-400 text-base">
+        <p>Built for MKT 412 at Bryant University. &copy; 2025.</p>
+    </footer>
+
+</body>
+</html>

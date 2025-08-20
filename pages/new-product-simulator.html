@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>New Product Launch Simulator</title>
+  <style>
+    :root {
+      --bg: #0f172a;        /* slate-900 */
+      --panel: #111827;     /* gray-900 */
+      --muted: #1f2937;     /* gray-800 */
+      --text: #e5e7eb;      /* gray-200 */
+      --subtext: #9ca3af;   /* gray-400 */
+      --accent: #38bdf8;    /* sky-400 */
+      --accent2: #a78bfa;   /* violet-400 */
+      --ok: #34d399;        /* emerald-400 */
+      --warn: #f59e0b;      /* amber-500 */
+      --bad: #f87171;       /* red-400 */
+    }
+    * { box-sizing: border-box }
+    html, body { height: 100% }
+    body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji"; background: radial-gradient(1200px 800px at 20% -10%, #1e293b, var(--bg)); color: var(--text) }
+    header { display:flex; align-items:center; justify-content:space-between; padding: 14px 18px; background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0)); border-bottom: 1px solid rgba(255,255,255,0.08) }
+    header h1 { margin:0; font-size: 20px; letter-spacing: .3px }
+    header .subtitle { color: var(--subtext); font-size: 12px }
+
+    .app { display: grid; grid-template-columns: 360px 1fr; gap: 16px; height: calc(100% - 64px) }
+    aside { padding: 14px; overflow:auto; border-right:1px solid rgba(255,255,255,0.06) }
+    main { padding: 14px; overflow:auto }
+
+    .card { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 12px; box-shadow: 0 8px 30px rgba(0,0,0,.25) }
+    .card + .card { margin-top: 12px }
+    .card h2 { font-size: 14px; margin: 0 0 10px 0; font-weight: 600; letter-spacing: .3px }
+
+    .row { display:flex; align-items:center; gap:8px; margin: 6px 0 }
+    .row label { width: 48%; font-size: 12px; color: var(--subtext) }
+    .row input[type="number"], .row input[type="text"] { width: 52%; background: var(--muted); border: 1px solid rgba(255,255,255,.06); color: var(--text); padding:6px 8px; border-radius: 8px }
+    .row input[type="range"] { width: 52% }
+
+    .grid { display:grid; grid-template-columns: repeat(3, 1fr); gap: 10px }
+    .kpi { padding: 10px; border-radius: 12px; background: linear-gradient(180deg, rgba(56,189,248,.08), rgba(167,139,250,.06)); border:1px solid rgba(255,255,255,.07) }
+    .kpi .label { color: var(--subtext); font-size: 11px }
+    .kpi .value { font-size: 18px; font-weight: 700; margin-top: 4px }
+
+    .controls { display:flex; gap:8px; flex-wrap:wrap; margin: 10px 0 2px }
+    button { background: linear-gradient(180deg, #1f2937, #111827); color: var(--text); border:1px solid rgba(255,255,255,.08); border-radius: 10px; padding: 8px 12px; cursor:pointer; transition: .15s transform ease, .15s background ease }
+    button:hover { transform: translateY(-1px); background: #1b2532 }
+
+    canvas { background: #0b1222; border:1px solid rgba(255,255,255,.08); border-radius: 12px; width: 100%; height: 260px }
+    .charts { display:grid; grid-template-columns: 1fr; gap: 12px }
+
+    .pill { display:inline-flex; align-items:center; gap:6px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.03); border-radius:999px; padding:4px 8px; font-size:11px; color: var(--subtext) }
+
+    .event { border-left: 3px solid var(--accent); padding-left: 8px; margin: 8px 0; color: var(--subtext); font-size: 12px }
+
+    .foot { color: var(--subtext); font-size: 11px; text-align:center; margin-top: 8px }
+    .small { font-size: 11px; color: var(--subtext) }
+
+    .range-row { display:grid; grid-template-columns: 52% 36% 12%; align-items:center; gap: 6px }
+    .range-row output { text-align:right; font-variant-numeric: tabular-nums; color: var(--subtext) }
+
+    .flex { display:flex; gap:8px; align-items:center }
+    .flex-1 { flex: 1 }
+    .right { text-align:right }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>New Product Launch Simulator</h1>
+      <div class="subtitle">Hands-on sandbox for pricing, channels, and competitive dynamics</div>
+    </div>
+    <div class="flex">
+      <span class="pill">No libraries • Single file</span>
+      <button id="exportBtn" title="Download current run as JSON">Export</button>
+      <label class="pill" for="importInput" style="cursor:pointer">Import<input id="importInput" type="file" accept="application/json" style="display:none"></label>
+    </div>
+  </header>
+
+  <div class="app">
+    <aside>
+      <div class="card">
+        <h2>Market & Product</h2>
+        <div class="range-row">
+          <label>Market Size (addressable)</label>
+          <output id="marketSizeOut">500,000</output>
+          <span></span>
+          <input id="marketSize" type="range" min="50000" max="5000000" value="500000" step="50000" oninput="syncOut(this, 'marketSizeOut', { f: fmtInt })">
+        </div>
+        <div class="range-row">
+          <label>Initial Awareness (%)</label>
+          <output id="awarenessOut">3%</output>
+          <span></span>
+          <input id="awareness" type="range" min="0" max="25" value="3" step="1" oninput="syncOut(this, 'awarenessOut', { s: '%' })">
+        </div>
+        <div class="range-row">
+          <label>Product-Market Fit</label>
+          <output id="pmfOut">62</output>
+          <span></span>
+          <input id="pmf" type="range" min="20" max="95" value="62" step="1" oninput="syncOut(this, 'pmfOut')">
+        </div>
+        <div class="range-row">
+          <label>Price ($)</label>
+          <output id="priceOut">79</output>
+          <span></span>
+          <input id="price" type="range" min="10" max="300" value="79" step="1" oninput="syncOut(this, 'priceOut', { p: '$' })">
+        </div>
+        <div class="range-row">
+          <label>Unit Cost ($)</label>
+          <output id="costOut">28</output>
+          <span></span>
+          <input id="cost" type="range" min="1" max="220" value="28" step="1" oninput="syncOut(this, 'costOut', { p: '$' })">
+        </div>
+        <div class="row small">
+          <label>Price Elasticity (higher = more sensitive)</label>
+          <input id="elasticity" type="number" min="0.3" max="3" step="0.1" value="1.1">
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Marketing</h2>
+        <div class="range-row">
+          <label>Budget per Period ($)</label>
+          <output id="budgetOut">100,000</output>
+          <span></span>
+          <input id="budget" type="range" min="10000" max="1000000" value="100000" step="10000" oninput="syncOut(this, 'budgetOut', { f: fmtInt })">
+        </div>
+        <div class="small" style="margin-top:8px; margin-bottom:6px">Channel Allocation (must total 100%)</div>
+        <div class="row">
+          <label>Search</label>
+          <input id="chSearch" type="range" min="0" max="100" value="35" step="1" oninput="allocChanged()">
+        </div>
+        <div class="row">
+          <label>Social</label>
+          <input id="chSocial" type="range" min="0" max="100" value="30" step="1" oninput="allocChanged()">
+        </div>
+        <div class="row">
+          <label>Influencers</label>
+          <input id="chInflu" type="range" min="0" max="100" value="20" step="1" oninput="allocChanged()">
+        </div>
+        <div class="row">
+          <label>Email</label>
+          <input id="chEmail" type="range" min="0" max="100" value="15" step="1" oninput="allocChanged()">
+        </div>
+        <div class="row">
+          <label>Total</label>
+          <div class="flex-1 right"><span id="allocTotal" class="mono">100%</span></div>
+        </div>
+        <div class="small">Awareness carryover & decay modeled; CAC has diminishing returns and noise by channel.</div>
+      </div>
+
+      <div class="card">
+        <h2>Competition & Ops</h2>
+        <div class="range-row">
+          <label>Competitor Strength</label>
+          <output id="compOut">0.55</output>
+          <span></span>
+          <input id="compStrength" type="range" min="0" max="1" value="0.55" step="0.05" oninput="syncOut(this, 'compOut')">
+        </div>
+        <div class="range-row">
+          <label>Operational Capacity (units/period)</label>
+          <output id="capOut">20,000</output>
+          <span></span>
+          <input id="capacity" type="range" min="2000" max="100000" value="20000" step="1000" oninput="syncOut(this, 'capOut', { f: fmtInt })">
+        </div>
+        <div class="range-row">
+          <label>Retention per Period</label>
+          <output id="retOut">82%</output>
+          <span></span>
+          <input id="retention" type="range" min="40" max="95" value="82" step="1" oninput="syncOut(this, 'retOut', { s: '%' })">
+        </div>
+        <div class="small">Competitor reacts stochastically; ops can constrain sales.</div>
+      </div>
+
+      <div class="card">
+        <h2>Simulation</h2>
+        <div class="row">
+          <label>Periods</label>
+          <input id="periods" type="number" min="4" max="24" step="1" value="12">
+        </div>
+        <div class="controls">
+          <button id="runOne">Run 1 Period</button>
+          <button id="autoRun">Auto-Run</button>
+          <button id="reset">Reset</button>
+        </div>
+        <div class="small">Each period ≈ 1 month by default.</div>
+      </div>
+
+      <div class="foot">Tip: tweak price & channels, then Auto-Run. Watch revenue, CAC, and market share.</div>
+    </aside>
+
+    <main>
+      <div class="card">
+        <h2>KPIs</h2>
+        <div class="grid">
+          <div class="kpi"><div class="label">Revenue (period)</div><div id="revNow" class="value">—</div></div>
+          <div class="kpi"><div class="label">Profit (period)</div><div id="profNow" class="value">—</div></div>
+          <div class="kpi"><div class="label">CAC (blended)</div><div id="cacNow" class="value">—</div></div>
+          <div class="kpi"><div class="label">CLV (est.)</div><div id="clvNow" class="value">—</div></div>
+          <div class="kpi"><div class="label">Payback (periods)</div><div id="paybackNow" class="value">—</div></div>
+          <div class="kpi"><div class="label">Market Share (cum.)</div><div id="shareNow" class="value">—</div></div>
+        </div>
+      </div>
+
+      <div class="card charts">
+        <h2>Charts</h2>
+        <canvas id="chartRevenue" width="1200" height="300"></canvas>
+        <canvas id="chartShare" width="1200" height="300"></canvas>
+        <canvas id="chartAwareness" width="1200" height="300"></canvas>
+      </div>
+
+      <div class="card">
+        <h2>Events & Log</h2>
+        <div id="events"></div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // ---------- Utilities ----------
+    const $ = sel => document.querySelector(sel);
+    const fmtInt = n => (+n).toLocaleString();
+    const fmtMoney = n => "$" + Math.round(n).toLocaleString();
+    const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+
+    function syncOut(input, outId, {p="", s="", f=null}={}) {
+      const v = input.value; $("#"+outId).textContent = p + (f ? f(v) : v) + s;
+    }
+
+    function allocChanged() {
+      const vals = ["#chSearch", "#chSocial", "#chInflu", "#chEmail"].map(s=>+$(s).value);
+      const total = vals.reduce((a,b)=>a+b,0);
+      $("#allocTotal").textContent = total + "%";
+      $("#allocTotal").style.color = total === 100 ? "" : (total < 100 ? "var(--warn)" : "var(--bad)");
+    }
+
+    // ---------- Model State ----------
+    const state = {
+      t: 0,
+      periods: [],
+      awareness: +$("#awareness").value / 100, // as fraction
+      rngSeed: Math.random()*1e9 | 0,
+    };
+
+    function readInputs() {
+      const channels = {
+        search: +$("#chSearch").value,
+        social: +$("#chSocial").value,
+        influ: +$("#chInflu").value,
+        email: +$("#chEmail").value,
+      };
+      const allocTotal = Object.values(channels).reduce((a,b)=>a+b,0);
+      return {
+        marketSize: +$("#marketSize").value,
+        pmf: +$("#pmf").value / 100,
+        price: +$("#price").value,
+        cost: +$("#cost").value,
+        elasticity: +$("#elasticity").value,
+        budget: +$("#budget").value,
+        channels,
+        allocOK: allocTotal === 100,
+        compStrength: +$("#compStrength").value,
+        capacity: +$("#capacity").value,
+        retention: +$("#retention").value / 100,
+        periods: +$("#periods").value
+      };
+    }
+
+    // Simple seeded RNG for reproducibility across a run
+    function mulberry32(a) {
+      return function() {
+        var t = a += 0x6D2B79F5;
+        t = Math.imul(t ^ t >>> 15, t | 1);
+        t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      }
+    }
+
+    let rand = mulberry32(state.rngSeed);
+
+    // ---------- Core Simulation ----------
+    function onePeriod() {
+      const inp = readInputs();
+      if (!inp.allocOK) {
+        logEvent("Channel allocation must total 100%.", "warn");
+        return;
+      }
+
+      // Awareness dynamics: spend builds awareness with diminishing returns + decay
+      const channelEff = { search: 1.1, social: 1.0, influ: 1.3, email: 0.6 };
+      const allocFrac = Object.fromEntries(Object.entries(inp.channels).map(([k,v])=>[k, v/100]));
+      const effSpend = Object.entries(allocFrac).reduce((sum, [k, f]) => sum + (Math.pow(f, 0.9) * channelEff[k]), 0);
+      const build = (Math.log(1 + inp.budget/40000) * 0.02) * effSpend; // awareness build
+      const decay = 0.015; // natural decay per period
+      state.awareness = clamp((state.awareness + build - decay), 0, 0.95);
+
+      // Demand side
+      const referencePrice = 99; // anchor for elasticity
+      const rel = (inp.price - referencePrice) / Math.max(referencePrice, 1);
+      const priceFactor = Math.exp(-inp.elasticity * rel); // >1 if below ref price, <1 if above
+
+      const baseConversion = 0.07 * inp.pmf; // core conversion tuned by PMF
+      const conv = clamp(baseConversion * priceFactor, 0.005, 0.35);
+
+      const potential = Math.round(inp.marketSize * state.awareness * conv);
+
+      // CAC by channel: diminishing returns & noise
+      const baseCAC = 22; // baseline $ per acquired user
+      const channelCAC = (k) => baseCAC / (channelEff[k]) * (1 + Math.pow(allocFrac[k], 1.2));
+      const blendedCAC = Object.keys(allocFrac).reduce((s,k)=> s + allocFrac[k] * channelCAC(k), 0) * (0.9 + 0.2*rand());
+
+      // Spend-limited acquisitions
+      const acqBySpend = Math.floor(inp.budget / Math.max(1, blendedCAC));
+      let demand = Math.min(potential, acqBySpend);
+
+      // Competitor reaction and share tug-of-war
+      const compPulse = (rand() < 0.25) ? (0.9 + 0.3*rand()) * inp.compStrength : inp.compStrength; // sometimes spike
+      const ourShareTilt = clamp(0.55 + 0.25*(inp.pmf - 0.5) + 0.1*(referencePrice - inp.price)/referencePrice - 0.2*compPulse, 0.1, 0.9);
+      const attainable = Math.round(demand * ourShareTilt);
+
+      // Operational cap
+      const units = Math.min(attainable, inp.capacity);
+
+      // Stochastic events
+      let eventNote = null;
+      const r = rand();
+      if (r < 0.05) {
+        // PR win: spike awareness and conv a bit next period
+        state.awareness = clamp(state.awareness + 0.02, 0, 0.95);
+        eventNote = "PR win boosts awareness.";
+      } else if (r < 0.09) {
+        // Supply hiccup this period
+        const cut = 0.2 + 0.4*rand();
+        const old = units;
+        const reduced = Math.max(0, Math.floor(units * (1 - cut)));
+        eventNote = `Supply hiccup (-${Math.round(cut*100)}%) capped units from ${old.toLocaleString()} to ${reduced.toLocaleString()}.`;
+        // apply cap retroactively
+        demand = Math.min(demand, reduced);
+      } else if (r < 0.13) {
+        // Competitor promo
+        eventNote = "Competitor promo nicks your share this period.";
+      }
+
+      const sold = Math.min(units, demand);
+
+      // Financials
+      const revenue = sold * inp.price;
+      const cogs = sold * inp.cost;
+      const marketing = inp.budget;
+      const gross = revenue - cogs;
+      const profit = gross - marketing;
+
+      // Customer economics
+      const marginPerUnit = Math.max(0, inp.price - inp.cost);
+      const clv = marginPerUnit * (inp.retention / Math.max(0.01, 1 - inp.retention));
+      const payback = (blendedCAC <= 0 || marginPerUnit <= 0) ? Infinity : (blendedCAC / marginPerUnit);
+
+      // Share tracking (cumulative vs market)
+      const totalEver = state.periods.reduce((s,p)=> s + p.sold, 0) + sold;
+      const cumShare = clamp(totalEver / Math.max(1, inp.marketSize), 0, 1);
+
+      const out = { t: state.t, awareness: state.awareness, potential, acqBySpend, demand, attainable, sold, revenue, profit, blendedCAC, clv, payback, cumShare, eventNote };
+      state.periods.push(out);
+      state.t++;
+
+      updateUI(out);
+    }
+
+    // ---------- UI & Charts ----------
+    function updateUI(latest) {
+      $("#revNow").textContent = fmtMoney(latest.revenue);
+      $("#profNow").textContent = (latest.profit>=0?"":"-") + fmtMoney(Math.abs(latest.profit));
+      $("#cacNow").textContent = fmtMoney(latest.blendedCAC);
+      $("#clvNow").textContent = fmtMoney(latest.clv);
+      $("#paybackNow").textContent = (latest.payback===Infinity?"∞": latest.payback.toFixed(1));
+      $("#shareNow").textContent = (latest.cumShare*100).toFixed(1) + "%";
+
+      if (latest.eventNote) logEvent(latest.eventNote);
+
+      drawAllCharts();
+    }
+
+    function drawAllCharts() {
+      const rev = state.periods.map(p=>p.revenue);
+      const share = state.periods.map(p=>p.cumShare*100);
+      const aware = state.periods.map(p=>p.awareness*100);
+      drawLineChart($("#chartRevenue"), rev, { title: "Revenue per Period" });
+      drawLineChart($("#chartShare"), share, { title: "Cumulative Market Share (%)", suffix: "%" });
+      drawLineChart($("#chartAwareness"), aware, { title: "Awareness (%)", suffix: "%" });
+    }
+
+    function drawLineChart(canvas, series, { title="", suffix="" }={}) {
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0,0,W,H);
+
+      // Title
+      ctx.fillStyle = 'rgba(255,255,255,.8)';
+      ctx.font = '14px ui-sans-serif, system-ui, -apple-system';
+      ctx.fillText(title, 12, 20);
+
+      const pad = { l: 46, r: 12, t: 28, b: 28 };
+      const n = series.length;
+      const max = Math.max(1, ...series);
+      const min = 0; // baseline
+
+      // Grid
+      ctx.strokeStyle = 'rgba(255,255,255,.08)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let i=0;i<=4;i++) {
+        const y = pad.t + (H - pad.t - pad.b) * (i/4);
+        ctx.moveTo(pad.l, y);
+        ctx.lineTo(W - pad.r, y);
+      }
+      ctx.stroke();
+
+      // Y labels
+      ctx.fillStyle = 'rgba(255,255,255,.6)';
+      ctx.font = '11px ui-sans-serif, system-ui, -apple-system';
+      for (let i=0;i<=4;i++) {
+        const v = min + (max-min) * (i/4);
+        const y = pad.t + (H - pad.t - pad.b) * (i/4) + 4;
+        const label = suffix === '%' ? v.toFixed(0)+suffix : (v>=1000? Math.round(v/1000)+"k" : Math.round(v)).toString();
+        ctx.fillText(label, 6, y);
+      }
+
+      if (n === 0) return;
+
+      // Line
+      ctx.strokeStyle = 'rgba(56,189,248,.9)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i=0;i<n;i++) {
+        const x = pad.l + (W - pad.l - pad.r) * (n<=1?0.5: i/(n-1));
+        const y = pad.t + (H - pad.t - pad.b) * (1 - (series[i]-min)/(max-min));
+        if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+
+      // Points
+      ctx.fillStyle = 'rgba(167,139,250,.9)';
+      for (let i=0;i<n;i++) {
+        const x = pad.l + (W - pad.l - pad.r) * (n<=1?0.5: i/(n-1));
+        const y = pad.t + (H - pad.t - pad.b) * (1 - (series[i]-min)/(max-min));
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI*2);
+        ctx.fill();
+      }
+
+      // X axis labels
+      ctx.fillStyle = 'rgba(255,255,255,.6)';
+      ctx.font = '11px ui-sans-serif, system-ui, -apple-system';
+      for (let i=0;i<n;i++) {
+        const x = pad.l + (W - pad.l - pad.r) * (n<=1?0.5: i/(n-1));
+        ctx.fillText((i+1).toString(), x-3, H-10);
+      }
+    }
+
+    function logEvent(text, tone="info") {
+      const el = document.createElement('div');
+      el.className = 'event';
+      el.style.borderLeftColor = tone==='warn'? 'var(--warn)' : tone==='bad'? 'var(--bad)' : 'var(--accent)';
+      el.textContent = `[P${state.t+1}] ` + text;
+      $("#events").prepend(el);
+    }
+
+    // ---------- Controls ----------
+    $("#runOne").addEventListener('click', onePeriod);
+
+    let autoTimer = null;
+    $("#autoRun").addEventListener('click', () => {
+      const { periods } = readInputs();
+      if (autoTimer) { clearInterval(autoTimer); autoTimer = null; return; }
+      autoTimer = setInterval(() => {
+        if (state.t >= periods) { clearInterval(autoTimer); autoTimer = null; return; }
+        onePeriod();
+      }, 350);
+    });
+
+    $("#reset").addEventListener('click', () => {
+      state.t = 0; state.periods = []; state.awareness = +$("#awareness").value / 100; state.rngSeed = Math.random()*1e9|0; rand = mulberry32(state.rngSeed);
+      $("#events").innerHTML = '';
+      drawAllCharts();
+      ["#revNow", "#profNow", "#cacNow", "#clvNow", "#paybackNow", "#shareNow"].forEach(id => $(id).textContent = '—');
+    });
+
+    // Export/Import
+    $("#exportBtn").addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify({ state }, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'launch-sim-export.json'; a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    $("#importInput").addEventListener('change', (e) => {
+      const file = e.target.files[0]; if (!file) return;
+      const fr = new FileReader();
+      fr.onload = () => {
+        try {
+          const data = JSON.parse(fr.result);
+          if (data && data.state) {
+            Object.assign(state, data.state);
+            rand = mulberry32(state.rngSeed);
+            drawAllCharts();
+            if (state.periods.length) updateUI(state.periods[state.periods.length-1]);
+            logEvent('Imported previous run.');
+          }
+        } catch (err) { alert('Invalid file.'); }
+      };
+      fr.readAsText(file);
+      e.target.value = '';
+    });
+
+    // Initialize UI text and charts
+    [
+      ["#marketSize", "marketSizeOut", fmtInt],
+      ["#awareness", "awarenessOut", null, '%'],
+      ["#pmf", "pmfOut"],
+      ["#price", "priceOut", null, '', '$'],
+      ["#cost", "costOut", null, '', '$'],
+      ["#budget", "budgetOut", fmtInt],
+      ["#compStrength", "compOut"],
+      ["#capacity", "capOut", fmtInt],
+      ["#retention", "retOut", null, '%']
+    ].forEach(([sel, out, f, s='', p='']) => syncOut($(sel), out, { f, s, p }));
+    allocChanged();
+    drawAllCharts();
+  </script>
+</body>
+</html>
