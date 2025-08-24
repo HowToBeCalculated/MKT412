@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mini TAM / SAM / SOM Simulator</title>
+  <style>
+    :root {
+      /* Bryant University palette per project brief */
+      --bg: #1a1a1a;         /* near-black */
+      --fg: #e0e0e0;         /* light gray text */
+      --accent: #e6a700;     /* Bryant gold */
+      --card: #222222;       /* dark card */
+      --muted: #bdbdbd;      /* muted text */
+      --grid: #333333;       /* chart grid */
+      --good: #50c878;       /* emerald for positive */
+      --bad: #ff6b6b;        /* soft red for negative */
+    }
+
+    /* Base */
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.35;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Layout */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 16px 64px;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-dot {
+      width: 14px; height: 14px; border-radius: 50%; background: var(--accent);
+      box-shadow: 0 0 0 4px color-mix(in sRGB, var(--accent) 25%, transparent);
+    }
+    h1 {
+      font-size: clamp(20px, 3vw, 28px);
+      margin: 0; font-weight: 700;
+    }
+    .subtle { color: var(--muted); font-size: 0.95rem; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 980px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid #2a2a2a;
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.25);
+    }
+    .card h3 { margin: 0 0 12px; font-size: 1.05rem; letter-spacing: .2px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 720px) { .row { grid-template-columns: 1fr; } }
+
+    /* Inputs */
+    .field { display: grid; gap: 6px; }
+    .field label { font-size: 0.9rem; color: var(--muted); }
+    .input {
+      background: #1b1b1b; color: var(--fg);
+      border: 1px solid #2d2d2d; border-radius: 10px;
+      padding: 10px 12px; font-size: 0.98rem;
+      outline: none; transition: border-color .15s ease;
+    }
+    .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in sRGB, var(--accent) 20%, transparent); }
+
+    .slider-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; }
+    input[type="range"] { width: 100%; }
+
+    .switch { display: inline-flex; align-items: center; gap: 8px; user-select: none; cursor: pointer; }
+    .switch input { display: none; }
+    .switch .track { width: 44px; height: 24px; border-radius: 999px; background: #444; position: relative; transition: background .2s ease; }
+    .switch .thumb { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; background: white; border-radius: 999px; transition: left .2s ease; }
+    .switch input:checked + .track { background: var(--accent); }
+    .switch input:checked + .track .thumb { left: 23px; }
+
+    /* KPI Chips */
+    .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 12px; }
+    @media (max-width: 980px) { .kpis { grid-template-columns: 1fr; } }
+    .kpi { background: #1d1d1d; border: 1px solid #2a2a2a; border-radius: 12px; padding: 12px; }
+    .kpi .label { color: var(--muted); font-size: 0.82rem; letter-spacing: .2px; }
+    .kpi .value { font-weight: 700; font-size: 1.2rem; margin-top: 4px; }
+
+    /* Charts */
+    .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 980px) { .charts { grid-template-columns: 1fr; } }
+    .chart { background: #1b1b1b; border: 1px solid #2a2a2a; border-radius: 12px; padding: 12px; }
+    .chart h4 { margin: 0 0 8px; font-size: .95rem; color: var(--muted); }
+    canvas { width: 100%; height: 220px; display: block; border-radius: 10px; background: #141414; }
+
+    /* Segments */
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 6px 8px; text-align: left; border-bottom: 1px dashed #333; font-size: .92rem; }
+    th { color: var(--muted); font-weight: 600; }
+    .seg-actions { display: flex; gap: 8px; }
+    .btn {
+      background: var(--accent); color: #1a1a1a; border: none; border-radius: 10px;
+      padding: 8px 12px; font-weight: 700; cursor: pointer; transition: transform .04s ease, filter .2s ease; font-size: .95rem;
+    }
+    .btn:hover { filter: brightness(1.05); }
+    .btn:active { transform: translateY(1px); }
+    .btn.secondary { background: #2a2a2a; color: var(--fg); border: 1px solid #3a3a3a; }
+
+    /* Footer note */
+    .note { margin-top: 10px; color: var(--muted); font-size: .85rem; }
+
+    /* Tooltip style */
+    .help { cursor: help; border-bottom: 1px dotted var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="title">
+        <div class="logo-dot" aria-hidden="true"></div>
+        <div>
+          <h1>Mini TAM / SAM / SOM Simulator</h1>
+          <div class="subtle">Adjust assumptions and watch your market funnel update in real time. All figures are annual by default.</div>
+        </div>
+      </div>
+      <label class="switch" title="Toggle segmented mode for per‑segment assumptions">
+        <input id="segMode" type="checkbox" />
+        <span class="track"><span class="thumb"></span></span>
+        <span>Segmented mode</span>
+      </label>
+    </header>
+
+    <div class="grid">
+      <!-- Left: Inputs -->
+      <section class="card" aria-labelledby="assumptionsTitle">
+        <h3 id="assumptionsTitle">Assumptions</h3>
+
+        <div id="basicInputs" class="row" role="group" aria-label="Basic inputs">
+          <div class="field">
+            <label for="population">Addressable population (people)</label>
+            <input id="population" class="input" type="number" min="0" step="1000" value="10000000" />
+          </div>
+          <div class="field">
+            <label for="usageRate">Category usage rate <span class="subtle">(% of population that buys in category)</span></label>
+            <div class="slider-row">
+              <input id="usageRate" type="range" min="0" max="100" step="0.1" value="30" />
+              <input id="usageRateNum" class="input" type="number" min="0" max="100" step="0.1" value="30" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="spend">Annual spend per customer (USD)</label>
+            <input id="spend" class="input" type="number" min="0" step="1" value="100" />
+          </div>
+        </div>
+
+        <div id="segmentInputs" class="card" style="display:none; margin-top:12px;">
+          <div class="row" style="margin-bottom:8px;">
+            <div class="subtle">Define up to 6 segments. Shares should sum ≤ 100% (remainder is ignored).</div>
+            <div class="seg-actions" style="justify-content:flex-end;">
+              <button id="addSeg" class="btn secondary" type="button" aria-label="Add segment">+ Add segment</button>
+              <button id="resetSeg" class="btn secondary" type="button">Reset segments</button>
+            </div>
+          </div>
+          <div style="overflow:auto;">
+            <table aria-label="Segments">
+              <thead>
+                <tr>
+                  <th style="min-width:120px;">Segment</th>
+                  <th title="% of total population in this segment">Pop. share %</th>
+                  <th title="% of this segment who buy in category">Usage %</th>
+                  <th title="Avg annual spend per customer in this segment">Spend $</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="segBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px;">
+          <div class="field">
+            <label for="serviceable">Serviceable fraction <span class="help" title="% of TAM you can actually serve due to geography, regulation, channels, etc.">(SAM)</span></label>
+            <div class="slider-row">
+              <input id="serviceable" type="range" min="0" max="100" step="0.1" value="60" />
+              <input id="serviceableNum" class="input" type="number" min="0" max="100" step="0.1" value="60" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="share">Target market share capture <span class="help" title="% of SAM you expect to capture at steady state">(SOM)</span></label>
+            <div class="slider-row">
+              <input id="share" type="range" min="0" max="100" step="0.1" value="5" />
+              <input id="shareNum" class="input" type="number" min="0" max="100" step="0.1" value="5" />
+            </div>
+          </div>
+        </div>
+
+        <div class="note">Definitions: <strong>TAM</strong> = total demand (customers × spend) for your category. <strong>SAM</strong> = portion of TAM you can serve. <strong>SOM</strong> = your expected share of SAM at steady state.</div>
+      </section>
+
+      <!-- Right: KPIs & Insights -->
+      <section class="card">
+        <h3>Results</h3>
+        <div class="kpis">
+          <div class="kpi"><div class="label">TAM (customers)</div><div class="value" id="tamCust">—</div></div>
+          <div class="kpi"><div class="label">SAM (customers)</div><div class="value" id="samCust">—</div></div>
+          <div class="kpi"><div class="label">SOM (customers)</div><div class="value" id="somCust">—</div></div>
+          <div class="kpi"><div class="label">TAM (revenue)</div><div class="value" id="tamRev">—</div></div>
+          <div class="kpi"><div class="label">SAM (revenue)</div><div class="value" id="samRev">—</div></div>
+          <div class="kpi"><div class="label">SOM (revenue)</div><div class="value" id="somRev">—</div></div>
+        </div>
+        <div class="card" style="margin-top:12px;">
+          <div class="subtle" style="margin-bottom:6px;">Auto‑insights</div>
+          <ul id="insights" style="margin:0; padding-left:18px;">
+            <li>Adjust assumptions to generate insights…</li>
+          </ul>
+        </div>
+      </section>
+    </div>
+
+    <!-- Charts -->
+    <section class="charts" style="margin-top:16px;">
+      <div class="chart">
+        <h4>Market Funnel (Customers)</h4>
+        <canvas id="custFunnel" aria-label="Customers funnel chart" role="img"></canvas>
+      </div>
+      <div class="chart">
+        <h4>Revenue Potential (USD)</h4>
+        <canvas id="revBars" aria-label="Revenue bars chart" role="img"></canvas>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:16px;">
+      <h3 style="margin-bottom:8px;">Teaching Tips</h3>
+      <ol class="subtle" style="margin:0; padding-left:18px;">
+        <li>Have teams justify <em>why</em> their SAM is constrained (geography, regulation, channel coverage). Force trade‑offs.</li>
+        <li>Ask for a one‑liner on what would unlock a 2× SAM. This drives strategic thinking.</li>
+        <li>Compare two teams with the same TAM but different SOM—what assumptions differ? Who is more realistic?</li>
+      </ol>
+    </section>
+  </div>
+
+  <script>
+    // ===== Utilities =====
+    const clamp = (x, a, b) => Math.min(Math.max(x, a), b);
+    const fmtNum = n => (isFinite(n) ? Math.round(n).toLocaleString('en-US') : '—');
+    const fmtUSD = n => (isFinite(n) ? n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }) : '—');
+
+    function linkSlider(slider, number) {
+      const sync = v => { slider.value = v; number.value = v; };
+      slider.addEventListener('input', () => { number.value = slider.value; dispatchUpdate(); });
+      number.addEventListener('input', () => { const v = clamp(Number(number.value || 0), Number(slider.min), Number(slider.max)); slider.value = v; dispatchUpdate(); });
+      return sync;
+    }
+
+    // High‑DPI canvas setup
+    function prepCanvas(canvas) {
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.max(300, rect.width * dpr);
+      canvas.height = Math.max(180, rect.height * dpr);
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      return ctx;
+    }
+
+    // Simple horizontal bar chart (funnel‑ish)
+    function drawHorizontalBars(canvas, labels, values, colors) {
+      const ctx = prepCanvas(canvas);
+      const W = canvas.getBoundingClientRect().width; // CSS pixels
+      const H = canvas.getBoundingClientRect().height;
+      ctx.clearRect(0, 0, W, H);
+
+      // grid
+      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--grid').trim();
+      ctx.lineWidth = 1; ctx.setLineDash([4, 6]);
+      for (let x = 0; x <= 5; x++) {
+        const gx = 16 + x * (W - 32) / 5;
+        ctx.beginPath(); ctx.moveTo(gx, 10); ctx.lineTo(gx, H - 10); ctx.stroke();
+      }
+      ctx.setLineDash([]);
+
+      const maxV = Math.max(1, ...values);
+      const barH = (H - 40) / labels.length;
+
+      ctx.font = '12px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#e0e0e0';
+
+      labels.forEach((lb, i) => {
+        const y = 20 + i * barH + barH/2;
+        const v = values[i];
+        const w = (W - 160) * (v / maxV);
+        // label
+        ctx.fillStyle = '#bdbdbd';
+        ctx.fillText(lb, 12, y);
+        // bar
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.fillRect(140, y - 10, Math.max(2, w), 20);
+        // value
+        ctx.fillStyle = '#e0e0e0';
+        const txt = fmtNum(v);
+        ctx.fillText(txt, 150 + Math.max(2, w) + 8, y);
+      });
+    }
+
+    // Simple vertical bar chart
+    function drawVerticalBars(canvas, labels, values, colors) {
+      const ctx = prepCanvas(canvas);
+      const W = canvas.getBoundingClientRect().width;
+      const H = canvas.getBoundingClientRect().height;
+      ctx.clearRect(0, 0, W, H);
+
+      // axes
+      const left = 54, bottom = H - 26, top = 14, right = W - 10;
+      const maxV = Math.max(1, ...values);
+
+      // y grid
+      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--grid').trim();
+      ctx.lineWidth = 1; ctx.setLineDash([4,6]);
+      const ticks = 5;
+      for (let t = 0; t <= ticks; t++) {
+        const y = bottom - (bottom - top) * (t / ticks);
+        ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(right, y); ctx.stroke();
+      }
+      ctx.setLineDash([]);
+
+      const barW = (right - left) / (values.length * 1.8);
+      const gap = barW * 0.8;
+
+      ctx.font = '12px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial';
+      ctx.textBaseline = 'middle';
+
+      values.forEach((v, i) => {
+        const x = left + i * (barW + gap) + gap;
+        const h = (bottom - top) * (v / maxV);
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.fillRect(x, bottom - h, barW, h);
+        // labels
+        ctx.save();
+        ctx.translate(x + barW/2, bottom + 12);
+        ctx.rotate(-Math.PI/16);
+        ctx.fillStyle = '#bdbdbd';
+        ctx.fillText(labels[i], -ctx.measureText(labels[i]).width/2, 0);
+        ctx.restore();
+        // values
+        ctx.fillStyle = '#e0e0e0';
+        ctx.fillText(fmtUSD(v), x, bottom - h - 10);
+      });
+
+      // y axis labels (min/max)
+      ctx.fillStyle = '#bdbdbd';
+      ctx.fillText('0', left - 20, bottom);
+      ctx.fillText(fmtUSD(maxV), left - 20, top + 8);
+    }
+
+    // ===== State & Logic =====
+    const segModeEl = document.getElementById('segMode');
+
+    // Basic inputs
+    const populationEl = document.getElementById('population');
+    const usageRateEl = document.getElementById('usageRate');
+    const usageRateNumEl = document.getElementById('usageRateNum');
+    const spendEl = document.getElementById('spend');
+
+    const serviceableEl = document.getElementById('serviceable');
+    const serviceableNumEl = document.getElementById('serviceableNum');
+    const shareEl = document.getElementById('share');
+    const shareNumEl = document.getElementById('shareNum');
+
+    // Sections
+    const basicInputs = document.getElementById('basicInputs');
+    const segmentInputs = document.getElementById('segmentInputs');
+
+    // KPIs
+    const tamCustEl = document.getElementById('tamCust');
+    const samCustEl = document.getElementById('samCust');
+    const somCustEl = document.getElementById('somCust');
+    const tamRevEl = document.getElementById('tamRev');
+    const samRevEl = document.getElementById('samRev');
+    const somRevEl = document.getElementById('somRev');
+
+    // Charts
+    const custFunnel = document.getElementById('custFunnel');
+    const revBars = document.getElementById('revBars');
+
+    // Insights
+    const insightsEl = document.getElementById('insights');
+
+    // Link sliders ↔ numeric inputs
+    linkSlider(usageRateEl, usageRateNumEl);
+    linkSlider(serviceableEl, serviceableNumEl);
+    linkSlider(shareEl, shareNumEl);
+
+    // Segment table
+    const segBody = document.getElementById('segBody');
+    const addSegBtn = document.getElementById('addSeg');
+    const resetSegBtn = document.getElementById('resetSeg');
+
+    let segments = [];
+
+    function defaultSegments() {
+      return [
+        { name: 'Urban Professionals', sharePct: 40, usagePct: 40, spend: 120 },
+        { name: 'Suburban Families',   sharePct: 35, usagePct: 25, spend: 90  },
+        { name: 'Value Seekers',       sharePct: 25, usagePct: 15, spend: 60  },
+      ];
+    }
+
+    function renderSegments() {
+      segBody.innerHTML = '';
+      segments.forEach((seg, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><input aria-label="Segment name" class="input" style="width:100%;" value="${seg.name}" data-k="name" data-i="${idx}"></td>
+          <td><input aria-label="Population share percent" class="input" type="number" min="0" max="100" step="0.1" value="${seg.sharePct}" data-k="sharePct" data-i="${idx}"></td>
+          <td><input aria-label="Usage percent" class="input" type="number" min="0" max="100" step="0.1" value="${seg.usagePct}" data-k="usagePct" data-i="${idx}"></td>
+          <td><input aria-label="Spend in dollars" class="input" type="number" min="0" step="1" value="${seg.spend}" data-k="spend" data-i="${idx}"></td>
+          <td><button class="btn secondary" data-del="${idx}" type="button">Remove</button></td>
+        `;
+        segBody.appendChild(tr);
+      });
+    }
+
+    segBody.addEventListener('input', (e) => {
+      const t = e.target; if (!t.dataset) return;
+      const i = Number(t.dataset.i); const k = t.dataset.k;
+      if (k && segments[i]) {
+        segments[i][k] = (k === 'name') ? String(t.value) : Number(t.value);
+        dispatchUpdate();
+      }
+    });
+    segBody.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-del]');
+      if (btn) {
+        const i = Number(btn.dataset.del);
+        segments.splice(i, 1);
+        renderSegments();
+        dispatchUpdate();
+      }
+    });
+
+    addSegBtn.addEventListener('click', () => {
+      if (segments.length >= 6) return alert('Max 6 segments');
+      segments.push({ name: `Segment ${segments.length+1}`, sharePct: 10, usagePct: 15, spend: 80 });
+      renderSegments();
+      dispatchUpdate();
+    });
+    resetSegBtn.addEventListener('click', () => {
+      segments = defaultSegments();
+      renderSegments();
+      dispatchUpdate();
+    });
+
+    // Toggle segmented mode
+    segModeEl.addEventListener('change', () => {
+      const on = segModeEl.checked;
+      segmentInputs.style.display = on ? 'block' : 'none';
+      basicInputs.style.opacity = on ? 0.4 : 1;
+      Array.from(basicInputs.querySelectorAll('input')).forEach(el => el.disabled = on);
+      dispatchUpdate();
+    });
+
+    // Update on any input change
+    document.addEventListener('input', (e) => {
+      if (e.target.closest('.container')) {
+        // Debounced by requestAnimationFrame in dispatchUpdate
+      }
+    }, true);
+
+    let rafToken = 0;
+    function dispatchUpdate() {
+      cancelAnimationFrame(rafToken);
+      rafToken = requestAnimationFrame(updateAll);
+    }
+
+    function calcFromBasic() {
+      const population = Number(populationEl.value || 0);
+      const usageRate = Number(usageRateEl.value || 0) / 100; // 0-1
+      const spend = Number(spendEl.value || 0);
+      const serviceable = Number(serviceableEl.value || 0) / 100;
+      const share = Number(shareEl.value || 0) / 100;
+
+      const tamCustomers = population * usageRate;
+      const tamRevenue = tamCustomers * spend;
+      const samCustomers = tamCustomers * serviceable;
+      const samRevenue = samCustomers * spend;
+      const somCustomers = samCustomers * share;
+      const somRevenue = somCustomers * spend;
+
+      return { population, spend, serviceable, share, tamCustomers, tamRevenue, samCustomers, samRevenue, somCustomers, somRevenue };
+    }
+
+    function calcFromSegments() {
+      const population = Number(populationEl.value || 0); // still needed as base
+      const serviceable = Number(serviceableEl.value || 0) / 100;
+      const share = Number(shareEl.value || 0) / 100;
+
+      let tamCustomers = 0;
+      let tamRevenue = 0;
+      let shareTotal = 0;
+      segments.forEach(seg => {
+        const popSeg = population * (Number(seg.sharePct||0) / 100);
+        const users = popSeg * (Number(seg.usagePct||0) / 100);
+        tamCustomers += users;
+        tamRevenue += users * Number(seg.spend||0);
+        shareTotal += Number(seg.sharePct||0);
+      });
+
+      const samCustomers = tamCustomers * serviceable;
+      const samRevenue = tamRevenue * serviceable; // assumes same serviceability across segments
+      const somCustomers = samCustomers * share;
+      const somRevenue = samRevenue * share;
+
+      return { population, spend: null, serviceable, share, tamCustomers, tamRevenue, samCustomers, samRevenue, somCustomers, somRevenue };
+    }
+
+    function updateInsights(state) {
+      const bullets = [];
+      // Sensitivity: +/-10% on usage, serviceable, share → effect on SOM revenue
+      const baseline = state.somRevenue;
+
+      function delta(pctKey) {
+        const clone = { ...state };
+        const adjust = 1.10;
+        if (pctKey === 'usage') return baseline * 0.10; // linear in basic mode; same proportion in seg mode overall
+        if (pctKey === 'serviceable') return baseline * 0.10;
+        if (pctKey === 'share') return baseline * 0.10;
+        return 0;
+      }
+      const deltas = [ ['Category usage', delta('usage')], ['Serviceable fraction', delta('serviceable')], ['Share capture', delta('share')] ];
+      deltas.sort((a,b)=>b[1]-a[1]);
+      bullets.push(`Biggest lever on SOM $ (±10% change): <strong>${deltas[0][0]}</strong>.`);
+
+      if (state.share > 0.2) bullets.push('Target share &gt; 20% is aggressive for many categories—pressure‑test your path to scale.');
+      if (state.serviceable < 0.3) bullets.push('Serviceable fraction &lt; 30% indicates distribution or regulatory bottlenecks—what unlocks access?');
+      if (state.tamRevenue > 1_000_000_000) bullets.push('TAM &gt; $1B suggests a large space—expect competition and differentiation pressure.');
+      if (bullets.length === 0) bullets.push('Your assumptions look balanced—now tie them to channel plans and budget.');
+
+      insightsEl.innerHTML = bullets.map(b => `<li>${b}</li>`).join('');
+    }
+
+    function updateAll() {
+      const segOn = segModeEl.checked;
+      const state = segOn ? calcFromSegments() : calcFromBasic();
+
+      // KPIs
+      tamCustEl.textContent = fmtNum(state.tamCustomers);
+      samCustEl.textContent = fmtNum(state.samCustomers);
+      somCustEl.textContent = fmtNum(state.somCustomers);
+      tamRevEl.textContent = fmtUSD(state.tamRevenue);
+      samRevEl.textContent = fmtUSD(state.samRevenue);
+      somRevEl.textContent = fmtUSD(state.somRevenue);
+
+      // Charts
+      drawHorizontalBars(
+        custFunnel,
+        ['TAM', 'SAM', 'SOM'],
+        [state.tamCustomers, state.samCustomers, state.somCustomers],
+        ['#4f7dcf', '#7ccf8b', '#e6a700']
+      );
+      drawVerticalBars(
+        revBars,
+        ['TAM', 'SAM', 'SOM'],
+        [state.tamRevenue, state.samRevenue, state.somRevenue],
+        ['#4f7dcf', '#7ccf8b', '#e6a700']
+      );
+
+      updateInsights(state);
+    }
+
+    // Init
+    function init() {
+      // Seed segments & render
+      segments = defaultSegments();
+      renderSegments();
+
+      // Ensure canvas resizes are handled
+      const ro = new ResizeObserver(() => dispatchUpdate());
+      ro.observe(custFunnel); ro.observe(revBars);
+
+      dispatchUpdate();
+    }
+
+    init();
+  </script>
+</body>
+</html>

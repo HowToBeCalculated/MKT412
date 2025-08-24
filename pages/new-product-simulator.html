@@ -1,533 +1,843 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>New Product Launch Simulator</title>
+  <title>MKT412 — New Product Launch Simulator</title>
   <style>
     :root {
-      --bg: #0f172a;        /* slate-900 */
-      --panel: #111827;     /* gray-900 */
-      --muted: #1f2937;     /* gray-800 */
-      --text: #e5e7eb;      /* gray-200 */
-      --subtext: #9ca3af;   /* gray-400 */
-      --accent: #38bdf8;    /* sky-400 */
-      --accent2: #a78bfa;   /* violet-400 */
-      --ok: #34d399;        /* emerald-400 */
-      --warn: #f59e0b;      /* amber-500 */
-      --bad: #f87171;       /* red-400 */
+      /* Bryant University palette per project brief */
+      --bg: #1a1a1a;         /* near-black */
+      --fg: #e0e0e0;         /* light gray text */
+      --accent: #e6a700;     /* Bryant gold */
+      --card: #222222;       /* dark card */
+      --muted: #bdbdbd;      /* muted text */
+      --grid: #333333;       /* chart grid */
+      --good: #50c878;       /* emerald for positive */
+      --bad: #ff6b6b;        /* soft red for negative */
     }
-    * { box-sizing: border-box }
-    html, body { height: 100% }
-    body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji"; background: radial-gradient(1200px 800px at 20% -10%, #1e293b, var(--bg)); color: var(--text) }
-    header { display:flex; align-items:center; justify-content:space-between; padding: 14px 18px; background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0)); border-bottom: 1px solid rgba(255,255,255,0.08) }
-    header h1 { margin:0; font-size: 20px; letter-spacing: .3px }
-    header .subtitle { color: var(--subtext); font-size: 12px }
 
-    .app { display: grid; grid-template-columns: 360px 1fr; gap: 16px; height: calc(100% - 64px) }
-    aside { padding: 14px; overflow:auto; border-right:1px solid rgba(255,255,255,0.06) }
-    main { padding: 14px; overflow:auto }
+    * { box-sizing: border-box; }
 
-    .card { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 12px; box-shadow: 0 8px 30px rgba(0,0,0,.25) }
-    .card + .card { margin-top: 12px }
-    .card h2 { font-size: 14px; margin: 0 0 10px 0; font-weight: 600; letter-spacing: .3px }
+    html, body { height: 100%; }
 
-    .row { display:flex; align-items:center; gap:8px; margin: 6px 0 }
-    .row label { width: 48%; font-size: 12px; color: var(--subtext) }
-    .row input[type="number"], .row input[type="text"] { width: 52%; background: var(--muted); border: 1px solid rgba(255,255,255,.06); color: var(--text); padding:6px 8px; border-radius: 8px }
-    .row input[type="range"] { width: 52% }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--fg);
+      background: radial-gradient(1200px 800px at 10% -10%, #202020, var(--bg));
+    }
 
-    .grid { display:grid; grid-template-columns: repeat(3, 1fr); gap: 10px }
-    .kpi { padding: 10px; border-radius: 12px; background: linear-gradient(180deg, rgba(56,189,248,.08), rgba(167,139,250,.06)); border:1px solid rgba(255,255,255,.07) }
-    .kpi .label { color: var(--subtext); font-size: 11px }
-    .kpi .value { font-size: 18px; font-weight: 700; margin-top: 4px }
+    header {
+      position: sticky; top: 0; z-index: 3;
+      backdrop-filter: blur(8px);
+      background: color-mix(in oklab, var(--bg), transparent 35%);
+      border-bottom: 1px solid #2a2a2a;
+    }
 
-    .controls { display:flex; gap:8px; flex-wrap:wrap; margin: 10px 0 2px }
-    button { background: linear-gradient(180deg, #1f2937, #111827); color: var(--text); border:1px solid rgba(255,255,255,.08); border-radius: 10px; padding: 8px 12px; cursor:pointer; transition: .15s transform ease, .15s background ease }
-    button:hover { transform: translateY(-1px); background: #1b2532 }
+    .wrap { max-width: 1260px; margin: 0 auto; padding: 16px 20px; }
 
-    canvas { background: #0b1222; border:1px solid rgba(255,255,255,.08); border-radius: 12px; width: 100%; height: 260px }
-    .charts { display:grid; grid-template-columns: 1fr; gap: 12px }
+    .title {
+      display: flex; align-items: center; gap: 14px;
+    }
+    .logo {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), #f0ca45);
+      box-shadow: 0 0 0 2px #000 inset, 0 6px 18px rgba(0,0,0,.35);
+    }
+    h1 { font-size: 20px; margin: 0; letter-spacing: .2px; }
+    .subtitle { font-size: 12px; color: var(--muted); }
 
-    .pill { display:inline-flex; align-items:center; gap:6px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.03); border-radius:999px; padding:4px 8px; font-size:11px; color: var(--subtext) }
+    .container {
+      max-width: 1260px; margin: 18px auto; display: grid; gap: 16px;
+      grid-template-columns: 360px 1fr; align-items: start; padding: 0 20px 28px;
+    }
 
-    .event { border-left: 3px solid var(--accent); padding-left: 8px; margin: 8px 0; color: var(--subtext); font-size: 12px }
+    .card { background: var(--card); border: 1px solid #2a2a2a; border-radius: 14px; }
+    .card h2 { font-size: 15px; margin: 0 0 8px 0; color: var(--accent); }
+    .card .pad { padding: 14px; }
 
-    .foot { color: var(--subtext); font-size: 11px; text-align:center; margin-top: 8px }
-    .small { font-size: 11px; color: var(--subtext) }
+    /* Controls */
+    .controls { position: sticky; top: 68px; }
+    .control { display: grid; grid-template-columns: 1fr 96px; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px dashed #2c2c2c; }
+    .control:last-child { border-bottom: none; }
+    .control label { font-size: 12px; color: var(--fg); display: block; }
+    .control small { color: var(--muted); font-size: 11px; }
+    .control input[type="range"] { grid-column: 1 / span 2; width: 100%; accent-color: var(--accent); }
+    .number { width: 100%; padding: 6px 8px; border-radius: 8px; border: 1px solid #3a3a3a; background: #111; color: var(--fg); font-variant-numeric: tabular-nums; }
 
-    .range-row { display:grid; grid-template-columns: 52% 36% 12%; align-items:center; gap: 6px }
-    .range-row output { text-align:right; font-variant-numeric: tabular-nums; color: var(--subtext) }
+    .row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
 
-    .flex { display:flex; gap:8px; align-items:center }
-    .flex-1 { flex: 1 }
-    .right { text-align:right }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace }
+    .btnbar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    button {
+      appearance: none; border: 1px solid #3a2a00; color: #181400; background: var(--accent);
+      padding: 8px 12px; border-radius: 10px; font-weight: 650; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.25);
+    }
+    button.secondary { background: #121212; color: var(--fg); border: 1px solid #323232; }
+
+    .info{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;border:1px solid #554400;color:var(--accent);font-size:11px;margin-left:6px;cursor:help;position:relative;}
+    .info::after{content:attr(data-tip);position:absolute;left:50%;bottom:100%;transform:translate(-50%,-8px);background:#111;border:1px solid #444;color:var(--fg);padding:6px 8px;border-radius:8px;box-shadow:0 8px 18px rgba(0,0,0,.45);white-space:normal;max-width:260px;opacity:0;visibility:hidden;transition:opacity .12s ease, visibility .12s ease;pointer-events:none;z-index:10;}
+    .info::before{content:'';position:absolute;left:50%;bottom:calc(100% - 4px);transform:translateX(-50%) rotate(45deg);width:8px;height:8px;background:#111;border-left:1px solid #444;border-top:1px solid #444;opacity:0;visibility:hidden;transition:opacity .12s ease, visibility .12s ease;pointer-events:none;z-index:10;}
+    .info:hover::after,.info:focus-visible::after,.info.show::after,.info:hover::before,.info:focus-visible::before,.info.show::before{opacity:1;visibility:visible;}
+
+    /* KPIs */
+    .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .kpi { padding: 12px; border-radius: 12px; border: 1px solid #2b2b2b; background: #191919; }
+    .kpi .label { font-size: 12px; color: var(--muted); }
+    .kpi .value { font-size: 20px; font-variant-numeric: tabular-nums; margin-top: 4px; }
+    .kpi .delta { font-size: 11px; margin-top: 2px; color: var(--muted); }
+
+    .charts { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    .chart { padding: 10px; }
+    canvas { width: 100%; height: 260px; display: block; background: #111; border: 1px solid #2a2a2a; border-radius: 12px; }
+
+    .table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .table th, .table td { border-bottom: 1px solid #2a2a2a; padding: 8px; }
+    .table th { text-align: left; color: var(--muted); font-weight: 600; }
+
+    .insights { font-size: 13px; line-height: 1.45; color: var(--fg); }
+    .insights b { color: var(--accent); }
+
+    .footer-note { color: var(--muted); font-size: 11px; margin-top: 8px; }
+
+    @media (max-width: 980px) {
+      .container { grid-template-columns: 1fr; }
+      .controls { position: static; }
+      .kpis { grid-template-columns: repeat(2, 1fr); }
+    }
   </style>
 </head>
 <body>
   <header>
-    <div>
-      <h1>New Product Launch Simulator</h1>
-      <div class="subtitle">Hands-on sandbox for pricing, channels, and competitive dynamics</div>
-    </div>
-    <div class="flex">
-      <span class="pill">No libraries • Single file</span>
-      <button id="exportBtn" title="Download current run as JSON">Export</button>
-      <label class="pill" for="importInput" style="cursor:pointer">Import<input id="importInput" type="file" accept="application/json" style="display:none"></label>
+    <div class="wrap title">
+      <div class="logo" aria-hidden="true"></div>
+      <div>
+        <h1>MKT412 · New Product Launch Simulator</h1>
+        <div class="subtitle">Adjust the levers ➜ simulate uncertainty ➜ study probabilistic outcomes (Monte Carlo)</div>
+      </div>
     </div>
   </header>
 
-  <div class="app">
-    <aside>
-      <div class="card">
-        <h2>Market & Product</h2>
-        <div class="range-row">
-          <label>Market Size (addressable)</label>
-          <output id="marketSizeOut">500,000</output>
-          <span></span>
-          <input id="marketSize" type="range" min="50000" max="5000000" value="500000" step="50000" oninput="syncOut(this, 'marketSizeOut', { f: fmtInt })">
+  <main class="container">
+    <!-- LEFT: Controls -->
+    <aside class="card controls">
+      <div class="pad">
+        <h2>Levers</h2>
+        <div class="control">
+          <div>
+            <label for="tam">Total Addressable Market (TAM)<span class="info" title="Placeholder: TAM = total potential customers in the broader market.">ⓘ</span></label>
+            <small>Potential customers in the whole market</small>
+          </div>
+          <input class="number" id="tam_n" type="number" min="10000" step="1000" />
+          <input id="tam" type="range" min="10000" max="2000000" step="1000" />
         </div>
-        <div class="range-row">
-          <label>Initial Awareness (%)</label>
-          <output id="awarenessOut">3%</output>
-          <span></span>
-          <input id="awareness" type="range" min="0" max="25" value="3" step="1" oninput="syncOut(this, 'awarenessOut', { s: '%' })">
-        </div>
-        <div class="range-row">
-          <label>Product-Market Fit</label>
-          <output id="pmfOut">62</output>
-          <span></span>
-          <input id="pmf" type="range" min="20" max="95" value="62" step="1" oninput="syncOut(this, 'pmfOut')">
-        </div>
-        <div class="range-row">
-          <label>Price ($)</label>
-          <output id="priceOut">79</output>
-          <span></span>
-          <input id="price" type="range" min="10" max="300" value="79" step="1" oninput="syncOut(this, 'priceOut', { p: '$' })">
-        </div>
-        <div class="range-row">
-          <label>Unit Cost ($)</label>
-          <output id="costOut">28</output>
-          <span></span>
-          <input id="cost" type="range" min="1" max="220" value="28" step="1" oninput="syncOut(this, 'costOut', { p: '$' })">
-        </div>
-        <div class="row small">
-          <label>Price Elasticity (higher = more sensitive)</label>
-          <input id="elasticity" type="number" min="0.3" max="3" step="0.1" value="1.1">
-        </div>
-      </div>
 
-      <div class="card">
-        <h2>Marketing</h2>
-        <div class="range-row">
-          <label>Budget per Period ($)</label>
-          <output id="budgetOut">100,000</output>
-          <span></span>
-          <input id="budget" type="range" min="10000" max="1000000" value="100000" step="10000" oninput="syncOut(this, 'budgetOut', { f: fmtInt })">
+        <div class="control">
+          <div>
+            <label for="sam">Addressable Share (SAM % of TAM)<span class="info" title="Placeholder: SAM = portion of TAM you can feasibly serve.">ⓘ</span></label>
+            <small>Portion you can realistically serve</small>
+          </div>
+          <input class="number" id="sam_n" type="number" min="1" max="100" step="1" />
+          <input id="sam" type="range" min="1" max="100" step="1" />
         </div>
-        <div class="small" style="margin-top:8px; margin-bottom:6px">Channel Allocation (must total 100%)</div>
-        <div class="row">
-          <label>Search</label>
-          <input id="chSearch" type="range" min="0" max="100" value="35" step="1" oninput="allocChanged()">
-        </div>
-        <div class="row">
-          <label>Social</label>
-          <input id="chSocial" type="range" min="0" max="100" value="30" step="1" oninput="allocChanged()">
-        </div>
-        <div class="row">
-          <label>Influencers</label>
-          <input id="chInflu" type="range" min="0" max="100" value="20" step="1" oninput="allocChanged()">
-        </div>
-        <div class="row">
-          <label>Email</label>
-          <input id="chEmail" type="range" min="0" max="100" value="15" step="1" oninput="allocChanged()">
-        </div>
-        <div class="row">
-          <label>Total</label>
-          <div class="flex-1 right"><span id="allocTotal" class="mono">100%</span></div>
-        </div>
-        <div class="small">Awareness carryover & decay modeled; CAC has diminishing returns and noise by channel.</div>
-      </div>
 
-      <div class="card">
-        <h2>Competition & Ops</h2>
-        <div class="range-row">
-          <label>Competitor Strength</label>
-          <output id="compOut">0.55</output>
-          <span></span>
-          <input id="compStrength" type="range" min="0" max="1" value="0.55" step="0.05" oninput="syncOut(this, 'compOut')">
+        <div class="control">
+          <div>
+            <label for="months">Horizon (months)<span class="info" title="Placeholder: Time span for the simulation window.">ⓘ</span></label>
+            <small>Length of simulation</small>
+          </div>
+          <input class="number" id="months_n" type="number" min="6" max="60" step="1" />
+          <input id="months" type="range" min="6" max="60" step="1" />
         </div>
-        <div class="range-row">
-          <label>Operational Capacity (units/period)</label>
-          <output id="capOut">20,000</output>
-          <span></span>
-          <input id="capacity" type="range" min="2000" max="100000" value="20000" step="1000" oninput="syncOut(this, 'capOut', { f: fmtInt })">
-        </div>
-        <div class="range-row">
-          <label>Retention per Period</label>
-          <output id="retOut">82%</output>
-          <span></span>
-          <input id="retention" type="range" min="40" max="95" value="82" step="1" oninput="syncOut(this, 'retOut', { s: '%' })">
-        </div>
-        <div class="small">Competitor reacts stochastically; ops can constrain sales.</div>
-      </div>
 
-      <div class="card">
-        <h2>Simulation</h2>
         <div class="row">
-          <label>Periods</label>
-          <input id="periods" type="number" min="4" max="24" step="1" value="12">
+          <div class="control">
+            <div>
+              <label for="price">Price ($)<span class="info" title="Placeholder: Average selling price per unit.">ⓘ</span></label>
+              <small>Average selling price per unit</small>
+            </div>
+            <input class="number" id="price_n" type="number" min="1" step="1" />
+            <input id="price" type="range" min="1" max="999" step="1" />
+          </div>
+          <div class="control">
+            <div>
+              <label for="unit_cost">Unit Cost ($)<span class="info" title="Placeholder: Variable cost per unit (COGS).">ⓘ</span></label>
+              <small>COGS per unit</small>
+            </div>
+            <input class="number" id="unit_cost_n" type="number" min="0" step="1" />
+            <input id="unit_cost" type="range" min="0" max="999" step="1" />
+          </div>
         </div>
-        <div class="controls">
-          <button id="runOne">Run 1 Period</button>
-          <button id="autoRun">Auto-Run</button>
-          <button id="reset">Reset</button>
-        </div>
-        <div class="small">Each period ≈ 1 month by default.</div>
-      </div>
 
-      <div class="foot">Tip: tweak price & channels, then Auto-Run. Watch revenue, CAC, and market share.</div>
+        <div class="row">
+          <div class="control">
+            <div>
+              <label for="fixed_cost">Fixed Cost / mo ($)<span class="info" title="Placeholder: Overhead not tied to unit volume (e.g., payroll, tools).">ⓘ</span></label>
+              <small>Overhead, payroll, tools</small>
+            </div>
+            <input class="number" id="fixed_cost_n" type="number" min="0" step="100" />
+            <input id="fixed_cost" type="range" min="0" max="200000" step="100" />
+          </div>
+          <div class="control">
+            <div>
+              <label for="ad_spend">Ad Spend / mo ($)<span class="info" title="Placeholder: Paid media budget per month.">ⓘ</span></label>
+              <small>Paid marketing budget</small>
+            </div>
+            <input class="number" id="ad_spend_n" type="number" min="0" step="100" />
+            <input id="ad_spend" type="range" min="0" max="200000" step="100" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="control">
+            <div>
+              <label for="base_cac">Cost per Lead/Visit (CPL $)<span class="info" title="Placeholder: Average cost to buy 1 visit/lead. Customers ≈ visits × conversion.">ⓘ</span></label>
+              <small>Paid traffic cost per visit/lead (not per customer). Customers ≈ visits × conversion.</small>
+            </div>
+            <input class="number" id="base_cac_n" type="number" min="0.5" step="0.1" />
+            <input id="base_cac" type="range" min="0.5" max="100" step="0.1" />
+          </div>
+          <div class="control">
+            <div>
+              <label for="conv_rate">Baseline Conversion (%)<span class="info" title="Placeholder: Share of visits that become customers.">ⓘ</span></label>
+              <small>Visitor ➜ customer</small>
+            </div>
+            <input class="number" id="conv_rate_n" type="number" min="0.01" max="100" step="0.01" />
+            <input id="conv_rate" type="range" min="0.01" max="20" step="0.01" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="control">
+            <div>
+              <label for="k_factor">Viral K-Factor<span class="info" title="Placeholder: Organic referrals per active customer per month.">ⓘ</span></label>
+              <small>Organic growth per active user</small>
+            </div>
+            <input class="number" id="k_factor_n" type="number" min="0" max="1" step="0.01" />
+            <input id="k_factor" type="range" min="0" max="1" step="0.01" />
+          </div>
+          <div class="control">
+            <div>
+              <label for="retention">Avg Retention (months)<span class="info" title="Placeholder: Average customer lifetime in months.">ⓘ</span></label>
+              <small>Higher ⇒ lower churn</small>
+            </div>
+            <input class="number" id="retention_n" type="number" min="1" max="60" step="1" />
+            <input id="retention" type="range" min="1" max="60" step="1" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="control">
+            <div>
+              <label for="seasonality">Seasonality Amplitude<span class="info" title="Placeholder: Strength of seasonal demand swings (0 = flat).">ⓘ</span></label>
+              <small>0 = flat, 0.3 ≈ ±30%</small>
+            </div>
+            <input class="number" id="seasonality_n" type="number" min="0" max="0.6" step="0.01" />
+            <input id="seasonality" type="range" min="0" max="0.6" step="0.01" />
+          </div>
+          <div class="control">
+            <div>
+              <label for="channel_eff">Channel Efficiency<span class="info" title="Placeholder: Efficiency multiplier on paid channels (>1 better).">ⓘ</span></label>
+              <small>&gt;1 better, &lt;1 worse</small>
+            </div>
+            <input class="number" id="channel_eff_n" type="number" min="0.2" max="2" step="0.01" />
+            <input id="channel_eff" type="range" min="0.2" max="2" step="0.01" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="control">
+            <div>
+              <label for="units_per">Units / cust / mo<span class="info" title="Placeholder: Average monthly units per active customer.">ⓘ</span></label>
+              <small>Avg units purchased per active</small>
+            </div>
+            <input class="number" id="units_per_n" type="number" min="0.1" max="10" step="0.1" />
+            <input id="units_per" type="range" min="0.1" max="10" step="0.1" />
+          </div>
+          <div class="control">
+            <div>
+              <label for="elasticity">Price Elasticity<span class="info" title="Placeholder: Sensitivity of conversion to price (typically negative).">ⓘ</span></label>
+              <small>Typically negative</small>
+            </div>
+            <input class="number" id="elasticity_n" type="number" min="-3" max="0" step="0.05" />
+            <input id="elasticity" type="range" min="-3" max="0" step="0.05" />
+          </div>
+        </div>
+
+        <!-- Price baseline control -->
+        <div class="control">
+          <div>
+            <label>Elasticity Baseline<span class="info" title="Placeholder: Reference price used for elasticity calculations.">ⓘ</span></label>
+            <small>Reference price for demand: <span id="price_base_label"></span></small>
+          </div>
+          <label style="grid-column: 1 / span 2; display:flex; align-items:center; gap:8px; font-size:12px;">
+            <input id="auto_baseline" type="checkbox" checked /> Baseline tracks current price on run
+          </label>
+        </div>
+
+        
+
+        
+
+        <div class="btnbar">
+          <button id="btn-run">Run simulation</button>
+          
+          <button id="btn-reset" class="secondary" title="Reset all levers to defaults">Reset defaults</button>
+          <button id="btn-baseline" class="secondary" title="Set current price as elasticity baseline">Set price as baseline</button>
+        </div>
+        <div class="footer-note">Tip: tweak a lever and press <b>Run simulation</b>. Monte Carlo adds randomness (CPL, conversion, churn, churn) each run to generate bands.</div>
+      </div>
     </aside>
 
-    <main>
-      <div class="card">
-        <h2>KPIs</h2>
-        <div class="grid">
-          <div class="kpi"><div class="label">Revenue (period)</div><div id="revNow" class="value">—</div></div>
-          <div class="kpi"><div class="label">Profit (period)</div><div id="profNow" class="value">—</div></div>
-          <div class="kpi"><div class="label">CAC (blended)</div><div id="cacNow" class="value">—</div></div>
-          <div class="kpi"><div class="label">CLV (est.)</div><div id="clvNow" class="value">—</div></div>
-          <div class="kpi"><div class="label">Payback (periods)</div><div id="paybackNow" class="value">—</div></div>
-          <div class="kpi"><div class="label">Market Share (cum.)</div><div id="shareNow" class="value">—</div></div>
+    <!-- RIGHT: Outputs -->
+    <section style="display:flex; flex-direction: column; gap: 12px;">
+      <div class="card pad">
+        <h2>Key Outcomes</h2>
+        <div class="kpis">
+          <div class="kpi"><div class="label">Expected Revenue (total)</div><div id="kpi_rev" class="value">—</div><div id="kpi_rev_delta" class="delta"></div></div>
+          <div class="kpi"><div class="label">Expected Profit (total)</div><div id="kpi_profit" class="value">—</div><div id="kpi_profit_delta" class="delta"></div></div>
+          <div class="kpi"><div class="label">Break-even Probability</div><div id="kpi_be_prob" class="value">—</div><div id="kpi_be_time" class="delta"></div></div>
+          <div class="kpi"><div class="label">Marketing ROI</div><div id="kpi_roi" class="value">—</div><div class="delta">profit / paid spend</div></div>
         </div>
       </div>
 
-      <div class="card charts">
-        <h2>Charts</h2>
-        <canvas id="chartRevenue" width="1200" height="300"></canvas>
-        <canvas id="chartShare" width="1200" height="300"></canvas>
-        <canvas id="chartAwareness" width="1200" height="300"></canvas>
+      <div class="card pad">
+        <h2>Revenue Over Time (P10 • P50 • P90)</h2>
+        <div class="chart"><canvas id="chart_line" width="1280" height="300"></canvas></div>
+        <div class="btnbar">
+          <button id="btn-export-rev" class="secondary">Export monthly percentiles (CSV)</button>
+        </div>
       </div>
 
-      <div class="card">
-        <h2>Events & Log</h2>
-        <div id="events"></div>
+      <div class="card pad">
+        <h2>Net Cashflow Over Time (P10 • P50 • P90)</h2>
+        <div class="chart"><canvas id="chart_cash" width="1280" height="300"></canvas></div>
       </div>
-    </main>
-  </div>
+
+      <div class="card pad">
+        <h2>Total Profit Distribution</h2>
+        <div class="chart"><canvas id="chart_hist" width="1280" height="300"></canvas></div>
+        <table class="table" id="tbl_pctls"></table>
+        <div class="btnbar">
+          <button id="btn-export-profit" class="secondary">Export profit by run (CSV)</button>
+        </div>
+      </div>
+
+      <div class="card pad">
+        <h2>Auto-Insights</h2>
+        <div id="insights" class="insights">Run the simulation to generate insights.</div>
+      </div>
+    </section>
+  </main>
 
   <script>
     // ---------- Utilities ----------
-    const $ = sel => document.querySelector(sel);
-    const fmtInt = n => (+n).toLocaleString();
-    const fmtMoney = n => "$" + Math.round(n).toLocaleString();
-    const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
-
-    function syncOut(input, outId, {p="", s="", f=null}={}) {
-      const v = input.value; $("#"+outId).textContent = p + (f ? f(v) : v) + s;
-    }
-
-    function allocChanged() {
-      const vals = ["#chSearch", "#chSocial", "#chInflu", "#chEmail"].map(s=>+$(s).value);
-      const total = vals.reduce((a,b)=>a+b,0);
-      $("#allocTotal").textContent = total + "%";
-      $("#allocTotal").style.color = total === 100 ? "" : (total < 100 ? "var(--warn)" : "var(--bad)");
-    }
-
-    // ---------- Model State ----------
-    const state = {
-      t: 0,
-      periods: [],
-      awareness: +$("#awareness").value / 100, // as fraction
-      rngSeed: Math.random()*1e9 | 0,
+    const fmt = {
+      num: (n) => n.toLocaleString(undefined, { maximumFractionDigits: 0 }),
+      cur0: (n) => n.toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }),
+      cur:  (n) => n.toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }),
+      pct0: (n) => (n*100).toFixed(0) + '%',
+      pct1: (n) => (n*100).toFixed(1) + '%',
     };
 
-    function readInputs() {
-      const channels = {
-        search: +$("#chSearch").value,
-        social: +$("#chSocial").value,
-        influ: +$("#chInflu").value,
-        email: +$("#chEmail").value,
-      };
-      const allocTotal = Object.values(channels).reduce((a,b)=>a+b,0);
-      return {
-        marketSize: +$("#marketSize").value,
-        pmf: +$("#pmf").value / 100,
-        price: +$("#price").value,
-        cost: +$("#cost").value,
-        elasticity: +$("#elasticity").value,
-        budget: +$("#budget").value,
-        channels,
-        allocOK: allocTotal === 100,
-        compStrength: +$("#compStrength").value,
-        capacity: +$("#capacity").value,
-        retention: +$("#retention").value / 100,
-        periods: +$("#periods").value
-      };
-    }
-
-    // Simple seeded RNG for reproducibility across a run
     function mulberry32(a) {
       return function() {
-        var t = a += 0x6D2B79F5;
-        t = Math.imul(t ^ t >>> 15, t | 1);
-        t ^= t + Math.imul(t ^ t >>> 7, t | 61);
-        return ((t ^ t >>> 14) >>> 0) / 4294967296;
-      }
+        let t = a += 0x6D2B79F5;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
     }
 
-    let rand = mulberry32(state.rngSeed);
-
-    // ---------- Core Simulation ----------
-    function onePeriod() {
-      const inp = readInputs();
-      if (!inp.allocOK) {
-        logEvent("Channel allocation must total 100%.", "warn");
-        return;
-      }
-
-      // Awareness dynamics: spend builds awareness with diminishing returns + decay
-      const channelEff = { search: 1.1, social: 1.0, influ: 1.3, email: 0.6 };
-      const allocFrac = Object.fromEntries(Object.entries(inp.channels).map(([k,v])=>[k, v/100]));
-      const effSpend = Object.entries(allocFrac).reduce((sum, [k, f]) => sum + (Math.pow(f, 0.9) * channelEff[k]), 0);
-      const build = (Math.log(1 + inp.budget/40000) * 0.02) * effSpend; // awareness build
-      const decay = 0.015; // natural decay per period
-      state.awareness = clamp((state.awareness + build - decay), 0, 0.95);
-
-      // Demand side
-      const referencePrice = 99; // anchor for elasticity
-      const rel = (inp.price - referencePrice) / Math.max(referencePrice, 1);
-      const priceFactor = Math.exp(-inp.elasticity * rel); // >1 if below ref price, <1 if above
-
-      const baseConversion = 0.07 * inp.pmf; // core conversion tuned by PMF
-      const conv = clamp(baseConversion * priceFactor, 0.005, 0.35);
-
-      const potential = Math.round(inp.marketSize * state.awareness * conv);
-
-      // CAC by channel: diminishing returns & noise
-      const baseCAC = 22; // baseline $ per acquired user
-      const channelCAC = (k) => baseCAC / (channelEff[k]) * (1 + Math.pow(allocFrac[k], 1.2));
-      const blendedCAC = Object.keys(allocFrac).reduce((s,k)=> s + allocFrac[k] * channelCAC(k), 0) * (0.9 + 0.2*rand());
-
-      // Spend-limited acquisitions
-      const acqBySpend = Math.floor(inp.budget / Math.max(1, blendedCAC));
-      let demand = Math.min(potential, acqBySpend);
-
-      // Competitor reaction and share tug-of-war
-      const compPulse = (rand() < 0.25) ? (0.9 + 0.3*rand()) * inp.compStrength : inp.compStrength; // sometimes spike
-      const ourShareTilt = clamp(0.55 + 0.25*(inp.pmf - 0.5) + 0.1*(referencePrice - inp.price)/referencePrice - 0.2*compPulse, 0.1, 0.9);
-      const attainable = Math.round(demand * ourShareTilt);
-
-      // Operational cap
-      const units = Math.min(attainable, inp.capacity);
-
-      // Stochastic events
-      let eventNote = null;
-      const r = rand();
-      if (r < 0.05) {
-        // PR win: spike awareness and conv a bit next period
-        state.awareness = clamp(state.awareness + 0.02, 0, 0.95);
-        eventNote = "PR win boosts awareness.";
-      } else if (r < 0.09) {
-        // Supply hiccup this period
-        const cut = 0.2 + 0.4*rand();
-        const old = units;
-        const reduced = Math.max(0, Math.floor(units * (1 - cut)));
-        eventNote = `Supply hiccup (-${Math.round(cut*100)}%) capped units from ${old.toLocaleString()} to ${reduced.toLocaleString()}.`;
-        // apply cap retroactively
-        demand = Math.min(demand, reduced);
-      } else if (r < 0.13) {
-        // Competitor promo
-        eventNote = "Competitor promo nicks your share this period.";
-      }
-
-      const sold = Math.min(units, demand);
-
-      // Financials
-      const revenue = sold * inp.price;
-      const cogs = sold * inp.cost;
-      const marketing = inp.budget;
-      const gross = revenue - cogs;
-      const profit = gross - marketing;
-
-      // Customer economics
-      const marginPerUnit = Math.max(0, inp.price - inp.cost);
-      const clv = marginPerUnit * (inp.retention / Math.max(0.01, 1 - inp.retention));
-      const payback = (blendedCAC <= 0 || marginPerUnit <= 0) ? Infinity : (blendedCAC / marginPerUnit);
-
-      // Share tracking (cumulative vs market)
-      const totalEver = state.periods.reduce((s,p)=> s + p.sold, 0) + sold;
-      const cumShare = clamp(totalEver / Math.max(1, inp.marketSize), 0, 1);
-
-      const out = { t: state.t, awareness: state.awareness, potential, acqBySpend, demand, attainable, sold, revenue, profit, blendedCAC, clv, payback, cumShare, eventNote };
-      state.periods.push(out);
-      state.t++;
-
-      updateUI(out);
+    function randNormal(rng) {
+      // Box–Muller transform
+      let u = 0, v = 0;
+      while (u === 0) u = rng();
+      while (v === 0) v = rng();
+      return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
     }
 
-    // ---------- UI & Charts ----------
-    function updateUI(latest) {
-      $("#revNow").textContent = fmtMoney(latest.revenue);
-      $("#profNow").textContent = (latest.profit>=0?"":"-") + fmtMoney(Math.abs(latest.profit));
-      $("#cacNow").textContent = fmtMoney(latest.blendedCAC);
-      $("#clvNow").textContent = fmtMoney(latest.clv);
-      $("#paybackNow").textContent = (latest.payback===Infinity?"∞": latest.payback.toFixed(1));
-      $("#shareNow").textContent = (latest.cumShare*100).toFixed(1) + "%";
-
-      if (latest.eventNote) logEvent(latest.eventNote);
-
-      drawAllCharts();
+    function lognormalNoise(rng, sigma = 0.25) {
+      // mean ~ 1.0 by setting mu = -0.5*sigma^2
+      const z = randNormal(rng);
+      const mu = -0.5 * sigma * sigma;
+      return Math.exp(mu + sigma * z);
     }
 
-    function drawAllCharts() {
-      const rev = state.periods.map(p=>p.revenue);
-      const share = state.periods.map(p=>p.cumShare*100);
-      const aware = state.periods.map(p=>p.awareness*100);
-      drawLineChart($("#chartRevenue"), rev, { title: "Revenue per Period" });
-      drawLineChart($("#chartShare"), share, { title: "Cumulative Market Share (%)", suffix: "%" });
-      drawLineChart($("#chartAwareness"), aware, { title: "Awareness (%)", suffix: "%" });
+    function clamp(x, a, b) { return Math.min(Math.max(x, a), b); }
+
+    function percentile(sortedArray, p) {
+      if (sortedArray.length === 0) return NaN;
+      const idx = (sortedArray.length - 1) * p;
+      const lower = Math.floor(idx);
+      const upper = Math.ceil(idx);
+      if (lower === upper) return sortedArray[lower];
+      return sortedArray[lower] + (sortedArray[upper] - sortedArray[lower]) * (idx - lower);
     }
 
-    function drawLineChart(canvas, series, { title="", suffix="" }={}) {
+    function mean(arr) { return arr.reduce((a, b) => a + b, 0) / (arr.length || 1); }
+
+    function median(arr) {
+      if (!arr.length) return NaN;
+      const s = [...arr].sort((a,b)=>a-b);
+      const m = Math.floor(s.length/2);
+      return s.length % 2 ? s[m] : (s[m-1] + s[m]) / 2;
+    }
+
+    function downloadCSV(filename, rows) {
+      const csv = rows.map(r => r.map(x => typeof x === 'number' ? String(x) : '"' + String(x).replaceAll('"', '""') + '"').join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename; a.style.display = 'none';
+      document.body.appendChild(a); a.click();
+      URL.revokeObjectURL(url); a.remove();
+    }
+
+    // ---------- Simple Charts (Canvas) ----------
+    function drawLineChart(canvas, labels, seriesList, opts={}) {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr; canvas.height = 300 * dpr; // fixed height
       const ctx = canvas.getContext('2d');
-      const W = canvas.width, H = canvas.height;
-      ctx.clearRect(0,0,W,H);
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0,0,canvas.width,canvas.height);
 
-      // Title
-      ctx.fillStyle = 'rgba(255,255,255,.8)';
-      ctx.font = '14px ui-sans-serif, system-ui, -apple-system';
-      ctx.fillText(title, 12, 20);
+      const W = rect.width, H = 300, pad = 36;
+      const xs = (i) => pad + (W - pad*1.5) * (i / (labels.length - 1 || 1));
+      const allY = seriesList.flatMap(s => s.data);
+      const yMin = Math.min(0, Math.min(...allY));
+      const yMax = Math.max(10, Math.max(...allY));
+      const ys = (v) => H - pad - (H - pad*2) * ((v - yMin) / (yMax - yMin || 1));
 
-      const pad = { l: 46, r: 12, t: 28, b: 28 };
-      const n = series.length;
-      const max = Math.max(1, ...series);
-      const min = 0; // baseline
-
-      // Grid
-      ctx.strokeStyle = 'rgba(255,255,255,.08)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      for (let i=0;i<=4;i++) {
-        const y = pad.t + (H - pad.t - pad.b) * (i/4);
-        ctx.moveTo(pad.l, y);
-        ctx.lineTo(W - pad.r, y);
+      // gridlines
+      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--grid');
+      ctx.lineWidth = 1; ctx.setLineDash([2,3]);
+      const steps = 5;
+      for (let g=0; g<=steps; g++) {
+        const y = pad + (H - pad*2) * (g/steps);
+        ctx.beginPath(); ctx.moveTo(pad, y); ctx.lineTo(W-pad/2, y); ctx.stroke();
       }
-      ctx.stroke();
+      ctx.setLineDash([]);
 
-      // Y labels
-      ctx.fillStyle = 'rgba(255,255,255,.6)';
-      ctx.font = '11px ui-sans-serif, system-ui, -apple-system';
-      for (let i=0;i<=4;i++) {
-        const v = min + (max-min) * (i/4);
-        const y = pad.t + (H - pad.t - pad.b) * (i/4) + 4;
-        const label = suffix === '%' ? v.toFixed(0)+suffix : (v>=1000? Math.round(v/1000)+"k" : Math.round(v)).toString();
-        ctx.fillText(label, 6, y);
+      // axes
+      ctx.strokeStyle = '#444';
+      ctx.beginPath(); ctx.moveTo(pad, pad/2); ctx.lineTo(pad, H-pad); ctx.lineTo(W-pad/2, H-pad); ctx.stroke();
+
+      // zero line (y=0) for cashflow readability
+      if (opts.zeroLine) {
+        const y0 = ys(0);
+        if (y0 >= pad/2 && y0 <= H - pad) {
+          ctx.save();
+          ctx.setLineDash([6,4]);
+          ctx.strokeStyle = '#666';
+          ctx.beginPath(); ctx.moveTo(pad, y0); ctx.lineTo(W - pad/2, y0); ctx.stroke();
+          ctx.fillStyle = '#bdbdbd'; ctx.font = '11px system-ui'; ctx.fillText('$0', 6, y0 - 4);
+          ctx.restore();
+        }
       }
 
-      if (n === 0) return;
-
-      // Line
-      ctx.strokeStyle = 'rgba(56,189,248,.9)';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      for (let i=0;i<n;i++) {
-        const x = pad.l + (W - pad.l - pad.r) * (n<=1?0.5: i/(n-1));
-        const y = pad.t + (H - pad.t - pad.b) * (1 - (series[i]-min)/(max-min));
-        if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-      }
-      ctx.stroke();
-
-      // Points
-      ctx.fillStyle = 'rgba(167,139,250,.9)';
-      for (let i=0;i<n;i++) {
-        const x = pad.l + (W - pad.l - pad.r) * (n<=1?0.5: i/(n-1));
-        const y = pad.t + (H - pad.t - pad.b) * (1 - (series[i]-min)/(max-min));
+      // shade between P10 and P90 (assume seriesList[0]=P10, [1]=P50, [2]=P90)
+      if (seriesList.length >= 3) {
+        const p10 = seriesList[0].data, p90 = seriesList[2].data;
         ctx.beginPath();
-        ctx.arc(x, y, 3, 0, Math.PI*2);
+        for (let i=0;i<labels.length;i++) ctx.lineTo(xs(i), ys(p10[i]));
+        for (let i=labels.length-1;i>=0;i--) ctx.lineTo(xs(i), ys(p90[i]));
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(230,167,0,0.12)'; // accent with alpha
         ctx.fill();
       }
 
-      // X axis labels
-      ctx.fillStyle = 'rgba(255,255,255,.6)';
-      ctx.font = '11px ui-sans-serif, system-ui, -apple-system';
-      for (let i=0;i<n;i++) {
-        const x = pad.l + (W - pad.l - pad.r) * (n<=1?0.5: i/(n-1));
-        ctx.fillText((i+1).toString(), x-3, H-10);
+      // lines
+      seriesList.forEach((s, idx) => {
+        ctx.beginPath();
+        for (let i=0;i<labels.length;i++) {
+          const x = xs(i), y = ys(s.data[i]);
+          if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+        }
+        ctx.lineWidth = idx===1 ? 2.2 : 1.4; // median thicker
+        ctx.strokeStyle = idx===1 ? '#e6a700' : '#9c8b45';
+        ctx.stroke();
+      });
+
+      // labels (x-axis months)
+      ctx.fillStyle = '#9c9c9c'; ctx.font = '11px system-ui';
+      const mStep = Math.ceil(labels.length / 12);
+      for (let i=0;i<labels.length;i+=mStep) {
+        ctx.fillText(labels[i], xs(i)-6, H - pad + 14);
+      }
+
+      // y-axis ticks
+      for (let g=0; g<=steps; g++) {
+        const val = yMax - (yMax - yMin) * (g/steps);
+        const text = (val>=1000 ? '$' + Math.round(val/1000)+'k' : '$' + Math.round(val));
+        ctx.fillText(text, 6, pad + (H - pad*2) * (g/steps) + 4);
+      }
+
+      // legend
+      const legend = [ ['P10','10th %ile','#9c8b45'], ['P50','Median','#e6a700'], ['P90','90th %ile','#9c8b45'] ];
+      legend.forEach((lg,i)=>{
+        const x = W - pad - 140 + i*44, y = pad - 12;
+        ctx.fillStyle = lg[2];
+        ctx.fillRect(x, y, 18, 4);
+        ctx.fillStyle = '#bdbdbd'; ctx.fillText(lg[0], x+22, y+6);
+      });
+    }
+
+    function drawHistogram2(canvas, data) {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr; canvas.height = 300 * dpr;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+
+      const W = rect.width, H = 300, pad = 36;
+      const nBins = 30;
+      const min = Math.min(...data), max = Math.max(...data);
+      const bins = new Array(nBins).fill(0);
+      const width = (max - min || 1) / nBins;
+      data.forEach(v => {
+        const idx = Math.min(nBins - 1, Math.floor((v - min) / width));
+        bins[idx]++;
+      });
+      const maxCount = Math.max(...bins);
+
+      // axes
+      ctx.strokeStyle = '#444';
+      ctx.beginPath(); ctx.moveTo(pad, pad/2); ctx.lineTo(pad, H-pad); ctx.lineTo(W-pad/2, H-pad); ctx.stroke();
+
+      // bars
+      const barW = (W - pad*1.5) / nBins;
+      for (let i=0;i<nBins;i++) {
+        const x = pad + i*barW;
+        const y = H - pad;
+        const h = (H - pad*2) * (bins[i] / (maxCount || 1));
+        ctx.fillStyle = '#e6a700aa';
+        ctx.fillRect(x, y - h, barW - 1, h);
+      }
+
+      // zero x-line at $0
+      if (min <= 0 && max >= 0) {
+        const x0 = pad + (W - pad*1.5) * ((0 - min) / (max - min || 1));
+        ctx.save();
+        ctx.setLineDash([6,4]);
+        ctx.strokeStyle = '#666';
+        ctx.beginPath(); ctx.moveTo(x0, pad/2); ctx.lineTo(x0, H - pad); ctx.stroke();
+        ctx.fillStyle = '#bdbdbd'; ctx.font = '11px system-ui'; ctx.fillText('$0', x0 + 4, pad + 12);
+        ctx.restore();
+      }
+
+      // x-axis ticks (currency)
+      ctx.fillStyle = '#9c9c9c'; ctx.font = '11px system-ui';
+      const steps = 5;
+      for (let g=0; g<=steps; g++) {
+        const v = min + (max - min) * (g/steps);
+        const text = v>=1000 ? '$' + Math.round(v/1000)+'k' : '$' + Math.round(v);
+        const x = pad + (W - pad*1.5) * (g/steps);
+        ctx.fillText(text, x - 10, H - pad + 14);
       }
     }
 
-    function logEvent(text, tone="info") {
-      const el = document.createElement('div');
-      el.className = 'event';
-      el.style.borderLeftColor = tone==='warn'? 'var(--warn)' : tone==='bad'? 'var(--bad)' : 'var(--accent)';
-      el.textContent = `[P${state.t+1}] ` + text;
-      $("#events").prepend(el);
+    // ---------- Model & Simulation ----------
+    const defaults = {
+      tam: 500000,
+      sam_pct: 40,
+      months: 24,
+      price: 49,
+      unit_cost: 20,
+      fixed_cost: 37500,
+      ad_spend: 15000,
+      base_cac: 2.5, // CPL (cost per lead/visit)
+      conv_rate: 2.5, // % (visit -> customer)
+      k_factor: 0.05,
+      retention: 20, // months
+      seasonality: 0.10,
+      channel_eff: 1.1,
+      units_per: 1.2,
+      elasticity: -1.0,
+      runs: 1000,
+      price_baseline: 49,
+      auto_baseline: true,
+    };
+
+    const state = { ...defaults };
+
+    function bindRange(id, key, scale=1) {
+      const r = document.getElementById(id);
+      const n = document.getElementById(id + '_n');
+      const sync = (fromRange) => {
+        const v = fromRange ? Number(r.value) : Number(n.value);
+        r.value = String(v);
+        n.value = String(v);
+        state[key] = v;
+      };
+      r.addEventListener('input', () => { sync(true); });
+      n.addEventListener('change', () => { sync(false); });
+      // init
+      r.value = String(state[key]); n.value = String(state[key]);
     }
 
-    // ---------- Controls ----------
-    $("#runOne").addEventListener('click', onePeriod);
+    function resetDefaults() {
+      Object.assign(state, { ...defaults });
+      [
+        'tam','sam','months','price','unit_cost','fixed_cost','ad_spend','base_cac','conv_rate','k_factor','retention','seasonality','channel_eff','units_per','elasticity'
+      ].forEach(id => {
+        const key = id === 'sam' ? 'sam_pct' : id;
+        const elRange = document.getElementById(id);
+        const elNum = document.getElementById(id + '_n');
+        if (elRange && elNum) { elRange.value = String(state[key]); elNum.value = String(state[key]); }
+      });
+      const ab = document.getElementById('auto_baseline'); if (ab) ab.checked = state.auto_baseline;
+      render();
+    }
 
-    let autoTimer = null;
-    $("#autoRun").addEventListener('click', () => {
-      const { periods } = readInputs();
-      if (autoTimer) { clearInterval(autoTimer); autoTimer = null; return; }
-      autoTimer = setInterval(() => {
-        if (state.t >= periods) { clearInterval(autoTimer); autoTimer = null; return; }
-        onePeriod();
-      }, 350);
-    });
-
-    $("#reset").addEventListener('click', () => {
-      state.t = 0; state.periods = []; state.awareness = +$("#awareness").value / 100; state.rngSeed = Math.random()*1e9|0; rand = mulberry32(state.rngSeed);
-      $("#events").innerHTML = '';
-      drawAllCharts();
-      ["#revNow", "#profNow", "#cacNow", "#clvNow", "#paybackNow", "#shareNow"].forEach(id => $(id).textContent = '—');
-    });
-
-    // Export/Import
-    $("#exportBtn").addEventListener('click', () => {
-      const blob = new Blob([JSON.stringify({ state }, null, 2)], {type:'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = 'launch-sim-export.json'; a.click();
-      URL.revokeObjectURL(url);
-    });
-
-    $("#importInput").addEventListener('change', (e) => {
-      const file = e.target.files[0]; if (!file) return;
-      const fr = new FileReader();
-      fr.onload = () => {
-        try {
-          const data = JSON.parse(fr.result);
-          if (data && data.state) {
-            Object.assign(state, data.state);
-            rand = mulberry32(state.rngSeed);
-            drawAllCharts();
-            if (state.periods.length) updateUI(state.periods[state.periods.length-1]);
-            logEvent('Imported previous run.');
-          }
-        } catch (err) { alert('Invalid file.'); }
+    function currentParams() {
+      return {
+        tam: Number(state.tam),
+        sam: Math.round(Number(state.tam) * (Number(state.sam_pct)/100)),
+        months: Number(state.months),
+        price: Number(state.price),
+        unit_cost: Number(state.unit_cost),
+        fixed_cost: Number(state.fixed_cost),
+        ad_spend: Number(state.ad_spend),
+        base_cac: Math.max(0.1, Number(state.base_cac)),
+        conv_rate: Math.max(0.0001, Number(state.conv_rate)/100),
+        k_factor: Math.max(0, Number(state.k_factor)),
+        retention: Math.max(1, Number(state.retention)),
+        seasonality: Math.max(0, Number(state.seasonality)),
+        channel_eff: Math.max(0.01, Number(state.channel_eff)),
+        units_per: Math.max(0.01, Number(state.units_per)),
+        elasticity: Number(state.elasticity),
+        runs: Math.round(Number(state.runs)),
+        price_baseline: Number(state.price_baseline),
       };
-      fr.readAsText(file);
-      e.target.value = '';
+    }
+
+    function simulate(params) {
+      const { months } = params;
+      const revRuns = Array.from({length: months}, () => new Array(params.runs).fill(0));
+      const cashRuns = Array.from({length: months}, () => new Array(params.runs).fill(0));
+      const profitTotals = new Array(params.runs).fill(0);
+      const beMonths = new Array(params.runs).fill(Infinity);
+
+      for (let run = 0; run < params.runs; run++) {
+        const rng = Math.random;
+        let active = 0;
+        let acquiredTotal = 0;
+        const addressable = Math.max(0, params.sam);
+        let cumProfit = 0;
+
+        for (let m = 0; m < months; m++) {
+          // seasonality ~ sine wave around 1.0
+          const season = 1 + params.seasonality * Math.sin(2 * Math.PI * ((m % 12) / 12));
+
+          // random CAC and conversion noise (log-normal multiplicative)
+          const convNoise = lognormalNoise(rng, 0.25);
+          const cacNoise = lognormalNoise(rng, 0.20);
+          const churnNoise = lognormalNoise(rng, 0.15);
+          // price elasticity (demand factor) (demand factor)
+          const priceFactor = Math.pow(params.price / params.price_baseline, params.elasticity);
+
+          // effective conversion rate and CAC
+          const conv = Math.max(0, params.conv_rate * season * convNoise * priceFactor);
+          const cac = Math.max(1, (params.base_cac / params.channel_eff) * cacNoise);
+
+          // paid + organic reach
+          const paidProspects = params.ad_spend / cac; // how many attempts we can fund
+          const organicProspects = params.k_factor * active; // referrals
+          const prospects = Math.min(paidProspects + organicProspects, Math.max(0, addressable - acquiredTotal));
+
+          const newCustomers = prospects * conv;
+          acquiredTotal += newCustomers;
+
+          // churn (geometric with mean=retention months)
+          const monthlyChurnRate = clamp(1 / params.retention, 0.001, 0.95);
+          const lost = Math.min(active, active * monthlyChurnRate * churnNoise);
+
+          active = Math.max(0, active + newCustomers - lost);
+
+          const units = active * params.units_per;
+          const revenue = units * params.price;
+          const variableCost = units * params.unit_cost;
+          const gross = revenue - variableCost;
+          const opex = params.fixed_cost + params.ad_spend;
+          const opProfit = gross - opex;
+
+          revRuns[m][run] = revenue;
+          cashRuns[m][run] = opProfit;
+          cumProfit += opProfit;
+          if (beMonths[run] === Infinity && cumProfit >= 0) beMonths[run] = m + 1;
+          // At end of horizon, record total profit
+          if (m === months - 1) profitTotals[run] = cumProfit;
+        }
+      }
+
+      // Aggregate percentiles per month
+      const p10 = [], p50 = [], p90 = [], labels = []; const cashP10 = [], cashP50 = [], cashP90 = [];
+      for (let m=0;m<months;m++) {
+        const arr = revRuns[m].slice().sort((a,b)=>a-b);
+        p10.push(percentile(arr, 0.10));
+        p50.push(percentile(arr, 0.50));
+        p90.push(percentile(arr, 0.90));
+        
+        const carr = cashRuns[m].slice().sort((a,b)=>a-b);
+        cashP10.push(percentile(carr, 0.10));
+        cashP50.push(percentile(carr, 0.50));
+        cashP90.push(percentile(carr, 0.90));
+        labels.push('M' + (m+1));
+      }
+
+      const profitSorted = profitTotals.slice().sort((a,b)=>a-b);
+      const profitP10 = percentile(profitSorted, 0.10);
+      const profitP50 = percentile(profitSorted, 0.50);
+      const profitP90 = percentile(profitSorted, 0.90);
+
+      const beFinite = beMonths.filter(x => isFinite(x));
+      const beProb = beFinite.length / params.runs;
+      const beMed = beFinite.length ? median(beFinite) : Infinity;
+      const beP90 = beFinite.length ? percentile(beFinite.slice().sort((a,b)=>a-b), 0.90) : Infinity;
+
+      const expectedRevenue = p50.reduce((a,b)=>a+b,0);
+      const expectedProfit = mean(profitTotals);
+      const mktSpend = params.ad_spend * params.months;
+      const roi = expectedProfit / Math.max(1, mktSpend);
+
+      return { labels, p10, p50, p90, cashP10, cashP50, cashP90, profitTotals, profitP10, profitP50, profitP90, beProb, beMed, beP90, expectedRevenue, expectedProfit, roi };
+    }
+
+    // ---------- Rendering ----------
+    const lineCanvas = document.getElementById('chart_line');
+    const cashCanvas = document.getElementById('chart_cash');
+    const histCanvas = document.getElementById('chart_hist');
+
+    let lastResult = null;
+
+    function render() {
+      const ab = document.getElementById('auto_baseline');
+      if (ab && ab.checked) { state.price_baseline = Number(state.price); }
+      const p = currentParams();
+      const pbl = document.getElementById('price_base_label'); if (pbl) pbl.textContent = '$' + p.price_baseline;
+      lastResult = simulate(p);
+
+      // KPIs
+      document.getElementById('kpi_rev').textContent = fmt.cur0(lastResult.expectedRevenue);
+      document.getElementById('kpi_profit').textContent = fmt.cur0(lastResult.expectedProfit);
+      document.getElementById('kpi_be_prob').textContent = fmt.pct0(lastResult.beProb);
+      document.getElementById('kpi_roi').textContent = (lastResult.roi>=0 ? '+' : '') + (lastResult.roi*100).toFixed(0) + '%';
+
+      const beTxt = isFinite(lastResult.beMed)
+        ? `Median time to break-even: ~M${Math.round(lastResult.beMed)} (P90: M${Math.round(lastResult.beP90)})`
+        : 'Break-even unlikely within horizon';
+      document.getElementById('kpi_be_time').textContent = beTxt;
+
+      // Charts
+      drawLineChart(lineCanvas, lastResult.labels, [
+        { name: 'P10', data: lastResult.p10 },
+        { name: 'P50', data: lastResult.p50 },
+        { name: 'P90', data: lastResult.p90 },
+      ], {zeroLine:false});
+      if (cashCanvas) {
+        drawLineChart(cashCanvas, lastResult.labels, [
+          { name: 'P10', data: lastResult.cashP10 },
+          { name: 'P50', data: lastResult.cashP50 },
+          { name: 'P90', data: lastResult.cashP90 },
+        ], {zeroLine:true});
+      }
+      drawHistogram2(histCanvas, lastResult.profitTotals);
+
+      // Table of percentiles for profit
+      const tbl = document.getElementById('tbl_pctls');
+      tbl.innerHTML = `
+        <tr><th>Metric</th><th>Value</th></tr>
+        <tr><td>Profit P10</td><td>${fmt.cur0(lastResult.profitP10)}</td></tr>
+        <tr><td>Profit P50 (median)</td><td>${fmt.cur0(lastResult.profitP50)}</td></tr>
+        <tr><td>Profit P90</td><td>${fmt.cur0(lastResult.profitP90)}</td></tr>
+      `;
+
+      // Insights
+      const insights = [];
+      if (lastResult.beProb === 0) {
+        insights.push('Break-even is <b>0%</b> under current settings because cumulative profit never turns positive. Check volume drivers: <b>CPL</b> and <b>Conversion</b> (since <i>customers ≈ visits × conversion</i>) and compare gross margin vs. fixed+ad spend.');
+      }
+      if (lastResult.beProb < 0.5) {
+        insights.push(`With the current levers, break-even within ${p.months} months is <b>${fmt.pct0(lastResult.beProb)}</b>. Consider raising <b>price</b>, improving <b>channel efficiency</b>, or trimming <b>fixed/ad spend</b>.`);
+      } else {
+        insights.push(`You have a >50% chance to break even by <b>M${Math.round(lastResult.beMed)}</b> (P90 by M${Math.round(lastResult.beP90)}).`);
+      }
+      if (p.elasticity < -1.2) {
+        insights.push(`High (elastic) demand: price increases hurt conversion notably (elasticity ${p.elasticity}). Test smaller price steps.`);
+      } else if (p.elasticity > -0.6) {
+        insights.push(`Low (inelastic) demand: conversion is less sensitive to price changes (elasticity ${p.elasticity}). Pricing power may exist.`);
+      }
+      if (p.seasonality > 0.25) insights.push(`Strong seasonality (±${Math.round(p.seasonality*100)}%) suggests budgeting more paid media ahead of peak months.`);
+      if (p.k_factor >= 0.05) insights.push(`Viral growth (K=${p.k_factor.toFixed(2)}) meaningfully amplifies acquisition as active base grows. Invest in referrals.`);
+
+      document.getElementById('insights').innerHTML = insights.map(x => `<div>• ${x}</div>`).join('');
+    }
+
+    // ---------- Wiring ----------
+    bindRange('tam','tam');
+    bindRange('sam','sam_pct');
+    bindRange('months','months');
+    bindRange('price','price');
+    bindRange('unit_cost','unit_cost');
+    bindRange('fixed_cost','fixed_cost');
+    bindRange('ad_spend','ad_spend');
+    bindRange('base_cac','base_cac');
+    bindRange('conv_rate','conv_rate');
+    bindRange('k_factor','k_factor');
+    bindRange('retention','retention');
+    bindRange('seasonality','seasonality');
+    bindRange('channel_eff','channel_eff');
+    bindRange('units_per','units_per');
+    bindRange('elasticity','elasticity');
+    
+
+    document.getElementById('btn-run').addEventListener('click', render);
+    
+    document.getElementById('btn-reset').addEventListener('click', resetDefaults);
+    document.getElementById('btn-baseline').addEventListener('click', () => {
+      state.price_baseline = Number(state.price);
+      const ab = document.getElementById('auto_baseline'); if (ab) { ab.checked = false; state.auto_baseline = false; }
+      const pbl = document.getElementById('price_base_label'); if (pbl) pbl.textContent = '$' + state.price_baseline;
+      const msg = document.createElement('div');
+      msg.textContent = `Elasticity baseline set to $${state.price_baseline}`;
+      msg.style.cssText = 'position:fixed; bottom:16px; right:16px; background:#111; border:1px solid #333; color:#e0e0e0; padding:8px 12px; border-radius:10px; z-index:9;';
+      document.body.appendChild(msg);
+      setTimeout(()=>msg.remove(), 2400);
     });
 
-    // Initialize UI text and charts
-    [
-      ["#marketSize", "marketSizeOut", fmtInt],
-      ["#awareness", "awarenessOut", null, '%'],
-      ["#pmf", "pmfOut"],
-      ["#price", "priceOut", null, '', '$'],
-      ["#cost", "costOut", null, '', '$'],
-      ["#budget", "budgetOut", fmtInt],
-      ["#compStrength", "compOut"],
-      ["#capacity", "capOut", fmtInt],
-      ["#retention", "retOut", null, '%']
-    ].forEach(([sel, out, f, s='', p='']) => syncOut($(sel), out, { f, s, p }));
-    allocChanged();
-    drawAllCharts();
+    // Exports
+    document.getElementById('btn-export-rev').addEventListener('click', () => {
+      if (!lastResult) return;
+      const rows = [['Month','Revenue_P10','Revenue_P50','Revenue_P90']];
+      for (let i=0;i<lastResult.labels.length;i++) rows.push([lastResult.labels[i], Math.round(lastResult.p10[i]), Math.round(lastResult.p50[i]), Math.round(lastResult.p90[i])]);
+      downloadCSV('monthly_revenue_percentiles.csv', rows);
+    });
+    document.getElementById('btn-export-profit').addEventListener('click', () => {
+      if (!lastResult) return;
+      const rows = [['Run','Total_Profit']];
+      lastResult.profitTotals.forEach((v,i)=>rows.push([i+1, Math.round(v)]));
+      downloadCSV('profit_distribution.csv', rows);
+    });
+
+    // Re-render on resize to keep canvases crisp
+    window.addEventListener('resize', () => { if (lastResult) { drawLineChart(lineCanvas, lastResult.labels, [{data:lastResult.p10},{data:lastResult.p50},{data:lastResult.p90}], {zeroLine:false}); if (cashCanvas) { drawLineChart(cashCanvas, lastResult.labels, [{data:lastResult.cashP10},{data:lastResult.cashP50},{data:lastResult.cashP90}], {zeroLine:true}); } drawHistogram2(histCanvas, lastResult.profitTotals); } });
+
+    // Tooltips init (upgrade 'title' to custom tooltip)
+    (function initTooltips(){
+      const infos = document.querySelectorAll('.info');
+      infos.forEach(el => {
+        if (!el.dataset.tip && el.getAttribute('title')) { el.dataset.tip = el.getAttribute('title'); el.removeAttribute('title'); }
+        el.setAttribute('tabindex','0');
+        el.addEventListener('click', (e)=>{ e.stopPropagation(); el.classList.toggle('show'); setTimeout(()=>el.classList.remove('show'), 2500); });
+      });
+      document.addEventListener('click', ()=>{ document.querySelectorAll('.info.show').forEach(x=>x.classList.remove('show')); });
+    })();
+
+    // Initialize UI with defaults and first render
+    resetDefaults();
   </script>
 </body>
 </html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentiment Analysis Prompts</title>
+    <style>
+        :root {
+            --bg: #1a1a1a;
+            --fg: #e0e0e0;
+            --accent: #e6a700;
+            --card: #222222;
+            --muted: #bdbdbd;
+            --grid: #333333;
+            --good: #50c878;
+            --bad: #ff6b6b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--fg);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background-color: var(--card);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+        }
+
+        h1, h2, h3 {
+            color: var(--accent);
+            font-weight: 600;
+            border-bottom: 2px solid var(--grid);
+            padding-bottom: 8px;
+            margin-top: 30px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            text-align: center;
+            color: var(--fg);
+            border-bottom: 2px solid var(--accent);
+        }
+
+        h2 {
+            font-size: 2em;
+        }
+
+        h3 {
+            font-size: 1.5em;
+            color: var(--fg);
+            border-bottom: 1px solid var(--grid);
+            padding-bottom: 4px;
+        }
+
+        p, ul, ol {
+            color: var(--fg);
+        }
+
+        strong {
+            color: var(--accent);
+        }
+
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        li {
+            background-color: var(--card);
+            border-left: 3px solid var(--accent);
+            margin: 12px 0;
+            padding: 12px 20px;
+            border-radius: 6px;
+        }
+
+        .good-sentiment {
+            color: var(--good);
+            font-weight: bold;
+        }
+
+        .bad-sentiment {
+            color: var(--bad);
+            font-weight: bold;
+        }
+
+        blockquote {
+            background-color: var(--grid);
+            border-left: 4px solid var(--accent);
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 6px;
+            font-style: italic;
+            color: var(--muted);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Effective Prompts for Sentiment Analysis</h1>
+    <p>Crafting the right prompt is crucial for getting accurate and useful sentiment analysis from an AI. The best prompts are specific and tailored to the level of detail you need. Below are several categories of prompts, from basic to advanced.</p>
+
+    ---
+
+    <h2>1. Basic Sentiment Analysis</h2>
+    <p>These prompts are designed for a quick, high-level assessment of a review's overall feeling. They are great for getting a simple classification.</p>
+    <ul>
+        <li>"What is the sentiment of this review: [insert review text]?"</li>
+        <li>"Classify the sentiment of the following review as positive, negative, or neutral: [insert review text]"</li>
+        <li>"Is this review <span class="good-sentiment">positive</span> or <span class="bad-sentiment">negative</span>? Review: [insert review text]"</li>
+    </ul>
+
+    ---
+
+    <h2>2. Detailed Sentiment Analysis</h2>
+    <p>When you need more than a simple label, these prompts provide a nuanced breakdown of the review's content.</p>
+    <ul>
+        <li>"Analyze the sentiment of this review and provide a score from -10 (very negative) to +10 (very positive). Also, provide a brief explanation for the score: [insert review text]"</li>
+        <li>"Identify the main sentiment of this review and highlight any mixed sentiments or conflicting opinions within it: [insert review text]"</li>
+        <li>"Provide a detailed sentiment analysis of this review. Include the overall sentiment, the sentiment towards specific aspects mentioned, and a summary of the key positive and negative points: [insert review text]"</li>
+    </ul>
+
+    ---
+
+    <h2>3. Specific Aspect Sentiment Analysis</h2>
+    <p>Use these prompts to pinpoint the sentiment toward a particular feature or topic mentioned in a review. This is ideal for product managers or researchers.</p>
+    <ul>
+        <li>"What is the sentiment towards the <strong>'customer service'</strong> in this review: [insert review text]"</li>
+        <li>"Analyze the sentiment specifically about the <strong>'battery life'</strong> mentioned in this review: [insert review text]"</li>
+        <li>"Is the reviewer's sentiment about the <strong>'ease of use'</strong> positive or negative? Review: [insert review text]"</li>
+    </ul>
+
+    ---
+
+    <h2>4. Comparative & Summarization Prompts</h2>
+    <p>These prompts are useful for comparing multiple reviews or for generating a concise summary of the sentiment.</p>
+    <ul>
+        <li>"Compare the sentiment of the following two reviews. Which one is more positive and why? [insert Review 1 text] [insert Review 2 text]"</li>
+        <li>"Summarize the sentiment of this review in one sentence: [insert review text]"</li>
+        <li>"Based on these reviews, what is the overall sentiment for Product A versus Product B? [insert reviews for Product A] [insert reviews for Product B]"</li>
+    </ul>
+
+    ---
+
+    <h2>Tips for Crafting the Best Prompts</h2>
+    <blockquote>
+        <p><strong>Be Explicit:</strong> Clearly state what you want. Don't just say "analyze this review." Say "analyze the sentiment of this review."</p>
+        <p><strong>Provide Context:</strong> If you're analyzing reviews for a specific product, mention it to help the AI. "Analyze the sentiment of this review about the 'Quantum Speaker'."</p>
+        <p><strong>Define the Output Format:</strong> Tell the AI how you want the answer. "Provide a score from 1-5," "Use bullet points," or "Summarize in a paragraph."</p>
+    </blockquote>
+</div>
+
+</body>
+</html>
