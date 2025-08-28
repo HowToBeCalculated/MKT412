@@ -125,8 +125,8 @@
         <h2>Levers</h2>
         <div class="control">
           <div>
-            <label for="tam">Total Addressable Market (TAM)<span class="info" title="Placeholder: TAM = total potential customers in the broader market.">ⓘ</span></label>
-            <small>Potential customers in the whole market</small>
+            <label for="tam">Total Addressable Market (TAM)<span class="info" title="Total Addressable Market: The total potential customers or revenue for a product/service in the entire market.">ⓘ</span></label>
+            <small>Total potential customers in the broader market</small>
           </div>
           <input class="number" id="tam_n" type="number" min="10000" step="1000" />
           <input id="tam" type="range" min="10000" max="2000000" step="1000" />
@@ -134,17 +134,17 @@
 
         <div class="control">
           <div>
-            <label for="sam">Addressable Share (SAM % of TAM)<span class="info" title="Placeholder: SAM = portion of TAM you can feasibly serve.">ⓘ</span></label>
-            <small>Portion you can realistically serve</small>
+            <label for="sam_pct">Addressable Share (SAM % of TAM)<span class="info" title="Serviceable Addressable Market: The portion of the Total Addressable Market that your business can realistically reach and serve.">ⓘ</span></label>
+            <small>The portion of the market you can realistically serve</small>
           </div>
-          <input class="number" id="sam_n" type="number" min="1" max="100" step="1" />
-          <input id="sam" type="range" min="1" max="100" step="1" />
+          <input class="number" id="sam_pct_n" type="number" min="1" max="100" step="1" />
+          <input id="sam_pct" type="range" min="1" max="100" step="1" />
         </div>
 
         <div class="control">
           <div>
-            <label for="months">Horizon (months)<span class="info" title="Placeholder: Time span for the simulation window.">ⓘ</span></label>
-            <small>Length of simulation</small>
+            <label for="months">Horizon (months)<span class="info" title="The total time duration, in months, for which the simulation will run.">ⓘ</span></label>
+            <small>Length of the simulation period</small>
           </div>
           <input class="number" id="months_n" type="number" min="6" max="60" step="1" />
           <input id="months" type="range" min="6" max="60" step="1" />
@@ -153,7 +153,7 @@
         <div class="row">
           <div class="control">
             <div>
-              <label for="price">Price ($)<span class="info" title="Placeholder: Average selling price per unit.">ⓘ</span></label>
+              <label for="price">Price ($)<span class="info" title="The average selling price per unit of your product.">ⓘ</span></label>
               <small>Average selling price per unit</small>
             </div>
             <input class="number" id="price_n" type="number" min="1" step="1" />
@@ -161,8 +161,8 @@
           </div>
           <div class="control">
             <div>
-              <label for="unit_cost">Unit Cost ($)<span class="info" title="Placeholder: Variable cost per unit (COGS).">ⓘ</span></label>
-              <small>COGS per unit</small>
+              <label for="unit_cost">Unit Cost ($)<span class="info" title="The variable cost associated with producing or acquiring one unit of the product (Cost of Goods Sold or COGS).">ⓘ</span></label>
+              <small>Cost of Goods Sold (COGS) per unit</small>
             </div>
             <input class="number" id="unit_cost_n" type="number" min="0" step="1" />
             <input id="unit_cost" type="range" min="0" max="999" step="1" />
@@ -172,16 +172,16 @@
         <div class="row">
           <div class="control">
             <div>
-              <label for="fixed_cost">Fixed Cost / mo ($)<span class="info" title="Placeholder: Overhead not tied to unit volume (e.g., payroll, tools).">ⓘ</span></label>
-              <small>Overhead, payroll, tools</small>
+              <label for="fixed_cost">Fixed Cost / mo ($)<span class="info" title="Costs that remain constant regardless of production or sales volume, such as rent, salaries, or software subscriptions, measured per month.">ⓘ</span></label>
+              <small>Monthly overhead costs (e.g., salaries, rent, software subscriptions)</small>
             </div>
             <input class="number" id="fixed_cost_n" type="number" min="0" step="100" />
             <input id="fixed_cost" type="range" min="0" max="200000" step="100" />
           </div>
           <div class="control">
             <div>
-              <label for="ad_spend">Ad Spend / mo ($)<span class="info" title="Placeholder: Paid media budget per month.">ⓘ</span></label>
-              <small>Paid marketing budget</small>
+              <label for="ad_spend">Ad Spend / mo ($)<span class="info" title="The budget allocated for paid marketing and advertising efforts each month.">ⓘ</span></label>
+              <small>Monthly budget for paid advertising and promotions</small>
             </div>
             <input class="number" id="ad_spend_n" type="number" min="0" step="100" />
             <input id="ad_spend" type="range" min="0" max="200000" step="100" />
@@ -191,7 +191,7 @@
         <div class="row">
           <div class="control">
             <div>
-              <label for="base_cac">Cost per Lead/Visit (CPL $)<span class="info" title="Placeholder: Average cost to buy 1 visit/lead. Customers ≈ visits × conversion.">ⓘ</span></label>
+              <label for="base_cac">Cost per Lead/Visit (CPL $)<span class="info" title="The average cost to acquire a single lead or website visit through marketing efforts.">ⓘ</span></label>
               <small>Paid traffic cost per visit/lead (not per customer). Customers ≈ visits × conversion.</small>
             </div>
             <input class="number" id="base_cac_n" type="number" min="0.5" step="0.1" />
@@ -199,8 +199,8 @@
           </div>
           <div class="control">
             <div>
-              <label for="conv_rate">Baseline Conversion (%)<span class="info" title="Placeholder: Share of visits that become customers.">ⓘ</span></label>
-              <small>Visitor ➜ customer</small>
+              <label for="conv_rate">Baseline Conversion (%)<span class="info" title="The percentage of leads or website visitors who successfully become paying customers.">ⓘ</span></label>
+              <small>Percentage of visitors who become paying customers</small>
             </div>
             <input class="number" id="conv_rate_n" type="number" min="0.01" max="100" step="0.01" />
             <input id="conv_rate" type="range" min="0.01" max="20" step="0.01" />
@@ -210,80 +210,59 @@
         <div class="row">
           <div class="control">
             <div>
-              <label for="k_factor">Viral K-Factor<span class="info" title="Placeholder: Organic referrals per active customer per month.">ⓘ</span></label>
-              <small>Organic growth per active user</small>
+              <label for="k_factor">Viral K-Factor<span class="info" title="A metric in viral marketing that quantifies how many new customers an existing customer generates through organic referrals.">ⓘ</span></label>
+              <small>Average number of new customers generated by an existing customer</small>
             </div>
             <input class="number" id="k_factor_n" type="number" min="0" max="1" step="0.01" />
             <input id="k_factor" type="range" min="0" max="1" step="0.01" />
           </div>
           <div class="control">
             <div>
-              <label for="retention">Avg Retention (months)<span class="info" title="Placeholder: Average customer lifetime in months.">ⓘ</span></label>
-              <small>Higher ⇒ lower churn</small>
+              <label for="retention">Avg Retention (months)<span class="info" title="The average duration, in months, that a customer continues to use or purchase your product/service.">ⓘ</span></label>
+              <small>Average customer lifetime in months (higher value means less customer churn)</small>
             </div>
             <input class="number" id="retention_n" type="number" min="1" max="60" step="1" />
             <input id="retention" type="range" min="1" max="60" step="1" />
           </div>
         </div>
-
+        
         <div class="row">
           <div class="control">
             <div>
-              <label for="seasonality">Seasonality Amplitude<span class="info" title="Placeholder: Strength of seasonal demand swings (0 = flat).">ⓘ</span></label>
-              <small>0 = flat, 0.3 ≈ ±30%</small>
-            </div>
-            <input class="number" id="seasonality_n" type="number" min="0" max="0.6" step="0.01" />
-            <input id="seasonality" type="range" min="0" max="0.6" step="0.01" />
-          </div>
-          <div class="control">
-            <div>
-              <label for="channel_eff">Channel Efficiency<span class="info" title="Placeholder: Efficiency multiplier on paid channels (>1 better).">ⓘ</span></label>
-              <small>&gt;1 better, &lt;1 worse</small>
-            </div>
-            <input class="number" id="channel_eff_n" type="number" min="0.2" max="2" step="0.01" />
-            <input id="channel_eff" type="range" min="0.2" max="2" step="0.01" />
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="control">
-            <div>
-              <label for="units_per">Units / cust / mo<span class="info" title="Placeholder: Average monthly units per active customer.">ⓘ</span></label>
-              <small>Avg units purchased per active</small>
+              <label for="units_per">Units per Customer per Month<span class="info" title="The average number of product units an active customer purchases each month.">ⓘ</span></label>
+              <small>Average number of product units purchased by an active customer each month</small>
             </div>
             <input class="number" id="units_per_n" type="number" min="0.1" max="10" step="0.1" />
             <input id="units_per" type="range" min="0.1" max="10" step="0.1" />
           </div>
           <div class="control">
             <div>
-              <label for="elasticity">Price Elasticity<span class="info" title="Placeholder: Sensitivity of conversion to price (typically negative).">ⓘ</span></label>
-              <small>Typically negative</small>
+              <label for="elasticity">Price Elasticity<span class="info" title="A measure of how sensitive customer demand is to changes in your product's price. It's typically negative: as price increases, demand decreases.">ⓘ</span></label>
+              <small>Sensitivity of customer demand to price changes (typically negative)</small>
             </div>
             <input class="number" id="elasticity_n" type="number" min="-3" max="0" step="0.05" />
             <input id="elasticity" type="range" min="-3" max="0" step="0.05" />
           </div>
         </div>
 
-        <!-- Price baseline control -->
         <div class="control">
           <div>
-            <label>Elasticity Baseline<span class="info" title="Placeholder: Reference price used for elasticity calculations.">ⓘ</span></label>
-            <small>Reference price for demand: <span id="price_base_label"></span></small>
+            <label for="price_baseline">Elasticity Baseline ($)<span class="info" title="The reference price used to calculate how price changes impact conversion rates, based on the price elasticity.">ⓘ</span></label>
+            <small>The price point used as a reference for demand sensitivity</small>
           </div>
-          <label style="grid-column: 1 / span 2; display:flex; align-items:center; gap:8px; font-size:12px;">
-            <input id="auto_baseline" type="checkbox" checked /> Baseline tracks current price on run
-          </label>
+          <input class="number" id="price_baseline_n" type="number" min="1" step="1" />
+          <input id="price_baseline" type="range" min="1" max="999" step="1" />
         </div>
-
+        <div class="control">
+            <label style="grid-column: 1 / span 2; display:flex; align-items:center; gap:8px; font-size:12px;">
+              <input id="auto_baseline" type="checkbox" checked /> Baseline tracks current price on run
+            </label>
+        </div>
         
-
-        
-
         <div class="btnbar">
           <button id="btn-run">Run simulation</button>
-          
           <button id="btn-reset" class="secondary" title="Reset all levers to defaults">Reset defaults</button>
-          <button id="btn-baseline" class="secondary" title="Set current price as elasticity baseline">Set price as baseline</button>
+          <button id="btn-set-price-baseline" class="secondary" title="Set current price as elasticity baseline">Set current price as baseline</button>
         </div>
         <div class="footer-note">Tip: tweak a lever and press <b>Run simulation</b>. Monte Carlo adds randomness (CPL, conversion, churn, churn) each run to generate bands.</div>
       </div>
@@ -310,8 +289,11 @@
       </div>
 
       <div class="card pad">
-        <h2>Net Cashflow Over Time (P10 • P50 • P90)</h2>
+        <h2>Cumulative Net Cashflow Over Time (P10 • P50 • P90)</h2>
         <div class="chart"><canvas id="chart_cash" width="1280" height="300"></canvas></div>
+        <div class="btnbar">
+          <button id="btn-export-cum-cash" class="secondary">Export cumulative cashflow (CSV)</button>
+        </div>
       </div>
 
       <div class="card pad">
@@ -545,50 +527,91 @@
       sam_pct: 40,
       months: 24,
       price: 49,
-      unit_cost: 20,
-      fixed_cost: 37500,
+      unit_cost: 25,
+      fixed_cost: 25000,
       ad_spend: 15000,
       base_cac: 2.5, // CPL (cost per lead/visit)
       conv_rate: 2.5, // % (visit -> customer)
       k_factor: 0.05,
       retention: 20, // months
-      seasonality: 0.10,
-      channel_eff: 1.1,
+      seasonality: 0.10, // Retained default in model
+      channel_eff: 1.0, // Set to 1 as per request
       units_per: 1.2,
       elasticity: -1.0,
       runs: 1000,
-      price_baseline: 49,
+      price_baseline: 49, // Default for new control
       auto_baseline: true,
     };
 
     const state = { ...defaults };
 
-    function bindRange(id, key, scale=1) {
-      const r = document.getElementById(id);
-      const n = document.getElementById(id + '_n');
-      const sync = (fromRange) => {
-        const v = fromRange ? Number(r.value) : Number(n.value);
-        r.value = String(v);
-        n.value = String(v);
-        state[key] = v;
-      };
-      r.addEventListener('input', () => { sync(true); });
-      n.addEventListener('change', () => { sync(false); });
-      // init
-      r.value = String(state[key]); n.value = String(state[key]);
+    // Function to bind range and number inputs
+    function bindInput(id, key) {
+        const r = document.getElementById(id); // range input
+        const n = document.getElementById(id + '_n'); // number input
+
+        const updateAll = (value) => {
+            let clampedValue = value;
+            if (r) {
+                const min = Number(r.min);
+                const max = Number(r.max);
+                if (!isNaN(min) && clampedValue < min) clampedValue = min;
+                if (!isNaN(max) && clampedValue > max) clampedValue = max;
+                r.value = String(clampedValue);
+            }
+            state[key] = clampedValue;
+            if (n) n.value = String(clampedValue);
+        };
+
+        if (r) {
+            r.addEventListener('input', () => {
+                const v = Number(r.value);
+                updateAll(v);
+                render();
+            });
+        }
+
+        if (n) {
+            n.addEventListener('change', () => {
+                const v = Number(n.value);
+                if (!isNaN(v)) {
+                    updateAll(v);
+                    render();
+                } else {
+                    updateAll(state[key]); // Revert to current state if input is invalid
+                }
+            });
+        }
+
+        // Initialize display and input values
+        updateAll(state[key]);
     }
 
     function resetDefaults() {
       Object.assign(state, { ...defaults });
       [
-        'tam','sam','months','price','unit_cost','fixed_cost','ad_spend','base_cac','conv_rate','k_factor','retention','seasonality','channel_eff','units_per','elasticity'
+        'tam','sam_pct','months','price','unit_cost','fixed_cost','ad_spend','base_cac','conv_rate','k_factor','retention','units_per','elasticity','price_baseline'
       ].forEach(id => {
-        const key = id === 'sam' ? 'sam_pct' : id;
-        const elRange = document.getElementById(id);
-        const elNum = document.getElementById(id + '_n');
-        if (elRange && elNum) { elRange.value = String(state[key]); elNum.value = String(state[key]); }
+        // Re-bind each control to update their UI elements
+        switch (id) {
+            case 'tam': bindInput('tam', 'tam'); break;
+            case 'price': bindInput('price', 'price'); break;
+            case 'unit_cost': bindInput('unit_cost', 'unit_cost'); break;
+            case 'fixed_cost': bindInput('fixed_cost', 'fixed_cost'); break;
+            case 'ad_spend': bindInput('ad_spend', 'ad_spend'); break;
+            case 'base_cac': bindInput('base_cac', 'base_cac'); break;
+            case 'conv_rate': bindInput('conv_rate', 'conv_rate'); break;
+            case 'sam_pct': bindInput('sam_pct', 'sam_pct'); break;
+            case 'months': bindInput('months', 'months'); break;
+            case 'k_factor': bindInput('k_factor', 'k_factor'); break;
+            case 'retention': bindInput('retention', 'retention'); break;
+            case 'units_per': bindInput('units_per', 'units_per'); break;
+            case 'elasticity': bindInput('elasticity', 'elasticity'); break;
+            case 'price_baseline': bindInput('price_baseline', 'price_baseline'); break;
+        }
       });
-      const ab = document.getElementById('auto_baseline'); if (ab) ab.checked = state.auto_baseline;
+      const ab = document.getElementById('auto_baseline');
+      if (ab) ab.checked = state.auto_baseline;
       render();
     }
 
@@ -602,11 +625,11 @@
         fixed_cost: Number(state.fixed_cost),
         ad_spend: Number(state.ad_spend),
         base_cac: Math.max(0.1, Number(state.base_cac)),
-        conv_rate: Math.max(0.0001, Number(state.conv_rate)/100),
+        conv_rate: Math.max(0.0001, Number(state.conv_rate)/100), // Convert percentage to decimal for simulation
         k_factor: Math.max(0, Number(state.k_factor)),
         retention: Math.max(1, Number(state.retention)),
-        seasonality: Math.max(0, Number(state.seasonality)),
-        channel_eff: Math.max(0.01, Number(state.channel_eff)),
+        seasonality: defaults.seasonality, // Use default
+        channel_eff: defaults.channel_eff, // Use default
         units_per: Math.max(0.01, Number(state.units_per)),
         elasticity: Number(state.elasticity),
         runs: Math.round(Number(state.runs)),
@@ -617,7 +640,8 @@
     function simulate(params) {
       const { months } = params;
       const revRuns = Array.from({length: months}, () => new Array(params.runs).fill(0));
-      const cashRuns = Array.from({length: months}, () => new Array(params.runs).fill(0));
+      const monthlyCashRuns = Array.from({length: months}, () => new Array(params.runs).fill(0)); 
+      const cumCashRuns = Array.from({length: months}, () => new Array(params.runs).fill(0)); 
       const profitTotals = new Array(params.runs).fill(0);
       const beMonths = new Array(params.runs).fill(Infinity);
 
@@ -626,26 +650,26 @@
         let active = 0;
         let acquiredTotal = 0;
         const addressable = Math.max(0, params.sam);
-        let cumProfit = 0;
+        let cumProfitThisRun = 0;
 
         for (let m = 0; m < months; m++) {
-          // seasonality ~ sine wave around 1.0
+          // seasonality ~ sine wave around 1.0 (using default.seasonality)
           const season = 1 + params.seasonality * Math.sin(2 * Math.PI * ((m % 12) / 12));
 
           // random CAC and conversion noise (log-normal multiplicative)
           const convNoise = lognormalNoise(rng, 0.25);
           const cacNoise = lognormalNoise(rng, 0.20);
           const churnNoise = lognormalNoise(rng, 0.15);
-          // price elasticity (demand factor) (demand factor)
+          // price elasticity (demand factor)
           const priceFactor = Math.pow(params.price / params.price_baseline, params.elasticity);
 
           // effective conversion rate and CAC
           const conv = Math.max(0, params.conv_rate * season * convNoise * priceFactor);
-          const cac = Math.max(1, (params.base_cac / params.channel_eff) * cacNoise);
+          const cac = Math.max(1, (params.base_cac / params.channel_eff) * cacNoise); // Using default.channel_eff
 
           // paid + organic reach
-          const paidProspects = params.ad_spend / cac; // how many attempts we can fund
-          const organicProspects = params.k_factor * active; // referrals
+          const paidProspects = params.ad_spend / cac; 
+          const organicProspects = params.k_factor * active; 
           const prospects = Math.min(paidProspects + organicProspects, Math.max(0, addressable - acquiredTotal));
 
           const newCustomers = prospects * conv;
@@ -665,26 +689,37 @@
           const opProfit = gross - opex;
 
           revRuns[m][run] = revenue;
-          cashRuns[m][run] = opProfit;
-          cumProfit += opProfit;
-          if (beMonths[run] === Infinity && cumProfit >= 0) beMonths[run] = m + 1;
-          // At end of horizon, record total profit
-          if (m === months - 1) profitTotals[run] = cumProfit;
+          monthlyCashRuns[m][run] = opProfit; 
+          
+          cumProfitThisRun += opProfit; 
+          cumCashRuns[m][run] = cumProfitThisRun; 
+
+          if (beMonths[run] === Infinity && cumProfitThisRun >= 0) beMonths[run] = m + 1;
+          if (m === months - 1) profitTotals[run] = cumProfitThisRun;
         }
       }
 
       // Aggregate percentiles per month
-      const p10 = [], p50 = [], p90 = [], labels = []; const cashP10 = [], cashP50 = [], cashP90 = [];
+      const p10 = [], p50 = [], p90 = [], labels = []; 
+      const cashP10 = [], cashP50 = [], cashP90 = []; 
+      const cumCashP10 = [], cumCashP50 = [], cumCashP90 = []; 
+
       for (let m=0;m<months;m++) {
         const arr = revRuns[m].slice().sort((a,b)=>a-b);
         p10.push(percentile(arr, 0.10));
         p50.push(percentile(arr, 0.50));
         p90.push(percentile(arr, 0.90));
         
-        const carr = cashRuns[m].slice().sort((a,b)=>a-b);
-        cashP10.push(percentile(carr, 0.10));
-        cashP50.push(percentile(carr, 0.50));
-        cashP90.push(percentile(carr, 0.90));
+        const monthlyCarr = monthlyCashRuns[m].slice().sort((a,b)=>a-b);
+        cashP10.push(percentile(monthlyCarr, 0.10));
+        cashP50.push(percentile(monthlyCarr, 0.50));
+        cashP90.push(percentile(monthlyCarr, 0.90));
+
+        const cumulativeArr = cumCashRuns[m].slice().sort((a,b)=>a-b);
+        cumCashP10.push(percentile(cumulativeArr, 0.10));
+        cumCashP50.push(percentile(cumulativeArr, 0.50));
+        cumCashP90.push(percentile(cumulativeArr, 0.90));
+
         labels.push('M' + (m+1));
       }
 
@@ -703,7 +738,7 @@
       const mktSpend = params.ad_spend * params.months;
       const roi = expectedProfit / Math.max(1, mktSpend);
 
-      return { labels, p10, p50, p90, cashP10, cashP50, cashP90, profitTotals, profitP10, profitP50, profitP90, beProb, beMed, beP90, expectedRevenue, expectedProfit, roi };
+      return { labels, p10, p50, p90, cashP10, cashP50, cashP90, cumCashP10, cumCashP50, cumCashP90, profitTotals, profitP10, profitP50, profitP90, beProb, beMed, beP90, expectedRevenue, expectedProfit, roi };
     }
 
     // ---------- Rendering ----------
@@ -714,10 +749,17 @@
     let lastResult = null;
 
     function render() {
-      const ab = document.getElementById('auto_baseline');
-      if (ab && ab.checked) { state.price_baseline = Number(state.price); }
+      const autoBaselineCheckbox = document.getElementById('auto_baseline');
+      if (autoBaselineCheckbox && autoBaselineCheckbox.checked) { 
+        state.price_baseline = Number(state.price); 
+        // Also update the UI for price_baseline if it's set automatically
+        const priceBaselineN = document.getElementById('price_baseline_n');
+        const priceBaselineRange = document.getElementById('price_baseline');
+        if (priceBaselineN) priceBaselineN.value = String(state.price_baseline);
+        if (priceBaselineRange) priceBaselineRange.value = String(state.price_baseline);
+      }
+      
       const p = currentParams();
-      const pbl = document.getElementById('price_base_label'); if (pbl) pbl.textContent = '$' + p.price_baseline;
       lastResult = simulate(p);
 
       // KPIs
@@ -737,11 +779,12 @@
         { name: 'P50', data: lastResult.p50 },
         { name: 'P90', data: lastResult.p90 },
       ], {zeroLine:false});
+      
       if (cashCanvas) {
         drawLineChart(cashCanvas, lastResult.labels, [
-          { name: 'P10', data: lastResult.cashP10 },
-          { name: 'P50', data: lastResult.cashP50 },
-          { name: 'P90', data: lastResult.cashP90 },
+          { name: 'CumP10', data: lastResult.cumCashP10 }, 
+          { name: 'CumP50', data: lastResult.cumCashP50 }, 
+          { name: 'CumP90', data: lastResult.cumCashP90 }, 
         ], {zeroLine:true});
       }
       drawHistogram2(histCanvas, lastResult.profitTotals);
@@ -777,35 +820,40 @@
     }
 
     // ---------- Wiring ----------
-    bindRange('tam','tam');
-    bindRange('sam','sam_pct');
-    bindRange('months','months');
-    bindRange('price','price');
-    bindRange('unit_cost','unit_cost');
-    bindRange('fixed_cost','fixed_cost');
-    bindRange('ad_spend','ad_spend');
-    bindRange('base_cac','base_cac');
-    bindRange('conv_rate','conv_rate');
-    bindRange('k_factor','k_factor');
-    bindRange('retention','retention');
-    bindRange('seasonality','seasonality');
-    bindRange('channel_eff','channel_eff');
-    bindRange('units_per','units_per');
-    bindRange('elasticity','elasticity');
-    
+    bindInput('tam', 'tam');
+    bindInput('sam_pct', 'sam_pct');
+    bindInput('months', 'months');
+    bindInput('price', 'price');
+    bindInput('unit_cost', 'unit_cost');
+    bindInput('fixed_cost', 'fixed_cost');
+    bindInput('ad_spend', 'ad_spend');
+    bindInput('base_cac', 'base_cac');
+    bindInput('conv_rate', 'conv_rate');
+    bindInput('k_factor', 'k_factor');
+    bindInput('retention', 'retention');
+    bindInput('units_per', 'units_per');
+    bindInput('elasticity', 'elasticity');
+    bindInput('price_baseline', 'price_baseline');
 
     document.getElementById('btn-run').addEventListener('click', render);
     
     document.getElementById('btn-reset').addEventListener('click', resetDefaults);
-    document.getElementById('btn-baseline').addEventListener('click', () => {
+    document.getElementById('btn-set-price-baseline').addEventListener('click', () => {
       state.price_baseline = Number(state.price);
       const ab = document.getElementById('auto_baseline'); if (ab) { ab.checked = false; state.auto_baseline = false; }
-      const pbl = document.getElementById('price_base_label'); if (pbl) pbl.textContent = '$' + state.price_baseline;
+      
+      const priceBaselineN = document.getElementById('price_baseline_n');
+      const priceBaselineRange = document.getElementById('price_baseline');
+
+      if (priceBaselineN) priceBaselineN.value = String(state.price_baseline);
+      if (priceBaselineRange) priceBaselineRange.value = String(state.price_baseline);
+
       const msg = document.createElement('div');
-      msg.textContent = `Elasticity baseline set to $${state.price_baseline}`;
+      msg.textContent = `Elasticity baseline set to ${fmt.cur(state.price_baseline)}`;
       msg.style.cssText = 'position:fixed; bottom:16px; right:16px; background:#111; border:1px solid #333; color:#e0e0e0; padding:8px 12px; border-radius:10px; z-index:9;';
       document.body.appendChild(msg);
       setTimeout(()=>msg.remove(), 2400);
+      render();
     });
 
     // Exports
@@ -815,6 +863,15 @@
       for (let i=0;i<lastResult.labels.length;i++) rows.push([lastResult.labels[i], Math.round(lastResult.p10[i]), Math.round(lastResult.p50[i]), Math.round(lastResult.p90[i])]);
       downloadCSV('monthly_revenue_percentiles.csv', rows);
     });
+
+    // New export for cumulative cashflow
+    document.getElementById('btn-export-cum-cash').addEventListener('click', () => {
+      if (!lastResult) return;
+      const rows = [['Month','Cumulative_Cashflow_P10','Cumulative_Cashflow_P50','Cumulative_Cashflow_P90']];
+      for (let i=0;i<lastResult.labels.length;i++) rows.push([lastResult.labels[i], Math.round(lastResult.cumCashP10[i]), Math.round(lastResult.cumCashP50[i]), Math.round(lastResult.cumCashP90[i])]);
+      downloadCSV('cumulative_cashflow_percentiles.csv', rows);
+    });
+
     document.getElementById('btn-export-profit').addEventListener('click', () => {
       if (!lastResult) return;
       const rows = [['Run','Total_Profit']];
@@ -823,7 +880,14 @@
     });
 
     // Re-render on resize to keep canvases crisp
-    window.addEventListener('resize', () => { if (lastResult) { drawLineChart(lineCanvas, lastResult.labels, [{data:lastResult.p10},{data:lastResult.p50},{data:lastResult.p90}], {zeroLine:false}); if (cashCanvas) { drawLineChart(cashCanvas, lastResult.labels, [{data:lastResult.cashP10},{data:lastResult.cashP50},{data:lastResult.cashP90}], {zeroLine:true}); } drawHistogram2(histCanvas, lastResult.profitTotals); } });
+    window.addEventListener('resize', () => { 
+      if (!lastResult) return;
+      drawLineChart(lineCanvas, lastResult.labels, [{data:lastResult.p10},{data:lastResult.p50},{data:lastResult.p90}], {zeroLine:false}); 
+      if (cashCanvas) { 
+        drawLineChart(cashCanvas, lastResult.labels, [{data:lastResult.cumCashP10},{data:lastResult.cumCashP50},{data:lastResult.cumCashP90}], {zeroLine:true}); 
+      } 
+      drawHistogram2(histCanvas, lastResult.profitTotals); 
+    });
 
     // Tooltips init (upgrade 'title' to custom tooltip)
     (function initTooltips(){
