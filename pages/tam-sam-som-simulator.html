@@ -135,16 +135,19 @@
         <div class="grid md:grid-cols-3 gap-4">
           <div>
             <h3 class="font-semibold section-title mb-2">🌍 TAM - Total Addressable Market</h3>
+            <p class="text-sm text-[var(--muted)] mb-2">TAM = (Total Potential Customers) x (Average Revenue Per Customer)</p>
             <p class="text-sm text-[var(--muted)] mb-2">Global EV charging infrastructure market - what if every gas station became an EV charger?</p>
             <div class="text-xs text-gray-400">Includes all EV charging hardware, software, services worldwide</div>
           </div>
           <div>
             <h3 class="font-semibold section-title mb-2">🎯 SAM - Serviceable Available Market</h3>
+            <p class="text-sm text-[var(--muted)] mb-2">SAM = (Target Segment Customers) x (Average Revenue Per Customer)</p>
             <p class="text-sm text-[var(--muted)] mb-2">North American urban markets where EcoCharge can realistically operate</p>
             <div class="text-xs text-gray-400">Limited by geography, regulations, and business model fit</div>
           </div>
           <div>
             <h3 class="font-semibold section-title mb-2">⚡ SOM - Serviceable Obtainable Market</h3>
+            <p class="text-sm text-[var(--muted)] mb-2">SOM = (Expected Market Share %) x (SAM)</p>
             <p class="text-sm text-[var(--muted)] mb-2">Market share EcoCharge can capture given competition and resources</p>
             <div class="text-xs text-gray-400">What you can realistically win in 5 years</div>
           </div>
@@ -349,7 +352,7 @@
   </div>
 
   <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 bg-black/80 text-white text-sm px-3 py-2 rounded shadow hidden" role="status" aria-live="polite"></div>
-  <button id="dev-chip" class="btn btn-ghost" type="button">🧪 Run Self‑Check</button>
+  <button id="dev-chip" class="btn btn-ghost hidden" type="button">🧪 Run Self‑Check</button>
 
 <script>
   // ----- State -----
