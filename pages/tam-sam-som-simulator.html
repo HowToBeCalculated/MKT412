@@ -2,606 +2,590 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <title>EcoCharge Market Analysis — Standalone</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Mini TAM / SAM / SOM Simulator</title>
+  <!-- Tailwind CDN (no build needed) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide icons (vanilla, not React) -->
+  <script defer src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
+    /* ===== Bryant theme ===== */
     :root {
-      /* Bryant University palette per project brief */
-      --bg: #1a1a1a;         /* near-black */
-      --fg: #e0e0e0;         /* light gray text */
-      --accent: #e6a700;     /* Bryant gold */
-      --card: #222222;       /* dark card */
-      --muted: #bdbdbd;      /* muted text */
-      --grid: #333333;       /* chart grid */
-      --good: #50c878;       /* emerald for positive */
-      --bad: #ff6b6b;        /* soft red for negative */
+      --bryant-dark: #1a1a1a;
+      --surface: #242424;
+      --surface-soft: #2a2a2a;
+      --border: #333;
+      --text: #e0e0e0;
+      --muted: #bdbdbd;
+      --accent: #e6a700; /* gold */
+      --accent-ink: #1a1a1a;
     }
+    body { font-family: 'Inter', sans-serif; background-color: var(--bryant-dark); color: var(--text); }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 0.75rem; }
+    .card-soft { background: var(--surface-soft); border: 1px solid rgba(255,255,255,0.04); border-radius: 0.75rem; }
+    .section-title { color: var(--accent); }
+    .btn { padding: 0.4rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 600; }
+    .btn-ghost { background: var(--surface-soft); color: var(--text); border: 1px solid #444; }
+    .btn-ghost:hover { background: #333; }
+    .btn-accent { background: var(--accent); color: var(--accent-ink); }
+    .kbd { background: #111; border: 1px solid #444; padding: 0 6px; border-radius: 6px; font-size: 12px; }
 
-    /* Base */
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-      background: var(--bg);
-      color: var(--fg);
-      line-height: 1.35;
-    }
-    a { color: var(--accent); text-decoration: none; }
-    a:hover { text-decoration: underline; }
+    /* Inputs on dark */
+    .input { background: #1f1f1f; color: var(--text); border: 1px solid #444; border-radius: 0.5rem; padding: 0.5rem 0.75rem; }
+    .input:focus { outline: none; box-shadow: 0 0 0 2px var(--accent); border-color: var(--accent); }
 
-    /* Layout */
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 24px 16px 64px;
-    }
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 16px;
-    }
-    .title {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .logo-dot {
-      width: 14px; height: 14px; border-radius: 50%; background: var(--accent);
-      box-shadow: 0 0 0 4px color-mix(in sRGB, var(--accent) 25%, transparent);
-    }
-    h1 {
-      font-size: clamp(20px, 3vw, 28px);
-      margin: 0; font-weight: 700;
-    }
-    .subtle { color: var(--muted); font-size: 0.95rem; }
+    /* Table */
+    table thead { background: #2a2a2a; }
+    table th { color: var(--accent); font-weight: 700; }
+    table td { color: var(--text); }
 
-    .grid {
-      display: grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap: 16px;
-    }
-    @media (max-width: 980px) {
-      .grid { grid-template-columns: 1fr; }
-    }
+    /* Chart */
+    .legend-dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; }
+    .track { background:#303030; border-radius:9999px; position:relative; height:12px; }
+    .fill { height:12px; border-radius:9999px; }
+    .fill-tam { background: var(--accent); }
+    .fill-sam { background: #d8d8d8; }
+    .fill-som { background: #ffffff; }
 
-    .card {
-      background: var(--card);
-      border: 1px solid #2a2a2a;
-      border-radius: 14px;
-      padding: 16px;
-      box-shadow: 0 10px 24px rgba(0,0,0,0.25);
-    }
-    .card h3 { margin: 0 0 12px; font-size: 1.05rem; letter-spacing: .2px; }
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    @media (max-width: 720px) { .row { grid-template-columns: 1fr; } }
-
-    /* Inputs */
-    .field { display: grid; gap: 6px; }
-    .field label { font-size: 0.9rem; color: var(--muted); }
-    .input {
-      background: #1b1b1b; color: var(--fg);
-      border: 1px solid #2d2d2d; border-radius: 10px;
-      padding: 10px 12px; font-size: 0.98rem;
-      outline: none; transition: border-color .15s ease;
-    }
-    .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in sRGB, var(--accent) 20%, transparent); }
-
-    .slider-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; }
-    input[type="range"] { width: 100%; }
-
-    .switch { display: inline-flex; align-items: center; gap: 8px; user-select: none; cursor: pointer; }
-    .switch input { display: none; }
-    .switch .track { width: 44px; height: 24px; border-radius: 999px; background: #444; position: relative; transition: background .2s ease; }
-    .switch .thumb { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; background: white; border-radius: 999px; transition: left .2s ease; }
-    .switch input:checked + .track { background: var(--accent); }
-    .switch input:checked + .track .thumb { left: 23px; }
-
-    /* KPI Chips */
-    .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 12px; }
-    @media (max-width: 980px) { .kpis { grid-template-columns: 1fr; } }
-    .kpi { background: #1d1d1d; border: 1px solid #2a2a2a; border-radius: 12px; padding: 12px; }
-    .kpi .label { color: var(--muted); font-size: 0.82rem; letter-spacing: .2px; }
-    .kpi .value { font-weight: 700; font-size: 1.2rem; margin-top: 4px; }
-
-    /* Charts */
-    .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    @media (max-width: 980px) { .charts { grid-template-columns: 1fr; } }
-    .chart { background: #1b1b1b; border: 1px solid #2a2a2a; border-radius: 12px; padding: 12px; }
-    .chart h4 { margin: 0 0 8px; font-size: .95rem; color: var(--muted); }
-    canvas { width: 100%; height: 220px; display: block; border-radius: 10px; background: #141414; }
-
-    /* Segments */
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 6px 8px; text-align: left; border-bottom: 1px dashed #333; font-size: .92rem; }
-    th { color: var(--muted); font-weight: 600; }
-    .seg-actions { display: flex; gap: 8px; }
-    .btn {
-      background: var(--accent); color: #1a1a1a; border: none; border-radius: 10px;
-      padding: 8px 12px; font-weight: 700; cursor: pointer; transition: transform .04s ease, filter .2s ease; font-size: .95rem;
-    }
-    .btn:hover { filter: brightness(1.05); }
-    .btn:active { transform: translateY(1px); }
-    .btn.secondary { background: #2a2a2a; color: var(--fg); border: 1px solid #3a3a3a; }
-
-    /* Footer note */
-    .note { margin-top: 10px; color: var(--muted); font-size: .85rem; }
-
-    /* Tooltip style */
-    .help { cursor: help; border-bottom: 1px dotted var(--muted); }
+    /* Dev chip */
+    #dev-chip { position: fixed; bottom: 12px; right: 12px; z-index: 50; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <div class="title">
-        <div class="logo-dot" aria-hidden="true"></div>
-        <div>
-          <h1>Mini TAM / SAM / SOM Simulator</h1>
-          <div class="subtle">Adjust assumptions and watch your market funnel update in real time. All figures are annual by default.</div>
+  <div class="max-w-6xl mx-auto p-6">
+    <!-- Hero Section -->
+    <div class="card p-8 mb-8">
+      <div class="flex items-start gap-6">
+        <div class="flex-shrink-0">
+          <div class="w-20 h-20 bg-[var(--accent)] rounded-full flex items-center justify-center">
+            <i data-lucide="zap" class="w-10 h-10" style="color:var(--accent-ink)"></i>
+          </div>
+        </div>
+        <div class="flex-1">
+          <h1 class="text-3xl font-bold mb-2">EcoCharge Network</h1>
+          <h2 class="text-xl section-title font-semibold mb-4">Smart EV Charging Infrastructure for Urban America</h2>
+
+          <div class="grid md:grid-cols-3 gap-4 mb-6">
+            <div class="card-soft p-4">
+              <div class="flex items-center mb-2">
+                <i data-lucide="car" class="w-5 h-5 mr-2 section-title"></i>
+                <span class="font-medium">The Vision</span>
+              </div>
+              <p class="text-sm text-[var(--muted)]">Ultra-fast charging stations with AI-powered grid optimization and renewable energy integration</p>
+            </div>
+            <div class="card-soft p-4">
+              <div class="flex items-center mb-2">
+                <i data-lucide="map-pin" class="w-5 h-5 mr-2 section-title"></i>
+                <span class="font-medium">The Strategy</span>
+              </div>
+              <p class="text-sm text-[var(--muted)]">Target high-density urban areas, shopping centers, and highway corridors across North America</p>
+            </div>
+            <div class="card-soft p-4">
+              <div class="flex items-center mb-2">
+                <i data-lucide="battery" class="w-5 h-5 mr-2 section-title"></i>
+                <span class="font-medium">The Edge</span>
+              </div>
+              <p class="text-sm text-[var(--muted)]">5-minute charging technology, mobile app integration, and dynamic pricing</p>
+            </div>
+          </div>
+
+          <div class="card-soft p-4">
+            <p class="font-medium">🎯 Your Mission:</p>
+            <p class="text-[var(--muted)]">You're the founder presenting to Series A investors. They want to see your market opportunity analysis for the next 5 years.</p>
+          </div>
         </div>
       </div>
-      <label class="switch" title="Toggle segmented mode for per‑segment assumptions">
-        <input id="segMode" type="checkbox" />
-        <span class="track"><span class="thumb"></span></span>
-        <span>Segmented mode</span>
-      </label>
-    </header>
-
-    <div class="grid">
-      <!-- Left: Inputs -->
-      <section class="card" aria-labelledby="assumptionsTitle">
-        <h3 id="assumptionsTitle">Assumptions</h3>
-
-        <div id="basicInputs" class="row" role="group" aria-label="Basic inputs">
-          <div class="field">
-            <label for="population">Addressable population (people)</label>
-            <input id="population" class="input" type="number" min="0" step="1000" value="10000000" />
-          </div>
-          <div class="field">
-            <label for="usageRate">Category usage rate <span class="subtle">(% of population that buys in category)</span></label>
-            <div class="slider-row">
-              <input id="usageRate" type="range" min="0" max="100" step="0.1" value="30" />
-              <input id="usageRateNum" class="input" type="number" min="0" max="100" step="0.1" value="30" />
-            </div>
-          </div>
-          <div class="field">
-            <label for="spend">Annual spend per customer (USD)</label>
-            <input id="spend" class="input" type="number" min="0" step="1" value="100" />
-          </div>
-        </div>
-
-        <div id="segmentInputs" class="card" style="display:none; margin-top:12px;">
-          <div class="row" style="margin-bottom:8px;">
-            <div class="subtle">Define up to 6 segments. Shares should sum ≤ 100% (remainder is ignored).</div>
-            <div class="seg-actions" style="justify-content:flex-end;">
-              <button id="addSeg" class="btn secondary" type="button" aria-label="Add segment">+ Add segment</button>
-              <button id="resetSeg" class="btn secondary" type="button">Reset segments</button>
-            </div>
-          </div>
-          <div style="overflow:auto;">
-            <table aria-label="Segments">
-              <thead>
-                <tr>
-                  <th style="min-width:120px;">Segment</th>
-                  <th title="% of total population in this segment">Pop. share %</th>
-                  <th title="% of this segment who buy in category">Usage %</th>
-                  <th title="Avg annual spend per customer in this segment">Spend $</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody id="segBody"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <div class="row" style="margin-top:12px;">
-          <div class="field">
-            <label for="serviceable">Serviceable fraction <span class="help" title="% of TAM you can actually serve due to geography, regulation, channels, etc.">(SAM)</span></label>
-            <div class="slider-row">
-              <input id="serviceable" type="range" min="0" max="100" step="0.1" value="60" />
-              <input id="serviceableNum" class="input" type="number" min="0" max="100" step="0.1" value="60" />
-            </div>
-          </div>
-          <div class="field">
-            <label for="share">Target market share capture <span class="help" title="% of SAM you expect to capture at steady state">(SOM)</span></label>
-            <div class="slider-row">
-              <input id="share" type="range" min="0" max="100" step="0.1" value="5" />
-              <input id="shareNum" class="input" type="number" min="0" max="100" step="0.1" value="5" />
-            </div>
-          </div>
-        </div>
-
-        <div class="note">Definitions: <strong>TAM</strong> = total demand (customers × spend) for your category. <strong>SAM</strong> = portion of TAM you can serve. <strong>SOM</strong> = your expected share of SAM at steady state.</div>
-      </section>
-
-      <!-- Right: KPIs & Insights -->
-      <section class="card">
-        <h3>Results</h3>
-        <div class="kpis">
-          <div class="kpi"><div class="label">TAM (customers)</div><div class="value" id="tamCust">—</div></div>
-          <div class="kpi"><div class="label">SAM (customers)</div><div class="value" id="samCust">—</div></div>
-          <div class="kpi"><div class="label">SOM (customers)</div><div class="value" id="somCust">—</div></div>
-          <div class="kpi"><div class="label">TAM (revenue)</div><div class="value" id="tamRev">—</div></div>
-          <div class="kpi"><div class="label">SAM (revenue)</div><div class="value" id="samRev">—</div></div>
-          <div class="kpi"><div class="label">SOM (revenue)</div><div class="value" id="somRev">—</div></div>
-        </div>
-        <div class="card" style="margin-top:12px;">
-          <div class="subtle" style="margin-bottom:6px;">Auto‑insights</div>
-          <ul id="insights" style="margin:0; padding-left:18px;">
-            <li>Adjust assumptions to generate insights…</li>
-          </ul>
-        </div>
-      </section>
     </div>
 
-    <!-- Charts -->
-    <section class="charts" style="margin-top:16px;">
-      <div class="chart">
-        <h4>Market Funnel (Customers)</h4>
-        <canvas id="custFunnel" aria-label="Customers funnel chart" role="img"></canvas>
-      </div>
-      <div class="chart">
-        <h4>Revenue Potential (USD)</h4>
-        <canvas id="revBars" aria-label="Revenue bars chart" role="img"></canvas>
-      </div>
-    </section>
+    <!-- Market Context -->
+    <div class="card p-6 mb-8">
+      <h2 class="text-xl font-semibold mb-4 flex items-center section-title">
+        <i data-lucide="info" class="w-5 h-5 mr-2 section-title"></i>
+        Market Context: The EV Revolution
+      </h2>
 
-    <section class="card" style="margin-top:16px;">
-      <h3 style="margin-bottom:8px;">Teaching Tips</h3>
-      <ol class="subtle" style="margin:0; padding-left:18px;">
-        <li>Have teams justify <em>why</em> their SAM is constrained (geography, regulation, channel coverage). Force trade‑offs.</li>
-        <li>Ask for a one‑liner on what would unlock a 2× SAM. This drives strategic thinking.</li>
-        <li>Compare two teams with the same TAM but different SOM—what assumptions differ? Who is more realistic?</li>
-      </ol>
-    </section>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div>
+          <h3 class="font-semibold mb-3">📊 Market Drivers</h3>
+          <ul class="space-y-2 text-sm text-[var(--muted)]">
+            <li class="flex items-start"><span class="section-title mr-2">•</span>EV sales growing 40%+ annually</li>
+            <li class="flex items-start"><span class="section-title mr-2">•</span>Government mandates: 50% EV by 2030</li>
+            <li class="flex items-start"><span class="section-title mr-2">•</span>Tesla opened Supercharger network</li>
+            <li class="flex items-start"><span class="section-title mr-2">•</span>$7.5B federal charging infrastructure fund</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-semibold mb-3">⚡ Your Competitive Advantage</h3>
+          <ul class="space-y-2 text-sm text-[var(--muted)]">
+            <li class="flex items-start"><span class="section-title mr-2">•</span>350kW ultra-fast charging (5-10 min top-ups)</li>
+            <li class="flex items-start"><span class="section-title mr-2">•</span>AI-powered demand prediction & pricing</li>
+            <li class="flex items-start"><span class="section-title mr-2">•</span>Renewable energy partnerships</li>
+            <li class="flex items-start"><span class="section-title mr-2">•</span>Premium customer experience & app</li>
+          </ul>
+        </div>
+      </div>
+
+      <button id="toggleFramework" class="mt-4 flex items-center text-sm btn btn-ghost" type="button">
+        <i data-lucide="info" class="w-4 h-4 mr-2 section-title"></i>
+        <span id="frameworkToggleLabel">Show</span> TAM/SAM/SOM Framework
+      </button>
+
+      <div id="frameworkPanel" class="mt-4 card-soft p-4 hidden">
+        <div class="grid md:grid-cols-3 gap-4">
+          <div>
+            <h3 class="font-semibold section-title mb-2">🌍 TAM - Total Addressable Market</h3>
+            <p class="text-sm text-[var(--muted)] mb-2">Global EV charging infrastructure market - what if every gas station became an EV charger?</p>
+            <div class="text-xs text-gray-400">Includes all EV charging hardware, software, services worldwide</div>
+          </div>
+          <div>
+            <h3 class="font-semibold section-title mb-2">🎯 SAM - Serviceable Available Market</h3>
+            <p class="text-sm text-[var(--muted)] mb-2">North American urban markets where EcoCharge can realistically operate</p>
+            <div class="text-xs text-gray-400">Limited by geography, regulations, and business model fit</div>
+          </div>
+          <div>
+            <h3 class="font-semibold section-title mb-2">⚡ SOM - Serviceable Obtainable Market</h3>
+            <p class="text-sm text-[var(--muted)] mb-2">Market share EcoCharge can capture given competition and resources</p>
+            <div class="text-xs text-gray-400">What you can realistically win in 5 years</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Strategy Scenarios -->
+    <div class="card p-6 mb-8">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-semibold section-title">🚀 Strategic Scenarios - Which Path Will You Take?</h2>
+        <button id="resetBtn" type="button" class="btn btn-ghost" aria-label="Reset to Default Plan">Reset to Default</button>
+      </div>
+      <div id="scenarios" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+    </div>
+
+    <!-- Input Controls -->
+    <div class="grid lg:grid-cols-2 gap-8 mb-8">
+      <!-- Market Size Inputs -->
+      <div class="card p-6">
+        <h2 class="text-xl font-semibold mb-4 flex items-center section-title">
+          <i data-lucide="target" class="w-5 h-5 mr-2 section-title"></i>
+          Market Sizing (2024)
+        </h2>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-2" for="tamInput">🌍 TAM - Global EV Charging Market</label>
+            <div class="relative">
+              <span class="absolute left-3 top-2 text-[var(--muted)]">$</span>
+              <input id="tamInput" type="number" min="0" step="1000" class="input w-full pl-8 pr-16" />
+              <span class="absolute right-3 top-2 text-[var(--muted)]">Million</span>
+            </div>
+            <div class="text-xs text-[var(--muted)] mt-1">All EV charging infrastructure globally</div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-2" for="samPercentInput">🎯 SAM - North American Urban Markets</label>
+            <div class="relative">
+              <input id="samPercentInput" type="number" min="0" max="100" step="0.1" class="input w-full pr-8" />
+              <span class="absolute right-3 top-2 text-[var(--muted)]">% of TAM</span>
+            </div>
+            <div id="samPreview" class="text-sm font-medium section-title mt-1">= $0M</div>
+            <div class="text-xs text-[var(--muted)]">Major cities: NYC, LA, Chicago, Toronto, etc.</div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-2" for="somPercentInput">⚡ SOM - EcoCharge Market Share</label>
+            <div class="relative">
+              <input id="somPercentInput" type="number" min="0" max="100" step="0.1" class="input w-full pr-8" />
+              <span class="absolute right-3 top-2 text-[var(--muted)]">% of SAM</span>
+            </div>
+            <div id="somPreview" class="text-sm font-medium" style="color:#ffffff">= $0M</div>
+            <div class="text-xs text-[var(--muted)]">Your realistic revenue opportunity</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Growth Rate Inputs -->
+      <div class="card p-6">
+        <h2 class="text-xl font-semibold mb-4 flex items-center section-title">
+          <i data-lucide="trending-up" class="w-5 h-5 mr-2 section-title"></i>
+          Growth Projections
+        </h2>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-2" for="tamGrowthInput">🌍 TAM Growth Rate</label>
+            <div class="relative">
+              <input id="tamGrowthInput" type="number" min="0" max="100" step="0.1" class="input w-full pr-8" />
+              <span class="absolute right-3 top-2 text-[var(--muted)]">%</span>
+            </div>
+            <div class="text-xs text-[var(--muted)] mt-1">Global EV adoption driving infrastructure demand</div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-2" for="samGrowthInput">🎯 SAM Growth Rate</label>
+            <div class="relative">
+              <input id="samGrowthInput" type="number" min="0" max="100" step="0.1" class="input w-full pr-8" />
+              <span class="absolute right-3 top-2 text-[var(--muted)]">%</span>
+            </div>
+            <div class="text-xs text-[var(--muted)] mt-1">Urban areas adopting EVs faster than rural</div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-2" for="somGrowthInput">⚡ SOM Growth Rate</label>
+            <div class="relative">
+              <input id="somGrowthInput" type="number" min="0" max="100" step="0.1" class="input w-full pr-8" />
+              <span class="absolute right-3 top-2 text-[var(--muted)]">%</span>
+            </div>
+            <div class="text-xs text-[var(--muted)] mt-1">Your aggressive expansion plan</div>
+          </div>
+        </div>
+
+        <div class="mt-4 card-soft p-4 rounded-md">
+          <div class="text-xs text-[var(--muted)] space-y-1">
+            <div><strong>💡 Growth Strategy:</strong></div>
+            <div>• Years 1–2: Focus on major metros</div>
+            <div>• Years 3–4: Highway corridors & suburbs</div>
+            <div>• Year 5: Secondary markets expansion</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Table -->
+    <div class="card border rounded-lg shadow-lg mb-8">
+      <div class="px-6 py-4 border-b border-[var(--border)] card-soft">
+        <h2 class="text-xl font-semibold flex items-center"><i data-lucide="calculator" class="w-5 h-5 mr-2 section-title"></i>EcoCharge 5-Year Revenue Projections</h2>
+        <p class="text-sm text-[var(--muted)] mt-1">Your potential revenue opportunity through 2028</p>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr>
+              <th class="px-4 py-3 text-left text-xs uppercase">Year</th>
+              <th class="px-4 py-3 text-left text-xs uppercase">Global Market (TAM)</th>
+              <th class="px-4 py-3 text-left text-xs uppercase">Your Market (SAM)</th>
+              <th class="px-4 py-3 text-left text-xs uppercase">Revenue Target (SOM)</th>
+              <th class="px-4 py-3 text-left text-xs uppercase text-[var(--muted)]">Market Share</th>
+              <th class="px-4 py-3 text-left text-xs uppercase text-[var(--muted)]">Stations*</th>
+            </tr>
+          </thead>
+          <tbody id="resultsBody" class="divide-y divide-[var(--border)]"></tbody>
+        </table>
+      </div>
+      <div class="px-4 py-2 text-xs text-[var(--muted)] card-soft border-t border-[var(--border)]">
+        *Estimated charging stations based on $2.5M average annual revenue per station
+      </div>
+    </div>
+
+    <!-- Visual Chart (themed colors) -->
+    <div class="card border rounded-lg shadow-lg mb-8 p-6">
+      <h2 class="text-xl font-semibold mb-4">📈 Market Growth Visualization</h2>
+      <div class="space-y-4" id="chartContainer"></div>
+      <div class="mt-3 text-sm flex gap-4">
+        <span><span class="legend-dot" style="background:var(--accent)"></span>TAM</span>
+        <span><span class="legend-dot" style="background:#d8d8d8"></span>SAM</span>
+        <span><span class="legend-dot" style="background:#ffffff; border:1px solid #555"></span>SOM</span>
+      </div>
+    </div>
+
+    <!-- Investment Summary -->
+    <div class="card p-8">
+      <h2 class="text-2xl font-bold mb-6 text-center section-title">💰 Investment Opportunity Summary</h2>
+
+      <div class="grid md:grid-cols-4 gap-6 mb-6">
+        <div class="card-soft p-6 text-center">
+          <h3 class="font-semibold mb-2 section-title">Market Size (2028)</h3>
+          <div id="summaryTam" class="text-3xl font-bold mb-1" style="color:var(--accent)">$0</div>
+          <div class="text-sm text-[var(--muted)]">Global TAM</div>
+        </div>
+
+        <div class="card-soft p-6 text-center">
+          <h3 class="font-semibold mb-2 section-title">Your Market (2028)</h3>
+          <div id="summarySam" class="text-3xl font-bold mb-1" style="color:#d8d8d8">$0</div>
+          <div class="text-sm text-[var(--muted)]">North America SAM</div>
+        </div>
+
+        <div class="card-soft p-6 text-center">
+          <h3 class="font-semibold mb-2 section-title">Revenue Target</h3>
+          <div id="summarySom" class="text-3xl font-bold mb-1" style="color:#ffffff">$0</div>
+          <div class="text-sm text-[var(--muted)]">2028 Revenue</div>
+        </div>
+
+        <div class="card-soft p-6 text-center">
+          <h3 class="font-semibold mb-2">Network Size</h3>
+          <div id="summaryStations" class="text-3xl font-bold mb-1">0</div>
+          <div class="text-sm text-[var(--muted)]">Charging Stations</div>
+        </div>
+      </div>
+
+      <div class="card-soft p-6">
+        <h3 class="font-bold text-lg mb-3 text-center">🎯 The Ask: Series A Funding</h3>
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <h4 class="font-semibold mb-2">💵 Funding Request:</h4>
+            <p id="fundingAsk" class="text-sm text-[var(--muted)] mb-4">$75M Series A to capture 0.0B market opportunity</p>
+
+            <h4 class="font-semibold mb-2">🚀 Use of Funds:</h4>
+            <ul class="text-sm text-[var(--muted)] space-y-1">
+              <li>• 60% - Infrastructure deployment (500+ stations)</li>
+              <li>• 25% - Technology development & AI platform</li>
+              <li>• 10% - Team expansion & operations</li>
+              <li>• 5% - Marketing & customer acquisition</li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="font-semibold mb-2">📊 Key Metrics (Year 5):</h4>
+            <ul class="text-sm text-[var(--muted)] space-y-1">
+              <li>• Revenue: <span id="metricRevenue">$0</span></li>
+              <li>• Market Share: <span id="metricShare">0%</span> of SAM</li>
+              <li>• Growth Rate: <span id="metricSomGrowth">0%</span> annually</li>
+              <li>• Growth Multiple: <span id="metricGrowthMultiple">0.0x</span></li>
+              <li>• Total Growth: <span id="metricTotalGrowthPercent">0%</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <script>
-    // ===== Utilities =====
-    const clamp = (x, a, b) => Math.min(Math.max(x, a), b);
-    const fmtNum = n => (isFinite(n) ? Math.round(n).toLocaleString('en-US') : '—');
-    const fmtUSD = n => (isFinite(n) ? n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }) : '—');
+  <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 bg-black/80 text-white text-sm px-3 py-2 rounded shadow hidden" role="status" aria-live="polite"></div>
+  <button id="dev-chip" class="btn btn-ghost" type="button">🧪 Run Self‑Check</button>
 
-    function linkSlider(slider, number) {
-      const sync = v => { slider.value = v; number.value = v; };
-      slider.addEventListener('input', () => { number.value = slider.value; dispatchUpdate(); });
-      number.addEventListener('input', () => { const v = clamp(Number(number.value || 0), Number(slider.min), Number(slider.max)); slider.value = v; dispatchUpdate(); });
-      return sync;
+<script>
+  // ----- State -----
+  const state = {
+    tam: 25000,
+    samPercent: 12,
+    somPercent: 8,
+    tamGrowth: 28,
+    samGrowth: 32,
+    somGrowth: 45,
+    results: [],
+    showInfo: false,
+    selectedScenarioIndex: 3,
+    isCustom: false
+  };
+
+  const competitorScenarios = [
+    { name: "Conservative Growth", description: "Playing it safe with steady expansion", tam: 25000, samPercent: 8, somPercent: 4, tamGrowth: 25, samGrowth: 28, somGrowth: 35 },
+    { name: "Aggressive Expansion", description: "Going big with venture backing", tam: 25000, samPercent: 15, somPercent: 12, tamGrowth: 30, samGrowth: 35, somGrowth: 50 },
+    { name: "Premium Markets Only", description: "Focus on high-income urban areas", tam: 25000, samPercent: 6, somPercent: 15, tamGrowth: 28, samGrowth: 40, somGrowth: 60 },
+    { name: "Current Plan", description: "Balanced growth strategy", tam: 25000, samPercent: 12, somPercent: 8, tamGrowth: 28, samGrowth: 32, somGrowth: 45 }
+  ];
+
+  // ----- Utilities -----
+  function formatCurrency(value) {
+    return value >= 1000 ? `$${(value/1000).toFixed(1)}B` : `$${value.toFixed(0)}M`;
+  }
+
+  // ----- Elements -----
+  const tamInput = document.getElementById('tamInput');
+  const samPercentInput = document.getElementById('samPercentInput');
+  const somPercentInput = document.getElementById('somPercentInput');
+  const tamGrowthInput = document.getElementById('tamGrowthInput');
+  const samGrowthInput = document.getElementById('samGrowthInput');
+  const somGrowthInput = document.getElementById('somGrowthInput');
+  const samPreview = document.getElementById('samPreview');
+  const somPreview = document.getElementById('somPreview');
+  const resultsBody = document.getElementById('resultsBody');
+  const chartContainer = document.getElementById('chartContainer');
+  const summaryTam = document.getElementById('summaryTam');
+  const summarySam = document.getElementById('summarySam');
+  const summarySom = document.getElementById('summarySom');
+  const summaryStations = document.getElementById('summaryStations');
+  const fundingAsk = document.getElementById('fundingAsk');
+  const metricRevenue = document.getElementById('metricRevenue');
+  const metricShare = document.getElementById('metricShare');
+  const metricSomGrowth = document.getElementById('metricSomGrowth');
+  const scenariosContainer = document.getElementById('scenarios');
+  const frameworkPanel = document.getElementById('frameworkPanel');
+  const toggleFrameworkBtn = document.getElementById('toggleFramework');
+  const frameworkToggleLabel = document.getElementById('frameworkToggleLabel');
+
+  // ----- Core calc -----
+  function calculateProjections() {
+    const { tam, samPercent, somPercent, tamGrowth, samGrowth, somGrowth } = state;
+    const projections = [];
+    for (let year = 0; year < 5; year++) {
+      const currentTam = tam * Math.pow(1 + tamGrowth/100, year);
+      const currentSam = (currentTam * samPercent/100) * Math.pow(1 + (samGrowth - tamGrowth)/100, year);
+      const currentSom = (currentSam * somPercent/100) * Math.pow(1 + (somGrowth - samGrowth)/100, year);
+      projections.push({ year: 2024 + year, tam: currentTam, sam: currentSam, som: currentSom });
     }
+    state.results = projections;
+  }
 
-    // High‑DPI canvas setup
-    function prepCanvas(canvas) {
-      const dpr = Math.max(1, window.devicePixelRatio || 1);
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = Math.max(300, rect.width * dpr);
-      canvas.height = Math.max(180, rect.height * dpr);
-      const ctx = canvas.getContext('2d');
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      return ctx;
-    }
+  // ----- Renderers -----
+  function renderPreviews() {
+    const samVal = state.tam * state.samPercent / 100;
+    const somVal = samVal * state.somPercent / 100;
+    samPreview.textContent = `= ${formatCurrency(samVal)}`;
+    somPreview.textContent = `= ${formatCurrency(somVal)}`;
+  }
 
-    // Simple horizontal bar chart (funnel‑ish)
-    function drawHorizontalBars(canvas, labels, values, colors) {
-      const ctx = prepCanvas(canvas);
-      const W = canvas.getBoundingClientRect().width; // CSS pixels
-      const H = canvas.getBoundingClientRect().height;
-      ctx.clearRect(0, 0, W, H);
+  function renderResultsTable() {
+    const avgRevenuePerStation = 2.5;
+    const rows = state.results.map((r, idx) => {
+      const stationCount = Math.round(r.som / avgRevenuePerStation).toLocaleString();
+      const yearBadge = idx === 0 ? '<span class="text-[var(--accent)] text-xs ml-1">(Launch)</span>' : '';
+      return `
+        <tr class="hover:bg-black/10">
+          <td class="px-4 py-3 text-sm font-medium">${r.year}${yearBadge}</td>
+          <td class="px-4 py-3 text-sm font-semibold" style="color:var(--accent)">${formatCurrency(r.tam)}</td>
+          <td class="px-4 py-3 text-sm font-semibold" style="color:#d8d8d8">${formatCurrency(r.sam)}</td>
+          <td class="px-4 py-3 text-sm font-bold" style="color:#ffffff">${formatCurrency(r.som)}</td>
+          <td class="px-4 py-3 text-sm text-[var(--muted)]">${((r.som/r.sam)*100).toFixed(1)}%</td>
+          <td class="px-4 py-3 text-sm text-[var(--muted)]">~${stationCount}</td>
+        </tr>`;
+    }).join('');
+    resultsBody.innerHTML = rows;
+  }
 
-      // grid
-      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--grid').trim();
-      ctx.lineWidth = 1; ctx.setLineDash([4, 6]);
-      for (let x = 0; x <= 5; x++) {
-        const gx = 16 + x * (W - 32) / 5;
-        ctx.beginPath(); ctx.moveTo(gx, 10); ctx.lineTo(gx, H - 10); ctx.stroke();
-      }
-      ctx.setLineDash([]);
+  function renderChart() {
+    const maxTam = Math.max(...state.results.map(r => r.tam));
+    const blocks = state.results.map((r, idx) => {
+      const wTam = (r.tam / maxTam) * 100;
+      const wSam = (r.sam / maxTam) * 100;
+      const wSom = (r.som / maxTam) * 100;
+      return `
+        <div class="space-y-2">
+          <div class="flex items-center text-sm font-medium">
+            <div class="w-12">${r.year}</div>
+            ${idx===0?'<span class="text-[var(--accent)] ml-2 text-xs">Launch Year</span>':''}
+            ${idx===4?'<span class="text-green-400 ml-2 text-xs">Series A Target</span>':''}
+          </div>
+          <div class="flex items-center">
+            <div class="w-20 text-xs font-medium" style="color:var(--accent)">Global TAM</div>
+            <div class="flex-1 mx-2 track"><div class="fill fill-tam" style="width:${wTam}%"></div></div>
+            <div class="text-xs ml-2">${formatCurrency(r.tam)}</div>
+          </div>
+          <div class="flex items-center">
+            <div class="w-20 text-xs font-medium" style="color:#d8d8d8">Your SAM</div>
+            <div class="flex-1 mx-2 track"><div class="fill fill-sam" style="width:${wSam}%"></div></div>
+            <div class="text-xs ml-2">${formatCurrency(r.sam)}</div>
+          </div>
+          <div class="flex items-center mb-4">
+            <div class="w-20 text-xs font-medium" style="color:#ffffff">Revenue</div>
+            <div class="flex-1 mx-2 track"><div class="fill fill-som" style="width:${wSom}%"></div></div>
+            <div class="text-xs ml-2">${formatCurrency(r.som)}</div>
+          </div>
+        </div>`;
+    }).join('');
+    chartContainer.innerHTML = blocks;
+  }
 
-      const maxV = Math.max(1, ...values);
-      const barH = (H - 40) / labels.length;
+  function renderSummary() {
+    if (!state.results.length) return;
+    const y5 = state.results[4];
+    const y1 = state.results[0];
+    summaryTam.textContent = formatCurrency(y5.tam);
+    summarySam.textContent = formatCurrency(y5.sam);
+    summarySom.textContent = formatCurrency(y5.som);
+    summaryStations.textContent = Math.round(y5.som / 2.5).toLocaleString();
+    fundingAsk.textContent = `$75M Series A to capture ${(y5.som/1000).toFixed(1)}B market opportunity`;
+    metricRevenue.textContent = formatCurrency(y5.som);
+    metricShare.textContent = ((y5.som / y5.sam) * 100).toFixed(1) + '%';
+    metricSomGrowth.textContent = `${state.somGrowth}%`;
+    const multiple = y5.som / y1.som;
+    const pct = (multiple - 1) * 100;
+    document.getElementById('metricGrowthMultiple').textContent = `${multiple.toFixed(1)}x`;
+    document.getElementById('metricTotalGrowthPercent').textContent = `${pct.toFixed(0)}%`;
+  }
 
-      ctx.font = '12px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial';
-      ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#e0e0e0';
+  // ----- Orchestrator -----
+  function updateAll() {
+    calculateProjections();
+    renderPreviews();
+    renderResultsTable();
+    renderChart();
+    renderSummary();
+  }
 
-      labels.forEach((lb, i) => {
-        const y = 20 + i * barH + barH/2;
-        const v = values[i];
-        const w = (W - 160) * (v / maxV);
-        // label
-        ctx.fillStyle = '#bdbdbd';
-        ctx.fillText(lb, 12, y);
-        // bar
-        ctx.fillStyle = colors[i % colors.length];
-        ctx.fillRect(140, y - 10, Math.max(2, w), 20);
-        // value
-        ctx.fillStyle = '#e0e0e0';
-        const txt = fmtNum(v);
-        ctx.fillText(txt, 150 + Math.max(2, w) + 8, y);
-      });
-    }
-
-    // Simple vertical bar chart
-    function drawVerticalBars(canvas, labels, values, colors) {
-      const ctx = prepCanvas(canvas);
-      const W = canvas.getBoundingClientRect().width;
-      const H = canvas.getBoundingClientRect().height;
-      ctx.clearRect(0, 0, W, H);
-
-      // axes
-      const left = 54, bottom = H - 26, top = 14, right = W - 10;
-      const maxV = Math.max(1, ...values);
-
-      // y grid
-      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--grid').trim();
-      ctx.lineWidth = 1; ctx.setLineDash([4,6]);
-      const ticks = 5;
-      for (let t = 0; t <= ticks; t++) {
-        const y = bottom - (bottom - top) * (t / ticks);
-        ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(right, y); ctx.stroke();
-      }
-      ctx.setLineDash([]);
-
-      const barW = (right - left) / (values.length * 1.8);
-      const gap = barW * 0.8;
-
-      ctx.font = '12px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial';
-      ctx.textBaseline = 'middle';
-
-      values.forEach((v, i) => {
-        const x = left + i * (barW + gap) + gap;
-        const h = (bottom - top) * (v / maxV);
-        ctx.fillStyle = colors[i % colors.length];
-        ctx.fillRect(x, bottom - h, barW, h);
-        // labels
-        ctx.save();
-        ctx.translate(x + barW/2, bottom + 12);
-        ctx.rotate(-Math.PI/16);
-        ctx.fillStyle = '#bdbdbd';
-        ctx.fillText(labels[i], -ctx.measureText(labels[i]).width/2, 0);
-        ctx.restore();
-        // values
-        ctx.fillStyle = '#e0e0e0';
-        ctx.fillText(fmtUSD(v), x, bottom - h - 10);
-      });
-
-      // y axis labels (min/max)
-      ctx.fillStyle = '#bdbdbd';
-      ctx.fillText('0', left - 20, bottom);
-      ctx.fillText(fmtUSD(maxV), left - 20, top + 8);
-    }
-
-    // ===== State & Logic =====
-    const segModeEl = document.getElementById('segMode');
-
-    // Basic inputs
-    const populationEl = document.getElementById('population');
-    const usageRateEl = document.getElementById('usageRate');
-    const usageRateNumEl = document.getElementById('usageRateNum');
-    const spendEl = document.getElementById('spend');
-
-    const serviceableEl = document.getElementById('serviceable');
-    const serviceableNumEl = document.getElementById('serviceableNum');
-    const shareEl = document.getElementById('share');
-    const shareNumEl = document.getElementById('shareNum');
-
-    // Sections
-    const basicInputs = document.getElementById('basicInputs');
-    const segmentInputs = document.getElementById('segmentInputs');
-
-    // KPIs
-    const tamCustEl = document.getElementById('tamCust');
-    const samCustEl = document.getElementById('samCust');
-    const somCustEl = document.getElementById('somCust');
-    const tamRevEl = document.getElementById('tamRev');
-    const samRevEl = document.getElementById('samRev');
-    const somRevEl = document.getElementById('somRev');
-
-    // Charts
-    const custFunnel = document.getElementById('custFunnel');
-    const revBars = document.getElementById('revBars');
-
-    // Insights
-    const insightsEl = document.getElementById('insights');
-
-    // Link sliders ↔ numeric inputs
-    linkSlider(usageRateEl, usageRateNumEl);
-    linkSlider(serviceableEl, serviceableNumEl);
-    linkSlider(shareEl, shareNumEl);
-
-    // Segment table
-    const segBody = document.getElementById('segBody');
-    const addSegBtn = document.getElementById('addSeg');
-    const resetSegBtn = document.getElementById('resetSeg');
-
-    let segments = [];
-
-    function defaultSegments() {
-      return [
-        { name: 'Urban Professionals', sharePct: 40, usagePct: 40, spend: 120 },
-        { name: 'Suburban Families',   sharePct: 35, usagePct: 25, spend: 90  },
-        { name: 'Value Seekers',       sharePct: 25, usagePct: 15, spend: 60  },
-      ];
-    }
-
-    function renderSegments() {
-      segBody.innerHTML = '';
-      segments.forEach((seg, idx) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><input aria-label="Segment name" class="input" style="width:100%;" value="${seg.name}" data-k="name" data-i="${idx}"></td>
-          <td><input aria-label="Population share percent" class="input" type="number" min="0" max="100" step="0.1" value="${seg.sharePct}" data-k="sharePct" data-i="${idx}"></td>
-          <td><input aria-label="Usage percent" class="input" type="number" min="0" max="100" step="0.1" value="${seg.usagePct}" data-k="usagePct" data-i="${idx}"></td>
-          <td><input aria-label="Spend in dollars" class="input" type="number" min="0" step="1" value="${seg.spend}" data-k="spend" data-i="${idx}"></td>
-          <td><button class="btn secondary" data-del="${idx}" type="button">Remove</button></td>
-        `;
-        segBody.appendChild(tr);
-      });
-    }
-
-    segBody.addEventListener('input', (e) => {
-      const t = e.target; if (!t.dataset) return;
-      const i = Number(t.dataset.i); const k = t.dataset.k;
-      if (k && segments[i]) {
-        segments[i][k] = (k === 'name') ? String(t.value) : Number(t.value);
-        dispatchUpdate();
-      }
+  // ----- Scenarios UI -----
+  function renderScenarios() {
+    scenariosContainer.innerHTML = '';
+    competitorScenarios.forEach((s, idx) => {
+      const isSelected = state.selectedScenarioIndex === idx;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = `p-4 rounded-lg border-2 text-left transition-all ${isSelected ? 'border-[var(--accent)] bg-black/20' : 'border-[#444] bg-transparent hover:border-[var(--accent)]'}`;
+      const displayName = (idx===3) ? (state.isCustom ? 'Custom' : 'Default') : s.name;
+      btn.innerHTML = `
+        <div class="font-medium text-sm mb-1">${displayName}</div>
+        <div class="text-xs text-[var(--muted)] mb-3">${s.description}</div>
+        <div class="space-y-1 text-xs">
+          <div>SAM: ${s.samPercent}% of TAM</div>
+          <div>SOM: ${s.somPercent}% of SAM</div>
+          <div class="font-medium" style="color:var(--accent)">Growth: ${s.tamGrowth}-${s.somGrowth}%</div>
+        </div>`;
+      btn.addEventListener('click', () => loadScenarioByIndex(idx));
+      scenariosContainer.appendChild(btn);
     });
-    segBody.addEventListener('click', (e) => {
-      const btn = e.target.closest('button[data-del]');
-      if (btn) {
-        const i = Number(btn.dataset.del);
-        segments.splice(i, 1);
-        renderSegments();
-        dispatchUpdate();
-      }
+  }
+
+  function loadScenarioByIndex(idx) {
+    const s = competitorScenarios[idx];
+    state.tam = s.tam; state.samPercent = s.samPercent; state.somPercent = s.somPercent;
+    state.tamGrowth = s.tamGrowth; state.samGrowth = s.samGrowth; state.somGrowth = s.somGrowth;
+    state.isCustom = false; state.selectedScenarioIndex = idx;
+    tamInput.value = state.tam; samPercentInput.value = state.samPercent; somPercentInput.value = state.somPercent;
+    tamGrowthInput.value = state.tamGrowth; samGrowthInput.value = state.samGrowth; somGrowthInput.value = state.somGrowth;
+    updateAll(); renderScenarios(); showToast(`${idx===3?'Default':s.name} applied`);
+  }
+
+  // ----- Inputs binding -----
+  function debounce(fn, ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
+  function bindInputs() {
+    const refresh = debounce(()=>{ updateAll(); renderScenarios(); }, 120);
+    const onEdit = (setter) => (e)=>{ setter(parseFloat(e.target.value)||0); state.isCustom=true; state.selectedScenarioIndex=3; refresh(); };
+    tamInput.addEventListener('input', onEdit(v=>state.tam=v));
+    samPercentInput.addEventListener('input', onEdit(v=>state.samPercent=v));
+    somPercentInput.addEventListener('input', onEdit(v=>state.somPercent=v));
+    tamGrowthInput.addEventListener('input', onEdit(v=>state.tamGrowth=v));
+    samGrowthInput.addEventListener('input', onEdit(v=>state.samGrowth=v));
+    somGrowthInput.addEventListener('input', onEdit(v=>state.somGrowth=v));
+  }
+
+  // ----- Framework panel toggle -----
+  function initFrameworkToggle(){
+    toggleFrameworkBtn.addEventListener('click', ()=>{
+      state.showInfo = !state.showInfo;
+      frameworkPanel.classList.toggle('hidden', !state.showInfo);
+      frameworkToggleLabel.textContent = state.showInfo ? 'Hide' : 'Show';
     });
+  }
 
-    addSegBtn.addEventListener('click', () => {
-      if (segments.length >= 6) return alert('Max 6 segments');
-      segments.push({ name: `Segment ${segments.length+1}`, sharePct: 10, usagePct: 15, spend: 80 });
-      renderSegments();
-      dispatchUpdate();
-    });
-    resetSegBtn.addEventListener('click', () => {
-      segments = defaultSegments();
-      renderSegments();
-      dispatchUpdate();
-    });
+  function primeInputs(){
+    tamInput.value = state.tam; samPercentInput.value = state.samPercent; somPercentInput.value = state.somPercent;
+    tamGrowthInput.value = state.tamGrowth; samGrowthInput.value = state.samGrowth; somGrowthInput.value = state.somGrowth;
+  }
 
-    // Toggle segmented mode
-    segModeEl.addEventListener('change', () => {
-      const on = segModeEl.checked;
-      segmentInputs.style.display = on ? 'block' : 'none';
-      basicInputs.style.opacity = on ? 0.4 : 1;
-      Array.from(basicInputs.querySelectorAll('input')).forEach(el => el.disabled = on);
-      dispatchUpdate();
-    });
+  function showToast(msg){ const t=document.getElementById('toast'); if(!t) return; t.textContent=msg; t.classList.remove('hidden'); clearTimeout(window.__toastTimer); window.__toastTimer=setTimeout(()=>t.classList.add('hidden'),1200); }
 
-    // Update on any input change
-    document.addEventListener('input', (e) => {
-      if (e.target.closest('.container')) {
-        // Debounced by requestAnimationFrame in dispatchUpdate
-      }
-    }, true);
+  // ----- Self-check (smoke tests) -----
+  function runSelfCheck(){
+    const tests=[]; const assert=(n,c)=>tests.push({n,pass:!!c}); const snap=JSON.parse(JSON.stringify(state));
+    state.tam=1000; state.samPercent=10; state.somPercent=10; state.tamGrowth=0; state.samGrowth=0; state.somGrowth=0; calculateProjections();
+    const y1=state.results[0], y5=state.results[4];
+    assert('T1 Y1 TAM', Math.abs(y1.tam-1000)<1e-9);
+    assert('T1 Y5 SOM unchanged', Math.abs(y5.som-10)<1e-9);
+    loadScenarioByIndex(1); const btn = document.getElementById('scenarios').children[1];
+    assert('T2 scenario selected', state.selectedScenarioIndex===1 && btn.className.includes('border'));
+    tamInput.value=12345; tamInput.dispatchEvent(new Event('input',{bubbles:true}));
+    const btn4=document.getElementById('scenarios').children[3];
+    assert('T3 custom mode', state.isCustom===true && btn4.className.includes('border'));
+    Object.assign(state,snap); primeInputs(); updateAll(); renderScenarios();
+    const passed=tests.filter(t=>t.pass).length; console.log(`Self-Check ${passed}/${tests.length}`); alert(`Self-Check: ${passed}/${tests.length} passed`);
+  }
 
-    let rafToken = 0;
-    function dispatchUpdate() {
-      cancelAnimationFrame(rafToken);
-      rafToken = requestAnimationFrame(updateAll);
-    }
-
-    function calcFromBasic() {
-      const population = Number(populationEl.value || 0);
-      const usageRate = Number(usageRateEl.value || 0) / 100; // 0-1
-      const spend = Number(spendEl.value || 0);
-      const serviceable = Number(serviceableEl.value || 0) / 100;
-      const share = Number(shareEl.value || 0) / 100;
-
-      const tamCustomers = population * usageRate;
-      const tamRevenue = tamCustomers * spend;
-      const samCustomers = tamCustomers * serviceable;
-      const samRevenue = samCustomers * spend;
-      const somCustomers = samCustomers * share;
-      const somRevenue = somCustomers * spend;
-
-      return { population, spend, serviceable, share, tamCustomers, tamRevenue, samCustomers, samRevenue, somCustomers, somRevenue };
-    }
-
-    function calcFromSegments() {
-      const population = Number(populationEl.value || 0); // still needed as base
-      const serviceable = Number(serviceableEl.value || 0) / 100;
-      const share = Number(shareEl.value || 0) / 100;
-
-      let tamCustomers = 0;
-      let tamRevenue = 0;
-      let shareTotal = 0;
-      segments.forEach(seg => {
-        const popSeg = population * (Number(seg.sharePct||0) / 100);
-        const users = popSeg * (Number(seg.usagePct||0) / 100);
-        tamCustomers += users;
-        tamRevenue += users * Number(seg.spend||0);
-        shareTotal += Number(seg.sharePct||0);
-      });
-
-      const samCustomers = tamCustomers * serviceable;
-      const samRevenue = tamRevenue * serviceable; // assumes same serviceability across segments
-      const somCustomers = samCustomers * share;
-      const somRevenue = samRevenue * share;
-
-      return { population, spend: null, serviceable, share, tamCustomers, tamRevenue, samCustomers, samRevenue, somCustomers, somRevenue };
-    }
-
-    function updateInsights(state) {
-      const bullets = [];
-      // Sensitivity: +/-10% on usage, serviceable, share → effect on SOM revenue
-      const baseline = state.somRevenue;
-
-      function delta(pctKey) {
-        const clone = { ...state };
-        const adjust = 1.10;
-        if (pctKey === 'usage') return baseline * 0.10; // linear in basic mode; same proportion in seg mode overall
-        if (pctKey === 'serviceable') return baseline * 0.10;
-        if (pctKey === 'share') return baseline * 0.10;
-        return 0;
-      }
-      const deltas = [ ['Category usage', delta('usage')], ['Serviceable fraction', delta('serviceable')], ['Share capture', delta('share')] ];
-      deltas.sort((a,b)=>b[1]-a[1]);
-      bullets.push(`Biggest lever on SOM $ (±10% change): <strong>${deltas[0][0]}</strong>.`);
-
-      if (state.share > 0.2) bullets.push('Target share &gt; 20% is aggressive for many categories—pressure‑test your path to scale.');
-      if (state.serviceable < 0.3) bullets.push('Serviceable fraction &lt; 30% indicates distribution or regulatory bottlenecks—what unlocks access?');
-      if (state.tamRevenue > 1_000_000_000) bullets.push('TAM &gt; $1B suggests a large space—expect competition and differentiation pressure.');
-      if (bullets.length === 0) bullets.push('Your assumptions look balanced—now tie them to channel plans and budget.');
-
-      insightsEl.innerHTML = bullets.map(b => `<li>${b}</li>`).join('');
-    }
-
-    function updateAll() {
-      const segOn = segModeEl.checked;
-      const state = segOn ? calcFromSegments() : calcFromBasic();
-
-      // KPIs
-      tamCustEl.textContent = fmtNum(state.tamCustomers);
-      samCustEl.textContent = fmtNum(state.samCustomers);
-      somCustEl.textContent = fmtNum(state.somCustomers);
-      tamRevEl.textContent = fmtUSD(state.tamRevenue);
-      samRevEl.textContent = fmtUSD(state.samRevenue);
-      somRevEl.textContent = fmtUSD(state.somRevenue);
-
-      // Charts
-      drawHorizontalBars(
-        custFunnel,
-        ['TAM', 'SAM', 'SOM'],
-        [state.tamCustomers, state.samCustomers, state.somCustomers],
-        ['#4f7dcf', '#7ccf8b', '#e6a700']
-      );
-      drawVerticalBars(
-        revBars,
-        ['TAM', 'SAM', 'SOM'],
-        [state.tamRevenue, state.samRevenue, state.somRevenue],
-        ['#4f7dcf', '#7ccf8b', '#e6a700']
-      );
-
-      updateInsights(state);
-    }
-
-    // Init
-    function init() {
-      // Seed segments & render
-      segments = defaultSegments();
-      renderSegments();
-
-      // Ensure canvas resizes are handled
-      const ro = new ResizeObserver(() => dispatchUpdate());
-      ro.observe(custFunnel); ro.observe(revBars);
-
-      dispatchUpdate();
-    }
-
-    init();
-  </script>
+  // ----- Boot -----
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.lucide?.createIcons) window.lucide.createIcons();
+    renderScenarios(); bindInputs(); initFrameworkToggle(); primeInputs(); updateAll();
+    const resetBtn=document.getElementById('resetBtn');
+    resetBtn?.addEventListener('click', ()=>{ const s=competitorScenarios[3]; Object.assign(state,{...s,isCustom:false,selectedScenarioIndex:3}); primeInputs(); updateAll(); renderScenarios(); showToast('Reset to Default'); });
+    document.getElementById('dev-chip')?.addEventListener('click', runSelfCheck);
+  });
+</script>
 </body>
 </html>
