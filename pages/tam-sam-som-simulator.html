@@ -170,7 +170,7 @@
       <div class="card p-6">
         <h2 class="text-xl font-semibold mb-4 flex items-center section-title">
           <i data-lucide="target" class="w-5 h-5 mr-2 section-title"></i>
-          Market Sizing (2024)
+          Market Sizing (2026)
         </h2>
 
         <div class="space-y-4">
@@ -257,7 +257,7 @@
     <div class="card border rounded-lg shadow-lg mb-8">
       <div class="px-6 py-4 border-b border-[var(--border)] card-soft">
         <h2 class="text-xl font-semibold flex items-center"><i data-lucide="calculator" class="w-5 h-5 mr-2 section-title"></i>EcoCharge 5-Year Revenue Projections</h2>
-        <p class="text-sm text-[var(--muted)] mt-1">Your potential revenue opportunity through 2028</p>
+        <p class="text-sm text-[var(--muted)] mt-1">Your potential revenue opportunity through 2030</p>
       </div>
 
       <div class="overflow-x-auto">
@@ -297,13 +297,13 @@
 
       <div class="grid md:grid-cols-4 gap-6 mb-6">
         <div class="card-soft p-6 text-center">
-          <h3 class="font-semibold mb-2 section-title">Market Size (2028)</h3>
+          <h3 class="font-semibold mb-2 section-title">Market Size (2030)</h3>
           <div id="summaryTam" class="text-3xl font-bold mb-1" style="color:var(--accent)">$0</div>
           <div class="text-sm text-[var(--muted)]">Global TAM</div>
         </div>
 
         <div class="card-soft p-6 text-center">
-          <h3 class="font-semibold mb-2 section-title">Your Market (2028)</h3>
+          <h3 class="font-semibold mb-2 section-title">Your Market (2030)</h3>
           <div id="summarySam" class="text-3xl font-bold mb-1" style="color:#d8d8d8">$0</div>
           <div class="text-sm text-[var(--muted)]">North America SAM</div>
         </div>
@@ -311,7 +311,7 @@
         <div class="card-soft p-6 text-center">
           <h3 class="font-semibold mb-2 section-title">Revenue Target</h3>
           <div id="summarySom" class="text-3xl font-bold mb-1" style="color:#ffffff">$0</div>
-          <div class="text-sm text-[var(--muted)]">2028 Revenue</div>
+          <div class="text-sm text-[var(--muted)]">2030 Revenue</div>
         </div>
 
         <div class="card-soft p-6 text-center">
@@ -413,7 +413,7 @@
       const currentTam = tam * Math.pow(1 + tamGrowth/100, year);
       const currentSam = (currentTam * samPercent/100) * Math.pow(1 + (samGrowth - tamGrowth)/100, year);
       const currentSom = (currentSam * somPercent/100) * Math.pow(1 + (somGrowth - samGrowth)/100, year);
-      projections.push({ year: 2024 + year, tam: currentTam, sam: currentSam, som: currentSom });
+      projections.push({ year: 2026 + year, tam: currentTam, sam: currentSam, som: currentSom });
     }
     state.results = projections;
   }
