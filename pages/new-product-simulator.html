@@ -6,21 +6,20 @@
   <title>MKT412 — New Product Launch Simulator</title>
   <style>
     :root {
-      /* Bryant University palette per project brief */
-      --bg: #1a1a1a;         /* near-black */
-      --fg: #e0e0e0;         /* light gray text */
-      --accent: #e6a700;     /* Bryant gold */
-      --card: #222222;       /* dark card */
-      --muted: #bdbdbd;      /* muted text */
-      --grid: #333333;       /* chart grid */
-      --good: #50c878;       /* emerald for positive */
-      --bad: #ff6b6b;        /* soft red for negative */
+      --bg: #1a1a1a;
+      --fg: #e0e0e0;
+      --accent: #e6a700;
+      --card: #222222;
+      --muted: #bdbdbd;
+      --grid: #333333;
+      --good: #50c878;
+      --bad: #ff6b6b;
+      --chip-bg: #121212;
+      --chip-br: #2b2b2b;
     }
 
     * { box-sizing: border-box; }
-
     html, body { height: 100%; }
-
     body {
       margin: 0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
@@ -34,12 +33,8 @@
       background: color-mix(in oklab, var(--bg), transparent 35%);
       border-bottom: 1px solid #2a2a2a;
     }
-
     .wrap { max-width: 1260px; margin: 0 auto; padding: 16px 20px; }
-
-    .title {
-      display: flex; align-items: center; gap: 14px;
-    }
+    .title { display: flex; align-items: center; gap: 14px; }
     .logo {
       width: 36px; height: 36px; border-radius: 10px;
       background: linear-gradient(135deg, var(--accent), #f0ca45);
@@ -50,23 +45,47 @@
 
     .container {
       max-width: 1260px; margin: 18px auto; display: grid; gap: 16px;
-      grid-template-columns: 360px 1fr; align-items: start; padding: 0 20px 28px;
+      grid-template-columns: 380px 1fr; align-items: start; padding: 0 20px 28px;
     }
 
     .card { background: var(--card); border: 1px solid #2a2a2a; border-radius: 14px; }
     .card h2 { font-size: 15px; margin: 0 0 8px 0; color: var(--accent); }
     .card .pad { padding: 14px; }
 
-    /* Controls */
+    /* Modules / Accordion */
     .controls { position: sticky; top: 68px; }
-    .control { display: grid; grid-template-columns: 1fr 96px; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px dashed #2c2c2c; }
+    .mod-header { display:flex; align-items:center; justify-content: space-between; margin-bottom: 10px; }
+    .mod-actions { display:flex; gap:8px; }
+    .tiny { font-size: 11px; padding: 6px 8px; border-radius: 8px; background:#121212; border:1px solid #323232; color:var(--fg); cursor:pointer; }
+    .tiny:hover { border-color:#444; }
+
+    details.module {
+      border: 1px solid #2c2c2c; border-radius: 12px; background: #1b1b1b; margin-bottom: 10px;
+      overflow: hidden;
+    }
+    details.module[open] { background: #1e1e1e; }
+    details.module > summary {
+      list-style: none; cursor: pointer; padding: 12px 14px; color: var(--accent);
+      display:flex; align-items:center; gap: 10px;
+    }
+    details.module > summary .sum-title { font-weight: 700; }
+    details.module > summary .chipset { margin-left:auto; display:flex; flex-wrap:wrap; gap:6px; }
+    details.module[open] > summary .chipset { display:none; } /* show chips only when collapsed */
+    .chip { font-size: 11px; color: var(--muted); background: var(--chip-bg); border:1px solid var(--chip-br); padding: 2px 6px; border-radius: 999px; }
+    .chip b { color: var(--fg); font-weight:600; }
+
+    .summary-grid { display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; margin: 0 14px 8px; }
+    .summary-item { font-size: 12px; color: var(--muted); }
+    .summary-item b { color: var(--fg); font-weight:600; }
+    .section-body { padding: 0 14px 12px; border-top: 1px dashed #2c2c2c; }
+
+    .control { display: grid; grid-template-columns: 1fr 110px; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px dashed #2c2c2c; }
     .control:last-child { border-bottom: none; }
     .control label { font-size: 12px; color: var(--fg); display: block; }
     .control small { color: var(--muted); font-size: 11px; }
     .control input[type="range"] { grid-column: 1 / span 2; width: 100%; accent-color: var(--accent); }
     .number { width: 100%; padding: 6px 8px; border-radius: 8px; border: 1px solid #3a3a3a; background: #111; color: var(--fg); font-variant-numeric: tabular-nums; }
-
-    .row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .row2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
 
     .btnbar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
     button {
@@ -81,13 +100,12 @@
     .info:hover::after,.info:focus-visible::after,.info.show::after,.info:hover::before,.info:focus-visible::before,.info.show::before{opacity:1;visibility:visible;}
 
     /* KPIs */
-    .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .kpis { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; }
     .kpi { padding: 12px; border-radius: 12px; border: 1px solid #2b2b2b; background: #191919; }
-    .kpi .label { font-size: 12px; color: var(--muted); }
+    .kpi .label { font-size: 12px; color: var(--muted); display:flex; align-items:center; gap:6px; }
     .kpi .value { font-size: 20px; font-variant-numeric: tabular-nums; margin-top: 4px; }
     .kpi .delta { font-size: 11px; margin-top: 2px; color: var(--muted); }
 
-    .charts { display: grid; grid-template-columns: 1fr; gap: 12px; }
     .chart { padding: 10px; }
     canvas { width: 100%; height: 260px; display: block; background: #111; border: 1px solid #2a2a2a; border-radius: 12px; }
 
@@ -97,13 +115,15 @@
 
     .insights { font-size: 13px; line-height: 1.45; color: var(--fg); }
     .insights b { color: var(--accent); }
-
     .footer-note { color: var(--muted); font-size: 11px; margin-top: 8px; }
 
     @media (max-width: 980px) {
       .container { grid-template-columns: 1fr; }
       .controls { position: static; }
       .kpis { grid-template-columns: repeat(2, 1fr); }
+      .summary-grid { grid-template-columns: 1fr; }
+      details.module > summary { flex-wrap: wrap; gap:6px; }
+      details.module > summary .chipset { margin-left: 0; }
     }
   </style>
 </head>
@@ -119,162 +139,256 @@
   </header>
 
   <main class="container">
-    <!-- LEFT: Controls -->
+    <!-- LEFT: Modules -->
     <aside class="card controls">
       <div class="pad">
-        <h2>Levers</h2>
-        <div class="control">
-          <div>
-            <label for="tam">Total Addressable Market (TAM)<span class="info" title="Total Addressable Market: The total potential customers or revenue for a product/service in the entire market.">ⓘ</span></label>
-            <small>Total potential customers in the broader market</small>
-          </div>
-          <input class="number" id="tam_n" type="number" min="10000" step="1000" />
-          <input id="tam" type="range" min="10000" max="2000000" step="1000" />
-        </div>
-
-        <div class="control">
-          <div>
-            <label for="sam_pct">Addressable Share (SAM % of TAM)<span class="info" title="Serviceable Addressable Market: The portion of the Total Addressable Market that your business can realistically reach and serve.">ⓘ</span></label>
-            <small>The portion of the market you can realistically serve</small>
-          </div>
-          <input class="number" id="sam_pct_n" type="number" min="1" max="100" step="1" />
-          <input id="sam_pct" type="range" min="1" max="100" step="1" />
-        </div>
-
-        <div class="control">
-          <div>
-            <label for="months">Horizon (months)<span class="info" title="The total time duration, in months, for which the simulation will run.">ⓘ</span></label>
-            <small>Length of the simulation period</small>
-          </div>
-          <input class="number" id="months_n" type="number" min="6" max="60" step="1" />
-          <input id="months" type="range" min="6" max="60" step="1" />
-        </div>
-
-        <div class="row">
-          <div class="control">
-            <div>
-              <label for="price">Price ($)<span class="info" title="The average selling price per unit of your product.">ⓘ</span></label>
-              <small>Average selling price per unit</small>
-            </div>
-            <input class="number" id="price_n" type="number" min="1" step="1" />
-            <input id="price" type="range" min="1" max="999" step="1" />
-          </div>
-          <div class="control">
-            <div>
-              <label for="unit_cost">Unit Cost ($)<span class="info" title="The variable cost associated with producing or acquiring one unit of the product (Cost of Goods Sold or COGS).">ⓘ</span></label>
-              <small>Cost of Goods Sold (COGS) per unit</small>
-            </div>
-            <input class="number" id="unit_cost_n" type="number" min="0" step="1" />
-            <input id="unit_cost" type="range" min="0" max="999" step="1" />
+        <div class="mod-header">
+          <h2>Modules</h2>
+          <div class="mod-actions">
+            <button id="btn-expand" class="tiny">Expand all</button>
+            <button id="btn-collapse" class="tiny">Collapse all</button>
           </div>
         </div>
 
-        <div class="row">
-          <div class="control">
-            <div>
-              <label for="fixed_cost">Fixed Cost / mo ($)<span class="info" title="Costs that remain constant regardless of production or sales volume, such as rent, salaries, or software subscriptions, measured per month.">ⓘ</span></label>
-              <small>Monthly overhead costs (e.g., salaries, rent, software subscriptions)</small>
-            </div>
-            <input class="number" id="fixed_cost_n" type="number" min="0" step="100" />
-            <input id="fixed_cost" type="range" min="0" max="200000" step="100" />
+        <!-- Market Sizing -->
+        <details class="module" open>
+          <summary>
+            <span class="sum-title">Market Sizing</span>
+            <span class="chipset" id="chip_mkt"></span>
+          </summary>
+          <div class="summary-grid">
+            <div class="summary-item">TAM: <b id="sum_mkt_tam">—</b></div>
+            <div class="summary-item">SAM now: <b id="sum_mkt_sam">—</b> (<span id="sum_mkt_share">—</span>)</div>
+            <div class="summary-item">SAM @ horizon: <b id="sum_mkt_sam_end">—</b></div>
+            <div class="summary-item">Horizon: <b id="sum_mkt_horizon">—</b> • SAM growth: <b id="sum_mkt_g">—</b></div>
           </div>
-          <div class="control">
-            <div>
-              <label for="ad_spend">Ad Spend / mo ($)<span class="info" title="The budget allocated for paid marketing and advertising efforts each month.">ⓘ</span></label>
-              <small>Monthly budget for paid advertising and promotions</small>
+          <div class="section-body">
+            <div class="control">
+              <div>
+                <label for="tam">Total Addressable Market (TAM)<span class="info" title="Total potential customers in the broad market.">ⓘ</span></label>
+                <small>Total potential customers</small>
+              </div>
+              <input class="number" id="tam_n" type="number" min="10000" step="1000" />
+              <input id="tam" type="range" min="10000" max="2000000" step="1000" />
             </div>
-            <input class="number" id="ad_spend_n" type="number" min="0" step="100" />
-            <input id="ad_spend" type="range" min="0" max="200000" step="100" />
+            <div class="control">
+              <div>
+                <label for="sam_pct">Addressable Share (SAM % of TAM)<span class="info" title="Serviceable Addressable Market: portion of TAM you can reach.">ⓘ</span></label>
+                <small>Addressable portion (%)</small>
+              </div>
+              <input class="number" id="sam_pct_n" type="number" min="1" max="100" step="1" />
+              <input id="sam_pct" type="range" min="1" max="100" step="1" />
+            </div>
+            <div class="control">
+              <div>
+                <label for="sam_growth">SAM Growth (annual %)<span class="info" title="Annual growth of SAM. Applied monthly as (1+g)^(1/12)-1.">ⓘ</span></label>
+                <small>-50% to 100% / yr</small>
+              </div>
+              <input class="number" id="sam_growth_n" type="number" min="-50" max="100" step="1" />
+              <input id="sam_growth" type="range" min="-50" max="100" step="1" />
+            </div>
+            <div class="control">
+              <div>
+                <label for="months">Horizon (months)<span class="info" title="Simulation duration in months.">ⓘ</span></label>
+                <small>Length of simulation</small>
+              </div>
+              <input class="number" id="months_n" type="number" min="6" max="60" step="1" />
+              <input id="months" type="range" min="6" max="60" step="1" />
+            </div>
           </div>
-        </div>
+        </details>
 
-        <div class="row">
-          <div class="control">
-            <div>
-              <label for="base_cac">Cost per Lead/Visit (CPL $)<span class="info" title="The average cost to acquire a single lead or website visit through marketing efforts.">ⓘ</span></label>
-              <small>Paid traffic cost per visit/lead (not per customer). Customers ≈ visits × conversion.</small>
-            </div>
-            <input class="number" id="base_cac_n" type="number" min="0.5" step="0.1" />
-            <input id="base_cac" type="range" min="0.5" max="100" step="0.1" />
+        <!-- CAC -->
+        <details class="module" open>
+          <summary>
+            <span class="sum-title">CAC</span>
+            <span class="chipset" id="chip_cac"></span>
+          </summary>
+          <div class="summary-grid">
+            <div class="summary-item">Est. CAC: <b id="sum_cac_cac">—</b></div>
+            <div class="summary-item">CPL: <b id="sum_cac_cpl">—</b> • Conv (eff.): <b id="sum_cac_conv">—</b></div>
+            <div class="summary-item">Paid visits/mo: <b id="sum_cac_visits">—</b> • Paid cust./mo: <b id="sum_cac_paidcust">—</b></div>
+            <div class="summary-item">K-Factor: <b id="sum_cac_k">—</b> • Churn/mo: <b id="sum_cac_churn">—</b></div>
           </div>
-          <div class="control">
-            <div>
-              <label for="conv_rate">Baseline Conversion (%)<span class="info" title="The percentage of leads or website visitors who successfully become paying customers.">ⓘ</span></label>
-              <small>Percentage of visitors who become paying customers</small>
+          <div class="section-body">
+            <div class="control">
+              <div>
+                <label for="ad_spend">Ad Spend / mo ($)<span class="info" title="Monthly paid marketing budget.">ⓘ</span></label>
+                <small>Budget for paid acquisition</small>
+              </div>
+              <input class="number" id="ad_spend_n" type="number" min="0" step="100" />
+              <input id="ad_spend" type="range" min="0" max="200000" step="100" />
             </div>
-            <input class="number" id="conv_rate_n" type="number" min="0.01" max="100" step="0.01" />
-            <input id="conv_rate" type="range" min="0.01" max="20" step="0.01" />
+            <div class="control">
+              <div>
+                <label for="base_cac">Cost per Lead/Visit (CPL $)<span class="info" title="Average cost to generate a lead/visit. CAC ≈ CPL / conversion.">ⓘ</span></label>
+                <small>Paid traffic cost per lead</small>
+              </div>
+              <input class="number" id="base_cac_n" type="number" min="0.5" step="0.1" />
+              <input id="base_cac" type="range" min="0.5" max="100" step="0.1" />
+            </div>
+            <div class="control">
+              <div>
+                <label for="conv_rate">Baseline Conversion (%)<span class="info" title="Visitor → customer (before seasonality & elasticity).">ⓘ</span></label>
+                <small>Visitor → customer</small>
+              </div>
+              <input class="number" id="conv_rate_n" type="number" min="0.01" max="100" step="0.01" />
+              <input id="conv_rate" type="range" min="0.01" max="20" step="0.01" />
+            </div>
+            <div class="row2">
+              <div class="control">
+                <div>
+                  <label for="k_factor">Viral K-Factor<span class="info" title="New customers per active per month via referrals (customers, not prospects).">ⓘ</span></label>
+                  <small>Organic customers per active</small>
+                </div>
+                <input class="number" id="k_factor_n" type="number" min="0" max="1" step="0.01" />
+                <input id="k_factor" type="range" min="0" max="1" step="0.01" />
+              </div>
+              <div class="control">
+                <div>
+                  <label for="retention">Avg Retention (months)<span class="info" title="Average active lifetime; churn ≈ 1/retention per month.">ⓘ</span></label>
+                  <small>Customer lifetime</small>
+                </div>
+                <input class="number" id="retention_n" type="number" min="1" max="60" step="1" />
+                <input id="retention" type="range" min="1" max="60" step="1" />
+              </div>
+            </div>
           </div>
-        </div>
+        </details>
 
-        <div class="row">
-          <div class="control">
-            <div>
-              <label for="k_factor">Viral K-Factor<span class="info" title="Average number of new customers each active customer generates per month via referrals (customers, not just prospects).">ⓘ</span></label>
-              <small>New customers per active customer per month</small>
-            </div>
-            <input class="number" id="k_factor_n" type="number" min="0" max="1" step="0.01" />
-            <input id="k_factor" type="range" min="0" max="1" step="0.01" />
+        <!-- Pricing -->
+        <details class="module" open>
+          <summary>
+            <span class="sum-title">Pricing</span>
+            <span class="chipset" id="chip_pri"></span>
+          </summary>
+          <div class="summary-grid">
+            <div class="summary-item">Unit margin: <b id="sum_pri_unit_margin">—</b> • GM: <b id="sum_pri_gm">—</b></div>
+            <div class="summary-item">Monthly margin / active: <b id="sum_pri_mm">—</b> • Monthly opex: <b id="sum_pri_opex">—</b></div>
+            <div class="summary-item">Elasticity baseline: <b id="sum_pri_baseline">—</b></div>
           </div>
-          <div class="control">
-            <div>
-              <label for="retention">Avg Retention (months)<span class="info" title="The average duration, in months, that a customer continues to use or purchase your product/service.">ⓘ</span></label>
-              <small>Average customer lifetime in months (higher value means less churn)</small>
+          <div class="section-body">
+            <div class="row2">
+              <div class="control">
+                <div>
+                  <label for="price">Price ($)<span class="info" title="Average selling price per unit.">ⓘ</span></label>
+                  <small>Per-unit price</small>
+                </div>
+                <input class="number" id="price_n" type="number" min="1" step="1" />
+                <input id="price" type="range" min="1" max="999" step="1" />
+              </div>
+              <div class="control">
+                <div>
+                  <label for="unit_cost">Unit Cost ($)<span class="info" title="Variable cost per unit (COGS).">ⓘ</span></label>
+                  <small>COGS per unit</small>
+                </div>
+                <input class="number" id="unit_cost_n" type="number" min="0" step="1" />
+                <input id="unit_cost" type="range" min="0" max="999" step="1" />
+              </div>
             </div>
-            <input class="number" id="retention_n" type="number" min="1" max="60" step="1" />
-            <input id="retention" type="range" min="1" max="60" step="1" />
-          </div>
-        </div>
-        
-        <div class="row">
-          <div class="control">
-            <div>
-              <label for="units_per">Units per Customer per Month<span class="info" title="The average number of product units an active customer purchases each month.">ⓘ</span></label>
-              <small>Average number of units purchased monthly by an active customer</small>
+            <div class="row2">
+              <div class="control">
+                <div>
+                  <label for="fixed_cost">Fixed Cost / mo ($)<span class="info" title="Overhead per month (rent, salaries, software).">ⓘ</span></label>
+                  <small>Monthly overhead</small>
+                </div>
+                <input class="number" id="fixed_cost_n" type="number" min="0" step="100" />
+                <input id="fixed_cost" type="range" min="0" max="200000" step="100" />
+              </div>
+              <div class="control">
+                <div>
+                  <label for="units_per">Units per Customer per Month<span class="info" title="Avg number of units an active customer buys each month.">ⓘ</span></label>
+                  <small>Units per active / mo</small>
+                </div>
+                <input class="number" id="units_per_n" type="number" min="0.1" max="10" step="0.1" />
+                <input id="units_per" type="range" min="0.1" max="10" step="0.1" />
+              </div>
             </div>
-            <input class="number" id="units_per_n" type="number" min="0.1" max="10" step="0.1" />
-            <input id="units_per" type="range" min="0.1" max="10" step="0.1" />
-          </div>
-          <div class="control">
-            <div>
-              <label for="elasticity">Price Elasticity<span class="info" title="A measure of how sensitive customer demand is to price. Typically negative: as price rises, demand falls.">ⓘ</span></label>
-              <small>Sensitivity of demand to price changes</small>
+            <div class="row2">
+              <div class="control">
+                <div>
+                  <label for="elasticity">Price Elasticity<span class="info" title="Conversion scales by (price / baseline)^elasticity (typically negative).">ⓘ</span></label>
+                  <small>Demand sensitivity</small>
+                </div>
+                <input class="number" id="elasticity_n" type="number" min="-3" max="0" step="0.05" />
+                <input id="elasticity" type="range" min="-3" max="0" step="0.05" />
+              </div>
+              <div class="control">
+                <div>
+                  <label for="price_baseline">Elasticity Baseline ($)<span class="info" title="Reference price used for elasticity.">ⓘ</span></label>
+                  <small>Reference price</small>
+                </div>
+                <input class="number" id="price_baseline_n" type="number" min="1" step="1" />
+                <input id="price_baseline" type="range" min="1" max="999" step="1" />
+              </div>
             </div>
-            <input class="number" id="elasticity_n" type="number" min="-3" max="0" step="0.05" />
-            <input id="elasticity" type="range" min="-3" max="0" step="0.05" />
+            <div class="control" style="grid-template-columns: 1fr;">
+              <label style="display:flex; align-items:center; gap:8px; font-size:12px;">
+                <input id="auto_baseline" type="checkbox" /> Baseline tracks current price on run
+              </label>
+              <div class="btnbar">
+                <button id="btn-set-price-baseline" class="secondary" title="Set current price as elasticity baseline">Set current price as baseline</button>
+              </div>
+            </div>
           </div>
-        </div>
+        </details>
 
-        <div class="control">
-          <div>
-            <label for="price_baseline">Elasticity Baseline ($)<span class="info" title="Reference price used to compute the elasticity impact on conversion.">ⓘ</span></label>
-            <small>The price point used as a reference for demand sensitivity</small>
+        <!-- Simulation Details -->
+        <details class="module" open>
+          <summary>
+            <span class="sum-title">Simulation Details</span>
+            <span class="chipset" id="chip_sim"></span>
+          </summary>
+          <div class="summary-grid">
+            <div class="summary-item">Seed: <b id="sum_sim_seed">—</b> • Runs: <b id="sum_sim_runs">—</b></div>
+            <div class="summary-item">Seasonality: <b id="sum_sim_season">—</b> • Channel eff.: <b id="sum_sim_channel">—</b></div>
           </div>
-          <input class="number" id="price_baseline_n" type="number" min="1" step="1" />
-          <input id="price_baseline" type="range" min="1" max="999" step="1" />
-        </div>
-        <div class="control">
-          <label style="grid-column: 1 / span 2; display:flex; align-items:center; gap:8px; font-size:12px;">
-            <input id="auto_baseline" type="checkbox" /> Baseline tracks current price on run
-          </label>
-        </div>
+          <div class="section-body">
+            <div class="row2">
+              <div class="control">
+                <div>
+                  <label for="seed">Random Seed<span class="info" title="Reproducible runs: we use seed + run_index for each Monte Carlo path.">ⓘ</span></label>
+                  <small>Same inputs + same seed ⇒ same results</small>
+                </div>
+                <input class="number" id="seed_n" type="number" min="0" max="2147483647" step="1" />
+                <input id="seed" type="range" min="0" max="2147483647" step="1" />
+              </div>
+              <div class="control">
+                <div>
+                  <label for="runs">Number of Simulations<span class="info" title="Monte Carlo paths per run. 1 = deterministic visualization.">ⓘ</span></label>
+                  <small>1–5000</small>
+                </div>
+                <input class="number" id="runs_n" type="number" min="1" max="5000" step="1" />
+                <input id="runs" type="range" min="1" max="5000" step="1" />
+              </div>
+            </div>
+            <div class="row2">
+              <div class="control">
+                <div>
+                  <label for="seasonality">Seasonality (±%)<span class="info" title="Amplitude of seasonal swing applied monthly (sine).">ⓘ</span></label>
+                  <small>0–50%</small>
+                </div>
+                <input class="number" id="seasonality_n" type="number" min="0" max="50" step="1" />
+                <input id="seasonality" type="range" min="0" max="50" step="1" />
+              </div>
+              <div class="control">
+                <div>
+                  <label for="channel_eff">Channel Efficiency<span class="info" title="Multiplier on CPL efficiency (CPL ÷ channel_eff). >1 lowers CPL; <1 raises it.">ⓘ</span></label>
+                  <small>0.25–2.0</small>
+                </div>
+                <input class="number" id="channel_eff_n" type="number" min="0.25" max="2" step="0.05" />
+                <input id="channel_eff" type="range" min="0.25" max="2" step="0.05" />
+              </div>
+            </div>
 
-        <!-- NEW: Random Seed control -->
-        <div class="control">
-          <div>
-            <label for="seed">Random Seed<span class="info" title="Runs are reproducible: we use seed + run_index for each Monte Carlo path. Same inputs + same seed = same outputs.">ⓘ</span></label>
-            <small>Same inputs + same seed ⇒ same results</small>
+            <div class="btnbar">
+              <button id="btn-run">Run simulation</button>
+              <button id="btn-reset" class="secondary" title="Reset all levers to defaults">Reset defaults</button>
+            </div>
           </div>
-          <input class="number" id="seed_n" type="number" min="0" max="2147483647" step="1" />
-          <input id="seed" type="range" min="0" max="2147483647" step="1" />
-        </div>
-        
-        <div class="btnbar">
-          <button id="btn-run">Run simulation</button>
-          <button id="btn-reset" class="secondary" title="Reset all levers to defaults">Reset defaults</button>
-          <button id="btn-set-price-baseline" class="secondary" title="Set current price as elasticity baseline">Set current price as baseline</button>
-        </div>
-        <div class="footer-note">Tip: tweak a lever and press <b>Run simulation</b>. Monte Carlo adds randomness (CPL, conversion, churn) each run to generate bands.</div>
+        </details>
+
+        <div class="footer-note">Tip: when a module is collapsed, quick facts show as chips in the header. Run the sim to update charts; summaries always reflect current inputs.</div>
       </div>
     </aside>
 
@@ -287,6 +401,11 @@
           <div class="kpi"><div class="label">Expected Profit (total)</div><div id="kpi_profit" class="value">—</div><div id="kpi_profit_delta" class="delta"></div></div>
           <div class="kpi"><div class="label">Break-even Probability</div><div id="kpi_be_prob" class="value">—</div><div id="kpi_be_time" class="delta"></div></div>
           <div class="kpi"><div class="label">Marketing ROI</div><div id="kpi_roi" class="value">—</div><div class="delta">profit / paid spend</div></div>
+          <div class="kpi"><div class="label">CAC (est.)
+            <span class="info" title="Estimated CAC at current settings (no randomness): CAC ≈ CPL / conversion. CPL = base CPL ÷ channel efficiency. Conversion adjusts with price elasticity.">ⓘ</span>
+          </div><div id="kpi_cac" class="value">—</div><div class="delta">avg cost per acquired customer</div></div>
+          <div class="kpi"><div class="label">LTV:CAC (est.)</div><div id="kpi_ltv_cac" class="value">—</div><div class="delta">cohort LTV / blended CAC</div></div>
+          <div class="kpi"><div class="label">Payback (months)</div><div id="kpi_payback" class="value">—</div><div class="delta">CAC / monthly margin</div></div>
         </div>
       </div>
 
@@ -304,6 +423,11 @@
         <div class="btnbar">
           <button id="btn-export-cum-cash" class="secondary">Export cumulative cashflow (CSV)</button>
         </div>
+      </div>
+
+      <div class="card pad">
+        <h2>Customers vs SAM (P10 • P50 • P90)</h2>
+        <div class="chart"><canvas id="chart_customers" width="1280" height="300"></canvas></div>
       </div>
 
       <div class="card pad">
@@ -325,7 +449,7 @@
   <script>
     // ---------- Utilities ----------
     const fmt = {
-      num: (n) => n.toLocaleString(undefined, { maximumFractionDigits: 0 }),
+      num:  (n) => n.toLocaleString(undefined, { maximumFractionDigits: 0 }),
       cur0: (n) => n.toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }),
       cur:  (n) => n.toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }),
       pct0: (n) => (n*100).toFixed(0) + '%',
@@ -340,24 +464,18 @@
         return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
       };
     }
-
     function randNormal(rng) {
-      // Box–Muller transform
       let u = 0, v = 0;
       while (u === 0) u = rng();
       while (v === 0) v = rng();
       return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
     }
-
     function lognormalNoise(rng, sigma = 0.25) {
-      // mean ~ 1.0 by setting mu = -0.5*sigma^2
       const z = randNormal(rng);
       const mu = -0.5 * sigma * sigma;
       return Math.exp(mu + sigma * z);
     }
-
     function clamp(x, a, b) { return Math.min(Math.max(x, a), b); }
-
     function percentile(sortedArray, p) {
       if (sortedArray.length === 0) return NaN;
       const idx = (sortedArray.length - 1) * p;
@@ -366,78 +484,80 @@
       if (lower === upper) return sortedArray[lower];
       return sortedArray[lower] + (sortedArray[upper] - sortedArray[lower]) * (idx - lower);
     }
-
     function mean(arr) { return arr.reduce((a, b) => a + b, 0) / (arr.length || 1); }
-
     function median(arr) {
       if (!arr.length) return NaN;
       const s = [...arr].sort((a,b)=>a-b);
       const m = Math.floor(s.length/2);
       return s.length % 2 ? s[m] : (s[m-1] + s[m]) / 2;
     }
-
     function downloadCSV(filename, rows) {
       const csv = rows.map(r => r.map(x => typeof x === 'number' ? String(x) : '"' + String(x).replaceAll('"', '""') + '"').join(',')).join('\n');
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = filename; a.style.display = 'none';
-      document.body.appendChild(a); a.click();
-      URL.revokeObjectURL(url); a.remove();
+      const a = document.createElement('a'); a.href = url; a.download = filename; a.style.display = 'none';
+      document.body.appendChild(a); a.click(); URL.revokeObjectURL(url); a.remove();
     }
 
-    // ---------- Simple Charts (Canvas) ----------
+    // ---------- KPI & Summary helpers ----------
+    function computeDeterministic(params) {
+      const priceFactor = Math.pow(params.price / params.price_baseline, params.elasticity);
+      const convEff = clamp(params.conv_rate * priceFactor, 0, 1);
+      const cpl = Math.max(0.1, params.base_cac / (params.channel_eff || 1));
+      const cac = (convEff > 0) ? cpl / convEff : Infinity;
+      const unitMargin = Math.max(0, params.price - params.unit_cost);
+      const gmPct = params.price > 0 ? unitMargin / params.price : 0;
+      const monthlyMargin = Math.max(0, params.units_per * unitMargin);
+      const ltv = monthlyMargin * params.retention;
+      const payback = (monthlyMargin > 0 && isFinite(cac)) ? (cac / monthlyMargin) : Infinity;
+      const visits = params.ad_spend / cpl;
+      const paidCustomers = visits * convEff;
+      const churnRate = clamp(1 / params.retention, 0.001, 0.95);
+      const ltvCac = (isFinite(cac) && cac > 0) ? (ltv / cac) : null;
+      return { priceFactor, convEff, cpl, cac, unitMargin, gmPct, monthlyMargin, ltvCac, payback, visits, paidCustomers, churnRate };
+    }
+
+    // Draw line chart with optional overlay (e.g., SAM)
     function drawLineChart(canvas, labels, seriesList, opts={}) {
       const dpr = window.devicePixelRatio || 1;
       const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width * dpr; canvas.height = 300 * dpr; // fixed height
-      const ctx = canvas.getContext('2d');
-      ctx.scale(dpr, dpr);
-      ctx.clearRect(0,0,canvas.width,canvas.height);
+      canvas.width = rect.width * dpr; canvas.height = 300 * dpr;
+      const ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr); ctx.clearRect(0,0,canvas.width,canvas.height);
 
       const W = rect.width, H = 300, pad = 36;
       const xs = (i) => pad + (W - pad*1.5) * (i / (labels.length - 1 || 1));
-      const allY = seriesList.flatMap(s => s.data);
+      const allY = seriesList.flatMap(s => s.data).concat((opts.overlay?.data || []));
       const yMin = Math.min(0, Math.min(...allY));
       const yMax = Math.max(10, Math.max(...allY));
       const ys = (v) => H - pad - (H - pad*2) * ((v - yMin) / (yMax - yMin || 1));
 
-      // gridlines
+      // grid
       ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--grid');
-      ctx.lineWidth = 1; ctx.setLineDash([2,3]);
-      const steps = 5;
-      for (let g=0; g<=steps; g++) {
-        const y = pad + (H - pad*2) * (g/steps);
-        ctx.beginPath(); ctx.moveTo(pad, y); ctx.lineTo(W-pad/2, y); ctx.stroke();
-      }
+      ctx.lineWidth = 1; ctx.setLineDash([2,3]); const steps = 5;
+      for (let g=0; g<=steps; g++) { const y = pad + (H - pad*2) * (g/steps); ctx.beginPath(); ctx.moveTo(pad, y); ctx.lineTo(W-pad/2, y); ctx.stroke(); }
       ctx.setLineDash([]);
 
       // axes
-      ctx.strokeStyle = '#444';
-      ctx.beginPath(); ctx.moveTo(pad, pad/2); ctx.lineTo(pad, H-pad); ctx.lineTo(W-pad/2, H-pad); ctx.stroke();
+      ctx.strokeStyle = '#444'; ctx.beginPath(); ctx.moveTo(pad, pad/2); ctx.lineTo(pad, H-pad); ctx.lineTo(W-pad/2, H-pad); ctx.stroke();
 
-      // zero line (y=0) for cashflow readability
+      // zero line (for cash charts)
       if (opts.zeroLine) {
         const y0 = ys(0);
         if (y0 >= pad/2 && y0 <= H - pad) {
-          ctx.save();
-          ctx.setLineDash([6,4]);
-          ctx.strokeStyle = '#666';
+          ctx.save(); ctx.setLineDash([6,4]); ctx.strokeStyle = '#666';
           ctx.beginPath(); ctx.moveTo(pad, y0); ctx.lineTo(W - pad/2, y0); ctx.stroke();
-          ctx.fillStyle = '#bdbdbd'; ctx.font = '11px system-ui'; ctx.fillText('$0', 6, y0 - 4);
+          ctx.fillStyle = '#bdbdbd'; ctx.font = '11px system-ui'; ctx.fillText((opts.yLabelZero || '$0'), 6, y0 - 4);
           ctx.restore();
         }
       }
 
-      // shade between P10 and P90 (assume seriesList[0]=P10, [1]=P50, [2]=P90)
+      // shade between P10 and P90 (assume [0]=P10,[1]=P50,[2]=P90)
       if (seriesList.length >= 3) {
         const p10 = seriesList[0].data, p90 = seriesList[2].data;
         ctx.beginPath();
         for (let i=0;i<labels.length;i++) ctx.lineTo(xs(i), ys(p10[i]));
         for (let i=labels.length-1;i>=0;i--) ctx.lineTo(xs(i), ys(p90[i]));
-        ctx.closePath();
-        ctx.fillStyle = 'rgba(230,167,0,0.12)'; // accent with alpha
-        ctx.fill();
+        ctx.closePath(); ctx.fillStyle = 'rgba(230,167,0,0.12)'; ctx.fill();
       }
 
       // lines
@@ -447,80 +567,81 @@
           const x = xs(i), y = ys(s.data[i]);
           if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
         }
-        ctx.lineWidth = idx===1 ? 2.2 : 1.4; // median thicker
+        ctx.lineWidth = idx===1 ? 2.2 : 1.4;
         ctx.strokeStyle = idx===1 ? '#e6a700' : '#9c8b45';
         ctx.stroke();
       });
 
-      // labels (x-axis months)
-      ctx.fillStyle = '#9c9c9c'; ctx.font = '11px system-ui';
-      const mStep = Math.ceil(labels.length / 12);
-      for (let i=0;i<labels.length;i+=mStep) {
-        ctx.fillText(labels[i], xs(i)-6, H - pad + 14);
+      // overlay (e.g., SAM curve)
+      if (opts.overlay?.data?.length) {
+        ctx.save();
+        ctx.setLineDash([6,4]);
+        ctx.strokeStyle = '#e0e0e0';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        for (let i=0;i<labels.length;i++) {
+          const x = xs(i), y = ys(opts.overlay.data[i]);
+          if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+        }
+        ctx.stroke();
+        ctx.restore();
       }
 
-      // y-axis ticks
+      // x labels
+      ctx.fillStyle = '#9c9c9c'; ctx.font = '11px system-ui';
+      const mStep = Math.ceil(labels.length / 12);
+      for (let i=0;i<labels.length;i+=mStep) ctx.fillText(labels[i], xs(i)-6, H - pad + 14);
+
+      // y ticks with formatter
+      const yFmt = opts.yFormatter || ((val)=> (val>=1000 ? '$' + Math.round(val/1000)+'k' : '$' + Math.round(val)));
       for (let g=0; g<=steps; g++) {
         const val = yMax - (yMax - yMin) * (g/steps);
-        const text = (val>=1000 ? '$' + Math.round(val/1000)+'k' : '$' + Math.round(val));
-        ctx.fillText(text, 6, pad + (H - pad*2) * (g/steps) + 4);
+        ctx.fillText(yFmt(val), 6, pad + (H - pad*2) * (g/steps) + 4);
       }
 
       // legend
-      const legend = [ ['P10','10th %ile','#9c8b45'], ['P50','Median','#e6a700'], ['P90','90th %ile','#9c8b45'] ];
+      const legend = opts.legend || [ ['P10','10th %ile','#9c8b45'], ['P50','Median','#e6a700'], ['P90','90th %ile','#9c8b45'] ];
       legend.forEach((lg,i)=>{
-        const x = W - pad - 140 + i*44, y = pad - 12;
-        ctx.fillStyle = lg[2];
-        ctx.fillRect(x, y, 18, 4);
+        const x = W - pad - 160 + i*52, y = pad - 12;
+        ctx.fillStyle = lg[2]; ctx.fillRect(x, y, 18, 4);
         ctx.fillStyle = '#bdbdbd'; ctx.fillText(lg[0], x+22, y+6);
       });
+      if (opts.overlay?.label) {
+        const x = W - pad - 160 - 70, y = pad - 12;
+        ctx.fillStyle = '#e0e0e0'; ctx.fillRect(x, y, 18, 2);
+        ctx.fillStyle = '#bdbdbd'; ctx.fillText(opts.overlay.label, x+22, y+6);
+      }
     }
 
     function drawHistogram2(canvas, data) {
       const dpr = window.devicePixelRatio || 1;
       const rect = canvas.getBoundingClientRect();
       canvas.width = rect.width * dpr; canvas.height = 300 * dpr;
-      const ctx = canvas.getContext('2d');
-      ctx.scale(dpr, dpr);
-      ctx.clearRect(0,0,canvas.width,canvas.height);
+      const ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr); ctx.clearRect(0,0,canvas.width,canvas.height);
 
-      const W = rect.width, H = 300, pad = 36;
-      const nBins = 30;
+      const W = rect.width, H = 300, pad = 36, nBins = 30;
       const min = Math.min(...data), max = Math.max(...data);
       const bins = new Array(nBins).fill(0);
       const width = (max - min || 1) / nBins;
-      data.forEach(v => {
-        const idx = Math.min(nBins - 1, Math.floor((v - min) / width));
-        bins[idx]++;
-      });
+      data.forEach(v => { const idx = Math.min(nBins - 1, Math.floor((v - min) / width)); bins[idx]++; });
       const maxCount = Math.max(...bins);
 
-      // axes
-      ctx.strokeStyle = '#444';
-      ctx.beginPath(); ctx.moveTo(pad, pad/2); ctx.lineTo(pad, H-pad); ctx.lineTo(W-pad/2, H-pad); ctx.stroke();
+      ctx.strokeStyle = '#444'; ctx.beginPath(); ctx.moveTo(pad, pad/2); ctx.lineTo(pad, H-pad); ctx.lineTo(W-pad/2, H-pad); ctx.stroke();
 
-      // bars
       const barW = (W - pad*1.5) / nBins;
       for (let i=0;i<nBins;i++) {
-        const x = pad + i*barW;
-        const y = H - pad;
+        const x = pad + i*barW, y = H - pad;
         const h = (H - pad*2) * (bins[i] / (maxCount || 1));
-        ctx.fillStyle = '#e6a700aa';
-        ctx.fillRect(x, y - h, barW - 1, h);
+        ctx.fillStyle = '#e6a700aa'; ctx.fillRect(x, y - h, barW - 1, h);
       }
 
-      // zero x-line at $0
       if (min <= 0 && max >= 0) {
         const x0 = pad + (W - pad*1.5) * ((0 - min) / (max - min || 1));
-        ctx.save();
-        ctx.setLineDash([6,4]);
-        ctx.strokeStyle = '#666';
+        ctx.save(); ctx.setLineDash([6,4]); ctx.strokeStyle = '#666';
         ctx.beginPath(); ctx.moveTo(x0, pad/2); ctx.lineTo(x0, H - pad); ctx.stroke();
-        ctx.fillStyle = '#bdbdbd'; ctx.font = '11px system-ui'; ctx.fillText('$0', x0 + 4, pad + 12);
-        ctx.restore();
+        ctx.fillStyle = '#bdbdbd'; ctx.font = '11px system-ui'; ctx.fillText('$0', x0 + 4, pad + 12); ctx.restore();
       }
 
-      // x-axis ticks (currency)
       ctx.fillStyle = '#9c9c9c'; ctx.font = '11px system-ui';
       const steps = 5;
       for (let g=0; g<=steps; g++) {
@@ -534,117 +655,89 @@
     // ---------- Model & Simulation ----------
     const defaults = {
       tam: 500000,
-      sam_pct: 40,
+      sam_pct: 30,
+      sam_growth: 5,         // annual % growth of SAM
       months: 24,
-      price: 49,
+
+      price: 45,
       unit_cost: 25,
-      fixed_cost: 25000,
-      ad_spend: 15000,
-      base_cac: 2.5, // CPL (cost per lead/visit)
-      conv_rate: 2.5, // % (visit -> customer)
-      k_factor: 0.05,
-      retention: 20, // months
-      seasonality: 0.10,
+      units_per: 1.0,
+
+      fixed_cost: 85000,     // tuned to hit ~50% BE with the ad spend below
+      ad_spend: 180000,
+
+      base_cac: 3.0,         // CPL ($)
+      conv_rate: 2.0,        // %
+      k_factor: 0.06,
+      retention: 12,         // months
+
+      seasonality: 10,       // ±10% amplitude
       channel_eff: 1.0,
-      units_per: 1.2,
       elasticity: -1.0,
+
       runs: 1000,
-      price_baseline: 49,
-      auto_baseline: false,   // OFF by default so elasticity shows effect
-      seed: 12345             // default seed
+      price_baseline: 45,    // match price so elasticity starts neutral
+      auto_baseline: false,
+      seed: 12345
     };
 
     const state = { ...defaults };
 
-    // Function to bind range and number inputs
     function bindInput(id, key) {
-        const r = document.getElementById(id); // range input
-        const n = document.getElementById(id + '_n'); // number input
-
-        const updateAll = (value) => {
-            let clampedValue = value;
-            if (r) {
-                const min = Number(r.min);
-                const max = Number(r.max);
-                if (!isNaN(min) && clampedValue < min) clampedValue = min;
-                if (!isNaN(max) && clampedValue > max) clampedValue = max;
-                r.value = String(clampedValue);
-            }
-            state[key] = clampedValue;
-            if (n) n.value = String(clampedValue);
-        };
-
+      const r = document.getElementById(id);
+      const n = document.getElementById(id + '_n');
+      const updateAll = (value) => {
+        let v = value;
         if (r) {
-            r.addEventListener('input', () => {
-                const v = Number(r.value);
-                updateAll(v);
-                render();
-            });
+          const min = Number(r.min), max = Number(r.max);
+          if (!isNaN(min) && v < min) v = min;
+          if (!isNaN(max) && v > max) v = max;
+          r.value = String(v);
         }
-
-        if (n) {
-            n.addEventListener('change', () => {
-                const v = Number(n.value);
-                if (!isNaN(v)) {
-                    updateAll(v);
-                    render();
-                } else {
-                    updateAll(state[key]); // Revert to current state if input is invalid
-                }
-            });
-        }
-
-        // Initialize display and input values
-        updateAll(state[key]);
+        state[key] = v;
+        if (n) n.value = String(v);
+      };
+      if (r) r.addEventListener('input', () => { updateAll(Number(r.value)); render(); });
+      if (n) n.addEventListener('change', () => {
+        const v = Number(n.value);
+        if (!isNaN(v)) { updateAll(v); render(); } else { updateAll(state[key]); }
+      });
+      updateAll(state[key]);
     }
 
     function resetDefaults() {
       Object.assign(state, { ...defaults });
-      [
-        'tam','sam_pct','months','price','unit_cost','fixed_cost','ad_spend','base_cac','conv_rate','k_factor','retention','units_per','elasticity','price_baseline','seed'
-      ].forEach(id => {
-        // Re-bind each control to update their UI elements
-        switch (id) {
-            case 'tam': bindInput('tam', 'tam'); break;
-            case 'price': bindInput('price', 'price'); break;
-            case 'unit_cost': bindInput('unit_cost', 'unit_cost'); break;
-            case 'fixed_cost': bindInput('fixed_cost', 'fixed_cost'); break;
-            case 'ad_spend': bindInput('ad_spend', 'ad_spend'); break;
-            case 'base_cac': bindInput('base_cac', 'base_cac'); break;
-            case 'conv_rate': bindInput('conv_rate', 'conv_rate'); break;
-            case 'sam_pct': bindInput('sam_pct', 'sam_pct'); break;
-            case 'months': bindInput('months', 'months'); break;
-            case 'k_factor': bindInput('k_factor', 'k_factor'); break;
-            case 'retention': bindInput('retention', 'retention'); break;
-            case 'units_per': bindInput('units_per', 'units_per'); break;
-            case 'elasticity': bindInput('elasticity', 'elasticity'); break;
-            case 'price_baseline': bindInput('price_baseline', 'price_baseline'); break;
-            case 'seed': bindInput('seed', 'seed'); break;
-        }
-      });
+      ['tam','sam_pct','sam_growth','months','price','unit_cost','fixed_cost','ad_spend','base_cac',
+       'conv_rate','k_factor','retention','units_per','elasticity','price_baseline',
+       'seed','runs','seasonality','channel_eff'
+      ].forEach(id => bindInput(id, id));
       const ab = document.getElementById('auto_baseline');
       if (ab) ab.checked = state.auto_baseline;
       render();
     }
 
     function currentParams() {
+      const seasonAmp = Math.max(0, Math.min(0.5, Number(state.seasonality)/100));
+      const samGAnnual = Number(state.sam_growth) / 100;
+      const samGMonthly = Math.pow(1 + samGAnnual, 1/12) - 1;
       return {
         tam: Number(state.tam),
-        sam: Math.round(Number(state.tam) * (Number(state.sam_pct)/100)),
+        sam0: Math.round(Number(state.tam) * (Number(state.sam_pct)/100)), // base month SAM
+        sam_growth_m: samGMonthly,
         months: Number(state.months),
         price: Number(state.price),
         unit_cost: Number(state.unit_cost),
         fixed_cost: Number(state.fixed_cost),
         ad_spend: Number(state.ad_spend),
         base_cac: Math.max(0.1, Number(state.base_cac)),
-        conv_rate: Math.max(0.0001, Number(state.conv_rate)/100), // Convert percentage to decimal for simulation
+        conv_rate: Math.max(0.0001, Number(state.conv_rate)/100),
         k_factor: Math.max(0, Number(state.k_factor)),
         retention: Math.max(1, Number(state.retention)),
-        seasonality: defaults.seasonality, // Use default
-        channel_eff: defaults.channel_eff, // Use default
+        seasonality: seasonAmp,
+        channel_eff: Math.max(0.01, Number(state.channel_eff)),
         units_per: Math.max(0.01, Number(state.units_per)),
         elasticity: Number(state.elasticity),
-        runs: Math.round(Number(state.runs)),
+        runs: Math.max(1, Math.round(Number(state.runs))),
         price_baseline: Number(state.price_baseline),
         seed: Math.floor(Number(state.seed)) >>> 0
       };
@@ -653,53 +746,46 @@
     function simulate(params) {
       const { months } = params;
       const revRuns = Array.from({length: months}, () => new Array(params.runs).fill(0));
-      const monthlyCashRuns = Array.from({length: months}, () => new Array(params.runs).fill(0)); 
-      const cumCashRuns = Array.from({length: months}, () => new Array(params.runs).fill(0)); 
+      const cumCashRuns = Array.from({length: months}, () => new Array(params.runs).fill(0));
       const profitTotals = new Array(params.runs).fill(0);
       const beMonths = new Array(params.runs).fill(Infinity);
+      const cumAcqRuns = Array.from({length: months}, () => new Array(params.runs).fill(0)); // cumulative customers
+
+      // Precompute SAM curve over time (deterministic)
+      const samCurve = Array.from({length: months}, (_,m)=> Math.max(0, Math.round(params.sam0 * Math.pow(1 + params.sam_growth_m, m))));
 
       for (let run = 0; run < params.runs; run++) {
-        // Seeded RNG per run for reproducibility
         const rng = mulberry32((params.seed + run) >>> 0);
 
         let active = 0;
         let acquiredTotal = 0;
-        const addressable = Math.max(0, params.sam);
         let cumProfitThisRun = 0;
 
         for (let m = 0; m < months; m++) {
-          // seasonality ~ sine wave around 1.0 (using default.seasonality)
+          const samNow = samCurve[m];
           const season = 1 + params.seasonality * Math.sin(2 * Math.PI * ((m % 12) / 12));
 
-          // random CAC and conversion noise (log-normal multiplicative)
-          const convNoise = lognormalNoise(rng, 0.25);
-          const cacNoise = lognormalNoise(rng, 0.20);
+          const convNoise  = lognormalNoise(rng, 0.25);
+          const cacNoise   = lognormalNoise(rng, 0.20);
           const churnNoise = lognormalNoise(rng, 0.15);
-          // price elasticity (demand factor)
+
           const priceFactor = Math.pow(params.price / params.price_baseline, params.elasticity);
 
-          // effective conversion rate and CAC
           const convRaw = Math.max(0, params.conv_rate * season * convNoise * priceFactor);
-          const conv = clamp(convRaw, 0, 1); // cap to [0,1]
-          const cac = Math.max(0.1, (params.base_cac / params.channel_eff) * cacNoise); // align to UI min
+          const conv = clamp(convRaw, 0, 1);
+          const cac  = Math.max(0.1, (params.base_cac / params.channel_eff) * cacNoise);
 
-          // paid + organic
-          const paidProspects = params.ad_spend / cac; 
-          const remaining = Math.max(0, addressable - acquiredTotal);
+          const paidProspects = params.ad_spend / cac;
+          const remaining = Math.max(0, samNow - acquiredTotal);
 
-          // viral K as customers per active
           const organicCustomers = params.k_factor * active;
-
-          // paid customers
           const paidCustomers = Math.min(paidProspects, remaining) * conv;
-
           const newCustomers = Math.min(organicCustomers + paidCustomers, remaining);
+
           acquiredTotal += newCustomers;
 
-          // churn (geometric with mean=retention months)
           const monthlyChurnRate = clamp(1 / params.retention, 0.001, 0.95);
           const lost = Math.min(active, active * monthlyChurnRate * churnNoise);
-
           active = Math.max(0, active + newCustomers - lost);
 
           const units = active * params.units_per;
@@ -710,30 +796,29 @@
           const opProfit = gross - opex;
 
           revRuns[m][run] = revenue;
-          monthlyCashRuns[m][run] = opProfit; 
-          
-          cumProfitThisRun += opProfit; 
-          cumCashRuns[m][run] = cumProfitThisRun; 
+          cumProfitThisRun += opProfit;
+          cumCashRuns[m][run] = cumProfitThisRun;
+          cumAcqRuns[m][run] = acquiredTotal;
 
           if (beMonths[run] === Infinity && cumProfitThisRun >= 0) beMonths[run] = m + 1;
           if (m === months - 1) profitTotals[run] = cumProfitThisRun;
         }
       }
 
-      // Aggregate percentiles per month
-      const p10 = [], p50 = [], p90 = [], labels = []; 
-      const cumCashP10 = [], cumCashP50 = [], cumCashP90 = []; 
+      // Percentiles
+      const p10 = [], p50 = [], p90 = [], labels = [];
+      const cumCashP10 = [], cumCashP50 = [], cumCashP90 = [];
+      const custP10 = [], custP50 = [], custP90 = [];
 
       for (let m=0;m<months;m++) {
-        const arr = revRuns[m].slice().sort((a,b)=>a-b);
-        p10.push(percentile(arr, 0.10));
-        p50.push(percentile(arr, 0.50));
-        p90.push(percentile(arr, 0.90));
+        const arrR = revRuns[m].slice().sort((a,b)=>a-b);
+        p10.push(percentile(arrR, 0.10)); p50.push(percentile(arrR, 0.50)); p90.push(percentile(arrR, 0.90));
 
-        const cumulativeArr = cumCashRuns[m].slice().sort((a,b)=>a-b);
-        cumCashP10.push(percentile(cumulativeArr, 0.10));
-        cumCashP50.push(percentile(cumulativeArr, 0.50));
-        cumCashP90.push(percentile(cumulativeArr, 0.90));
+        const arrC = cumCashRuns[m].slice().sort((a,b)=>a-b);
+        cumCashP10.push(percentile(arrC, 0.10)); cumCashP50.push(percentile(arrC, 0.50)); cumCashP90.push(percentile(arrC, 0.90));
+
+        const arrA = cumAcqRuns[m].slice().sort((a,b)=>a-b);
+        custP10.push(percentile(arrA, 0.10)); custP50.push(percentile(arrA, 0.50)); custP90.push(percentile(arrA, 0.90));
 
         labels.push('M' + (m+1));
       }
@@ -753,28 +838,97 @@
       const mktSpend = params.ad_spend * params.months;
       const roi = expectedProfit / Math.max(1, mktSpend);
 
-      return { labels, p10, p50, p90, cumCashP10, cumCashP50, cumCashP90, profitTotals, profitP10, profitP50, profitP90, beProb, beMed, beP90, expectedRevenue, expectedProfit, roi };
+      return {
+        labels, p10, p50, p90,
+        cumCashP10, cumCashP50, cumCashP90,
+        custP10, custP50, custP90,
+        samCurve,
+        profitTotals, profitP10, profitP50, profitP90,
+        beProb, beMed, beP90, expectedRevenue, expectedProfit, roi
+      };
     }
 
     // ---------- Rendering ----------
     const lineCanvas = document.getElementById('chart_line');
     const cashCanvas = document.getElementById('chart_cash');
+    const custCanvas = document.getElementById('chart_customers');
     const histCanvas = document.getElementById('chart_hist');
-
     let lastResult = null;
 
+    function updateModuleSummaries(p) {
+      // Market
+      const samEnd = Math.round(p.sam0 * Math.pow(1 + p.sam_growth_m, p.months-1));
+      document.getElementById('sum_mkt_tam').textContent = fmt.num(p.tam);
+      document.getElementById('sum_mkt_sam').textContent = fmt.num(p.sam0);
+      document.getElementById('sum_mkt_share').textContent = fmt.pct1(p.sam0 / Math.max(1, p.tam));
+      document.getElementById('sum_mkt_sam_end').textContent = fmt.num(samEnd);
+      document.getElementById('sum_mkt_horizon').textContent = p.months + ' mo';
+      document.getElementById('sum_mkt_g').textContent = (Math.round((Math.pow(1 + p.sam_growth_m,12)-1)*1000)/10).toFixed(1) + '%/yr';
+
+      // Deterministic derived metrics
+      const d = computeDeterministic(p);
+
+      // CAC
+      document.getElementById('sum_cac_cac').textContent = isFinite(d.cac) ? fmt.cur0(d.cac) : '∞';
+      document.getElementById('sum_cac_cpl').textContent = fmt.cur0(d.cpl);
+      document.getElementById('sum_cac_conv').textContent = fmt.pct1(d.convEff);
+      document.getElementById('sum_cac_visits').textContent = fmt.num(Math.round(d.visits));
+      document.getElementById('sum_cac_paidcust').textContent = fmt.num(Math.round(d.paidCustomers));
+      document.getElementById('sum_cac_k').textContent = (Math.round(p.k_factor*100)/100).toFixed(2);
+      document.getElementById('sum_cac_churn').textContent = fmt.pct1(d.churnRate);
+
+      // Pricing
+      document.getElementById('sum_pri_unit_margin').textContent = fmt.cur0(d.unitMargin);
+      document.getElementById('sum_pri_gm').textContent = fmt.pct1(d.gmPct);
+      document.getElementById('sum_pri_mm').textContent = fmt.cur0(d.monthlyMargin);
+      document.getElementById('sum_pri_opex').textContent = fmt.cur0(p.fixed_cost + p.ad_spend);
+      document.getElementById('sum_pri_baseline').textContent = '$' + p.price_baseline + (document.getElementById('auto_baseline').checked ? ' (auto)' : '');
+
+      // Simulation
+      document.getElementById('sum_sim_seed').textContent = String(p.seed);
+      document.getElementById('sum_sim_runs').textContent = String(p.runs);
+      document.getElementById('sum_sim_season').textContent = '±' + Math.round(p.seasonality*100) + '%';
+      document.getElementById('sum_sim_channel').textContent = (Math.round(p.channel_eff*100)/100).toFixed(2) + '×';
+
+      // Chips (collapsed summaries)
+      const chip = (label, val) => `<span class="chip"><b>${label}</b> ${val}</span>`;
+      document.getElementById('chip_mkt').innerHTML =
+        chip('TAM', fmt.num(p.tam)) +
+        chip('SAM', fmt.num(p.sam0)) +
+        chip('H', p.months + 'm') +
+        chip('gSAM/yr', (Math.round((Math.pow(1+p.sam_growth_m,12)-1)*1000)/10).toFixed(1)+'%');
+
+      document.getElementById('chip_cac').innerHTML =
+        chip('CPL', fmt.cur0(d.cpl)) +
+        chip('Conv', fmt.pct1(d.convEff)) +
+        chip('CAC', isFinite(d.cac)?fmt.cur0(d.cac):'∞') +
+        chip('K', p.k_factor.toFixed(2));
+
+      document.getElementById('chip_pri').innerHTML =
+        chip('P', '$'+p.price) +
+        chip('COGS', '$'+p.unit_cost) +
+        chip('GM', fmt.pct1(d.gmPct)) +
+        chip('MM/active', fmt.cur0(d.monthlyMargin));
+
+      document.getElementById('chip_sim').innerHTML =
+        chip('Seed', p.seed) +
+        chip('Runs', p.runs) +
+        chip('Season', '±'+Math.round(p.seasonality*100)+'%') +
+        chip('Eff', (Math.round(p.channel_eff*100)/100).toFixed(2)+'×');
+    }
+
     function render() {
-      const autoBaselineCheckbox = document.getElementById('auto_baseline');
-      if (autoBaselineCheckbox && autoBaselineCheckbox.checked) { 
-        state.price_baseline = Number(state.price); 
-        // Also update the UI for price_baseline if it's set automatically
-        const priceBaselineN = document.getElementById('price_baseline_n');
-        const priceBaselineRange = document.getElementById('price_baseline');
-        if (priceBaselineN) priceBaselineN.value = String(state.price_baseline);
-        if (priceBaselineRange) priceBaselineRange.value = String(state.price_baseline);
+      const ab = document.getElementById('auto_baseline');
+      if (ab && ab.checked) {
+        state.price_baseline = Number(state.price);
+        const n = document.getElementById('price_baseline_n');
+        const r = document.getElementById('price_baseline');
+        if (n) n.value = String(state.price_baseline);
+        if (r) r.value = String(state.price_baseline);
       }
-      
+
       const p = currentParams();
+      updateModuleSummaries(p);
       lastResult = simulate(p);
 
       // KPIs
@@ -782,29 +936,39 @@
       document.getElementById('kpi_profit').textContent = fmt.cur0(lastResult.expectedProfit);
       document.getElementById('kpi_be_prob').textContent = fmt.pct0(lastResult.beProb);
       document.getElementById('kpi_roi').textContent = (lastResult.roi>=0 ? '+' : '') + (lastResult.roi*100).toFixed(0) + '%';
-
       const beTxt = isFinite(lastResult.beMed)
         ? `Median time to break-even: ~M${Math.round(lastResult.beMed)} (P90: M${Math.round(lastResult.beP90)})`
         : 'Break-even unlikely within horizon';
       document.getElementById('kpi_be_time').textContent = beTxt;
 
+      const d = computeDeterministic(p);
+      document.getElementById('kpi_cac').textContent = (isFinite(d.cac)) ? fmt.cur0(d.cac) : '—';
+      document.getElementById('kpi_ltv_cac').textContent = (d.ltvCac && isFinite(d.ltvCac)) ? (d.ltvCac.toFixed(1) + '×') : '—';
+      document.getElementById('kpi_payback').textContent = (isFinite(d.payback)) ? d.payback.toFixed(1) : '∞';
+
       // Charts
-      drawLineChart(lineCanvas, lastResult.labels, [
-        { name: 'P10', data: lastResult.p10 },
-        { name: 'P50', data: lastResult.p50 },
-        { name: 'P90', data: lastResult.p90 },
-      ], {zeroLine:false});
-      
-      if (cashCanvas) {
-        drawLineChart(cashCanvas, lastResult.labels, [
-          { name: 'CumP10', data: lastResult.cumCashP10 }, 
-          { name: 'CumP50', data: lastResult.cumCashP50 }, 
-          { name: 'CumP90', data: lastResult.cumCashP90 }, 
-        ], {zeroLine:true});
-      }
+      drawLineChart(lineCanvas, lastResult.labels,
+        [{ name:'P10', data:lastResult.p10 }, { name:'P50', data:lastResult.p50 }, { name:'P90', data:lastResult.p90 }],
+        { zeroLine:false }
+      );
+
+      drawLineChart(cashCanvas, lastResult.labels,
+        [{ data:lastResult.cumCashP10 }, { data:lastResult.cumCashP50 }, { data:lastResult.cumCashP90 }],
+        { zeroLine:true, yLabelZero:'$0' }
+      );
+
+      drawLineChart(custCanvas, lastResult.labels,
+        [{ data:lastResult.custP10 }, { data:lastResult.custP50 }, { data:lastResult.custP90 }],
+        {
+          zeroLine:false,
+          yFormatter: (v)=> (v>=1000 ? Math.round(v/1000)+'k' : Math.round(v)),
+          overlay: { data: lastResult.samCurve, label: 'SAM (ceiling)' }
+        }
+      );
+
       drawHistogram2(histCanvas, lastResult.profitTotals);
 
-      // Table of percentiles for profit
+      // Profit percentiles table
       const tbl = document.getElementById('tbl_pctls');
       tbl.innerHTML = `
         <tr><th>Metric</th><th>Value</th></tr>
@@ -813,63 +977,48 @@
         <tr><td>Profit P90</td><td>${fmt.cur0(lastResult.profitP90)}</td></tr>
       `;
 
-      // Insights
+      // Insights (quick)
       const insights = [];
       if (lastResult.beProb === 0) {
-        insights.push('Break-even is <b>0%</b> under current settings because cumulative profit never turns positive. Check volume drivers: <b>CPL</b> and <b>Conversion</b> (since <i>customers ≈ visits × conversion</i>) and compare gross margin vs. fixed+ad spend.');
+        insights.push('Break-even is <b>0%</b> under current settings. Check CPL, conversion, and gross margin vs fixed+ad spend.');
       }
       if (lastResult.beProb < 0.5) {
-        insights.push(`With the current levers, break-even within ${p.months} months is <b>${fmt.pct0(lastResult.beProb)}</b>. Consider raising <b>price</b>, improving <b>channel efficiency</b>, or trimming <b>fixed/ad spend</b>.`);
+        insights.push(`Break-even within ${p.months} months is <b>${fmt.pct0(lastResult.beProb)}</b>. Consider price/margin, channel efficiency, or overhead.`);
       } else {
-        insights.push(`You have a >50% chance to break even by <b>M${Math.round(lastResult.beMed)}</b> (P90 by M${Math.round(lastResult.beP90)}).`);
+        insights.push(`>50% chance to break even by <b>M${Math.round(lastResult.beMed)}</b> (P90 by M${Math.round(lastResult.beP90)}).`);
       }
-      if (p.elasticity < -1.2) {
-        insights.push(`High (elastic) demand: price increases hurt conversion notably (elasticity ${p.elasticity}). Test smaller price steps.`);
-      } else if (p.elasticity > -0.6) {
-        insights.push(`Low (inelastic) demand: conversion is less sensitive to price changes (elasticity ${p.elasticity}). Pricing power may exist.`);
-      }
-      if (p.seasonality > 0.25) insights.push(`Strong seasonality (±${Math.round(p.seasonality*100)}%) suggests budgeting more paid media ahead of peak months.`);
-      if (p.k_factor >= 0.05) insights.push(`Viral growth (K=${p.k_factor.toFixed(2)}) meaningfully amplifies acquisition as active base grows. Invest in referrals.`);
-
+      if (p.elasticity < -1.2) insights.push(`High demand elasticity (${p.elasticity}). Consider smaller price moves.`);
+      if (p.elasticity > -0.6) insights.push(`Low elasticity (${p.elasticity}). Potential pricing power.`);
+      if (p.k_factor >= 0.05) insights.push(`Viral growth (K=${p.k_factor.toFixed(2)}) amplifies acquisition as active base grows.`);
+      if (d.ltvCac && d.ltvCac < 3) insights.push(`LTV:CAC is <b>${d.ltvCac.toFixed(1)}×</b> with payback <b>${isFinite(d.payback)?d.payback.toFixed(1):'∞'} months</b>. Target ≥ 3× or faster payback.`);
       document.getElementById('insights').innerHTML = insights.map(x => `<div>• ${x}</div>`).join('');
     }
 
-    // ---------- Wiring ----------
-    bindInput('tam', 'tam');
-    bindInput('sam_pct', 'sam_pct');
-    bindInput('months', 'months');
-    bindInput('price', 'price');
-    bindInput('unit_cost', 'unit_cost');
-    bindInput('fixed_cost', 'fixed_cost');
-    bindInput('ad_spend', 'ad_spend');
-    bindInput('base_cac', 'base_cac');
-    bindInput('conv_rate', 'conv_rate');
-    bindInput('k_factor', 'k_factor');
-    bindInput('retention', 'retention');
-    bindInput('units_per', 'units_per');
-    bindInput('elasticity', 'elasticity');
-    bindInput('price_baseline', 'price_baseline');
-    bindInput('seed', 'seed');
+    // Wiring
+    [
+      'tam','sam_pct','sam_growth','months','price','unit_cost','fixed_cost','ad_spend','base_cac','conv_rate',
+      'k_factor','retention','units_per','elasticity','price_baseline','seed','runs','seasonality','channel_eff'
+    ].forEach(id => bindInput(id, id));
 
     document.getElementById('btn-run').addEventListener('click', render);
-    
     document.getElementById('btn-reset').addEventListener('click', resetDefaults);
     document.getElementById('btn-set-price-baseline').addEventListener('click', () => {
       state.price_baseline = Number(state.price);
       const ab = document.getElementById('auto_baseline'); if (ab) { ab.checked = false; state.auto_baseline = false; }
-      
-      const priceBaselineN = document.getElementById('price_baseline_n');
-      const priceBaselineRange = document.getElementById('price_baseline');
-
-      if (priceBaselineN) priceBaselineN.value = String(state.price_baseline);
-      if (priceBaselineRange) priceBaselineRange.value = String(state.price_baseline);
-
+      const n = document.getElementById('price_baseline_n'); const r = document.getElementById('price_baseline');
+      if (n) n.value = String(state.price_baseline); if (r) r.value = String(state.price_baseline);
       const msg = document.createElement('div');
-      msg.textContent = `Elasticity baseline set to ${fmt.cur(state.price_baseline)}`;
+      msg.textContent = `Elasticity baseline set to $${state.price_baseline}`;
       msg.style.cssText = 'position:fixed; bottom:16px; right:16px; background:#111; border:1px solid #333; color:#e0e0e0; padding:8px 12px; border-radius:10px; z-index:9;';
-      document.body.appendChild(msg);
-      setTimeout(()=>msg.remove(), 2400);
-      render();
+      document.body.appendChild(msg); setTimeout(()=>msg.remove(), 2400); render();
+    });
+
+    // Expand/Collapse all
+    document.getElementById('btn-expand').addEventListener('click', () => {
+      document.querySelectorAll('details.module').forEach(d => d.open = true);
+    });
+    document.getElementById('btn-collapse').addEventListener('click', () => {
+      document.querySelectorAll('details.module').forEach(d => d.open = false);
     });
 
     // Exports
@@ -879,15 +1028,12 @@
       for (let i=0;i<lastResult.labels.length;i++) rows.push([lastResult.labels[i], Math.round(lastResult.p10[i]), Math.round(lastResult.p50[i]), Math.round(lastResult.p90[i])]);
       downloadCSV('monthly_revenue_percentiles.csv', rows);
     });
-
-    // New export for cumulative cashflow
     document.getElementById('btn-export-cum-cash').addEventListener('click', () => {
       if (!lastResult) return;
       const rows = [['Month','Cumulative_Cashflow_P10','Cumulative_Cashflow_P50','Cumulative_Cashflow_P90']];
       for (let i=0;i<lastResult.labels.length;i++) rows.push([lastResult.labels[i], Math.round(lastResult.cumCashP10[i]), Math.round(lastResult.cumCashP50[i]), Math.round(lastResult.cumCashP90[i])]);
       downloadCSV('cumulative_cashflow_percentiles.csv', rows);
     });
-
     document.getElementById('btn-export-profit').addEventListener('click', () => {
       if (!lastResult) return;
       const rows = [['Run','Total_Profit']];
@@ -895,17 +1041,7 @@
       downloadCSV('profit_distribution.csv', rows);
     });
 
-    // Re-render on resize to keep canvases crisp
-    window.addEventListener('resize', () => { 
-      if (!lastResult) return;
-      drawLineChart(lineCanvas, lastResult.labels, [{data:lastResult.p10},{data:lastResult.p50},{data:lastResult.p90}], {zeroLine:false}); 
-      if (cashCanvas) { 
-        drawLineChart(cashCanvas, lastResult.labels, [{data:lastResult.cumCashP10},{data:lastResult.cumCashP50},{data:lastResult.cumCashP90}], {zeroLine:true}); 
-      } 
-      drawHistogram2(histCanvas, lastResult.profitTotals); 
-    });
-
-    // Tooltips init (upgrade 'title' to custom tooltip)
+    // Tooltips init
     (function initTooltips(){
       const infos = document.querySelectorAll('.info');
       infos.forEach(el => {
@@ -916,8 +1052,21 @@
       document.addEventListener('click', ()=>{ document.querySelectorAll('.info.show').forEach(x=>x.classList.remove('show')); });
     })();
 
-    // Initialize UI with defaults and first render
+    // Resize redraw
+    window.addEventListener('resize', () => {
+      if (!lastResult) return;
+      drawLineChart(lineCanvas, lastResult.labels, [{data:lastResult.p10},{data:lastResult.p50},{data:lastResult.p90}], {zeroLine:false});
+      drawLineChart(cashCanvas, lastResult.labels, [{data:lastResult.cumCashP10},{data:lastResult.cumCashP50},{data:lastResult.cumCashP90}], {zeroLine:true});
+      drawLineChart(custCanvas, lastResult.labels, [{data:lastResult.custP10},{data:lastResult.custP50},{data:lastResult.custP90}], {
+        yFormatter:(v)=> (v>=1000 ? Math.round(v/1000)+'k' : Math.round(v)),
+        overlay:{ data:lastResult.samCurve, label:'SAM (ceiling)' }
+      });
+      drawHistogram2(histCanvas, lastResult.profitTotals);
+    });
+
+    // Init
     resetDefaults();
   </script>
 </body>
 </html>
+
