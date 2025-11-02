@@ -17,7 +17,6 @@
       --chip-bg: #121212;
       --chip-br: #2b2b2b;
     }
-
     * { box-sizing: border-box; }
     html, body { height: 100%; }
     body {
@@ -26,28 +25,14 @@
       color: var(--fg);
       background: radial-gradient(1200px 800px at 10% -10%, #202020, var(--bg));
     }
-
-    header {
-      position: sticky; top: 0; z-index: 3;
-      backdrop-filter: blur(8px);
-      background: color-mix(in oklab, var(--bg), transparent 35%);
-      border-bottom: 1px solid #2a2a2a;
-    }
+    header { position: sticky; top: 0; z-index: 3; backdrop-filter: blur(8px); background: color-mix(in oklab, var(--bg), transparent 35%); border-bottom: 1px solid #2a2a2a; }
     .wrap { max-width: 1260px; margin: 0 auto; padding: 16px 20px; }
     .title { display: flex; align-items: center; gap: 14px; }
-    .logo {
-      width: 36px; height: 36px; border-radius: 10px;
-      background: linear-gradient(135deg, var(--accent), #f0ca45);
-      box-shadow: 0 0 0 2px #000 inset, 0 6px 18px rgba(0,0,0,.35);
-    }
+    .logo { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--accent), #f0ca45); box-shadow: 0 0 0 2px #000 inset, 0 6px 18px rgba(0,0,0,.35); }
     h1 { font-size: 20px; margin: 0; letter-spacing: .2px; }
     .subtitle { font-size: 12px; color: var(--muted); }
 
-    .container {
-      max-width: 1260px; margin: 18px auto; display: grid; gap: 16px;
-      grid-template-columns: 380px 1fr; align-items: start; padding: 0 20px 28px;
-    }
-
+    .container { max-width: 1260px; margin: 18px auto; display: grid; gap: 16px; grid-template-columns: 380px 1fr; align-items: start; padding: 0 20px 28px; }
     .card { background: var(--card); border: 1px solid #2a2a2a; border-radius: 14px; }
     .card h2 { font-size: 15px; margin: 0 0 8px 0; color: var(--accent); }
     .card .pad { padding: 14px; }
@@ -59,18 +44,12 @@
     .tiny { font-size: 11px; padding: 6px 8px; border-radius: 8px; background:#121212; border:1px solid #323232; color:var(--fg); cursor:pointer; }
     .tiny:hover { border-color:#444; }
 
-    details.module {
-      border: 1px solid #2c2c2c; border-radius: 12px; background: #1b1b1b; margin-bottom: 10px;
-      overflow: hidden;
-    }
+    details.module { border: 1px solid #2c2c2c; border-radius: 12px; background: #1b1b1b; margin-bottom: 10px; overflow: hidden; }
     details.module[open] { background: #1e1e1e; }
-    details.module > summary {
-      list-style: none; cursor: pointer; padding: 12px 14px; color: var(--accent);
-      display:flex; align-items:center; gap: 10px;
-    }
+    details.module > summary { list-style: none; cursor: pointer; padding: 12px 14px; color: var(--accent); display:flex; align-items:center; gap: 10px; }
     details.module > summary .sum-title { font-weight: 700; }
     details.module > summary .chipset { margin-left:auto; display:flex; flex-wrap:wrap; gap:6px; }
-    details.module[open] > summary .chipset { display:none; } /* show chips only when collapsed */
+    details.module[open] > summary .chipset { display:none; }
     .chip { font-size: 11px; color: var(--muted); background: var(--chip-bg); border:1px solid var(--chip-br); padding: 2px 6px; border-radius: 999px; }
     .chip b { color: var(--fg); font-weight:600; }
 
@@ -88,10 +67,7 @@
     .row2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
 
     .btnbar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-    button {
-      appearance: none; border: 1px solid #3a2a00; color: #181400; background: var(--accent);
-      padding: 8px 12px; border-radius: 10px; font-weight: 650; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.25);
-    }
+    button { appearance: none; border: 1px solid #3a2a00; color: #181400; background: var(--accent); padding: 8px 12px; border-radius: 10px; font-weight: 650; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.25); }
     button.secondary { background: #121212; color: var(--fg); border: 1px solid #323232; }
 
     .info{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;border:1px solid #554400;color:var(--accent);font-size:11px;margin-left:6px;cursor:help;position:relative;}
@@ -342,6 +318,7 @@
           <div class="summary-grid">
             <div class="summary-item">Seed: <b id="sum_sim_seed">—</b> • Runs: <b id="sum_sim_runs">—</b></div>
             <div class="summary-item">Seasonality: <b id="sum_sim_season">—</b> • Channel eff.: <b id="sum_sim_channel">—</b></div>
+            <div class="summary-item">σ(conv/cac/churn): <b id="sum_sim_sigmas">—</b></div>
           </div>
           <div class="section-body">
             <div class="row2">
@@ -362,6 +339,7 @@
                 <input id="runs" type="range" min="1" max="5000" step="1" />
               </div>
             </div>
+
             <div class="row2">
               <div class="control">
                 <div>
@@ -379,6 +357,21 @@
                 <input class="number" id="channel_eff_n" type="number" min="0.25" max="2" step="0.05" />
                 <input id="channel_eff" type="range" min="0.25" max="2" step="0.05" />
               </div>
+            </div>
+
+            <!-- Market Turbulence Presets -->
+            <div class="control" style="grid-template-columns: 1fr 180px;">
+              <div>
+                <label for="turbulence_preset">Market Turbulence
+                  <span class="info" title="Sets σ (standard deviation) for three lognormal noises used each month: conversion, CPL/CAC, and churn.">ⓘ</span>
+                </label>
+                <small>Controls uncertainty strength</small>
+              </div>
+              <select id="turbulence_preset" class="number" style="padding:6px 8px;">
+                <option value="typical">Typical (default)</option>
+                <option value="calm">Calm</option>
+                <option value="volatile">Volatile</option>
+              </select>
             </div>
 
             <div class="btnbar">
@@ -455,26 +448,9 @@
       pct0: (n) => (n*100).toFixed(0) + '%',
       pct1: (n) => (n*100).toFixed(1) + '%',
     };
-
-    function mulberry32(a) {
-      return function() {
-        let t = a += 0x6D2B79F5;
-        t = Math.imul(t ^ (t >>> 15), t | 1);
-        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-      };
-    }
-    function randNormal(rng) {
-      let u = 0, v = 0;
-      while (u === 0) u = rng();
-      while (v === 0) v = rng();
-      return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
-    }
-    function lognormalNoise(rng, sigma = 0.25) {
-      const z = randNormal(rng);
-      const mu = -0.5 * sigma * sigma;
-      return Math.exp(mu + sigma * z);
-    }
+    function mulberry32(a) { return function() { let t = a += 0x6D2B79F5; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+    function randNormal(rng) { let u = 0, v = 0; while (u === 0) u = rng(); while (v === 0) v = rng(); return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v); }
+    function lognormalNoise(rng, sigma = 0.25) { const z = randNormal(rng); const mu = -0.5 * sigma * sigma; return Math.exp(mu + sigma * z); }
     function clamp(x, a, b) { return Math.min(Math.max(x, a), b); }
     function percentile(sortedArray, p) {
       if (sortedArray.length === 0) return NaN;
@@ -485,12 +461,7 @@
       return sortedArray[lower] + (sortedArray[upper] - sortedArray[lower]) * (idx - lower);
     }
     function mean(arr) { return arr.reduce((a, b) => a + b, 0) / (arr.length || 1); }
-    function median(arr) {
-      if (!arr.length) return NaN;
-      const s = [...arr].sort((a,b)=>a-b);
-      const m = Math.floor(s.length/2);
-      return s.length % 2 ? s[m] : (s[m-1] + s[m]) / 2;
-    }
+    function median(arr) { if (!arr.length) return NaN; const s = [...arr].sort((a,b)=>a-b); const m = Math.floor(s.length/2); return s.length % 2 ? s[m] : (s[m-1] + s[m]) / 2; }
     function downloadCSV(filename, rows) {
       const csv = rows.map(r => r.map(x => typeof x === 'number' ? String(x) : '"' + String(x).replaceAll('"', '""') + '"').join(',')).join('\n');
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -540,7 +511,7 @@
       // axes
       ctx.strokeStyle = '#444'; ctx.beginPath(); ctx.moveTo(pad, pad/2); ctx.lineTo(pad, H-pad); ctx.lineTo(W-pad/2, H-pad); ctx.stroke();
 
-      // zero line (for cash charts)
+      // zero line
       if (opts.zeroLine) {
         const y0 = ys(0);
         if (y0 >= pad/2 && y0 <= H - pad) {
@@ -551,7 +522,7 @@
         }
       }
 
-      // shade between P10 and P90 (assume [0]=P10,[1]=P50,[2]=P90)
+      // shade P10–P90
       if (seriesList.length >= 3) {
         const p10 = seriesList[0].data, p90 = seriesList[2].data;
         ctx.beginPath();
@@ -572,12 +543,10 @@
         ctx.stroke();
       });
 
-      // overlay (e.g., SAM curve)
+      // overlay
       if (opts.overlay?.data?.length) {
         ctx.save();
-        ctx.setLineDash([6,4]);
-        ctx.strokeStyle = '#e0e0e0';
-        ctx.lineWidth = 1.6;
+        ctx.setLineDash([6,4]); ctx.strokeStyle = '#e0e0e0'; ctx.lineWidth = 1.6;
         ctx.beginPath();
         for (let i=0;i<labels.length;i++) {
           const x = xs(i), y = ys(opts.overlay.data[i]);
@@ -587,12 +556,10 @@
         ctx.restore();
       }
 
-      // x labels
+      // labels/ticks
       ctx.fillStyle = '#9c9c9c'; ctx.font = '11px system-ui';
       const mStep = Math.ceil(labels.length / 12);
       for (let i=0;i<labels.length;i+=mStep) ctx.fillText(labels[i], xs(i)-6, H - pad + 14);
-
-      // y ticks with formatter
       const yFmt = opts.yFormatter || ((val)=> (val>=1000 ? '$' + Math.round(val/1000)+'k' : '$' + Math.round(val)));
       for (let g=0; g<=steps; g++) {
         const val = yMax - (yMax - yMin) * (g/steps);
@@ -656,33 +623,41 @@
     const defaults = {
       tam: 500000,
       sam_pct: 30,
-      sam_growth: 5,         // annual % growth of SAM
+      sam_growth: 5,
       months: 24,
 
       price: 45,
       unit_cost: 25,
       units_per: 1.0,
 
-      fixed_cost: 85000,     // tuned to hit ~50% BE with the ad spend below
+      fixed_cost: 85000,
       ad_spend: 180000,
 
-      base_cac: 3.0,         // CPL ($)
-      conv_rate: 2.0,        // %
+      base_cac: 3.0,
+      conv_rate: 2.0,
       k_factor: 0.06,
-      retention: 12,         // months
+      retention: 12,
 
-      seasonality: 10,       // ±10% amplitude
+      seasonality: 10,      // ±%
       channel_eff: 1.0,
       elasticity: -1.0,
 
       runs: 1000,
-      price_baseline: 45,    // match price so elasticity starts neutral
+      price_baseline: 45,
       auto_baseline: false,
-      seed: 12345
+      seed: 12345,
+
+      // Volatility defaults (Typical)
+      sigma_conv: 0.25,
+      sigma_cac:  0.20,
+      sigma_churn:0.15,
+
+      turbulence_preset: 'typical'
     };
 
     const state = { ...defaults };
 
+    // Bind helper
     function bindInput(id, key) {
       const r = document.getElementById(id);
       const n = document.getElementById(id + '_n');
@@ -702,17 +677,43 @@
         const v = Number(n.value);
         if (!isNaN(v)) { updateAll(v); render(); } else { updateAll(state[key]); }
       });
+      // Initialize
       updateAll(state[key]);
+    }
+
+    // Apply turbulence preset
+    const PRESETS = {
+      calm:     { sigma_conv: 0.10, sigma_cac: 0.10, sigma_churn: 0.08 },
+      typical:  { sigma_conv: 0.25, sigma_cac: 0.20, sigma_churn: 0.15 },
+      volatile: { sigma_conv: 0.45, sigma_cac: 0.35, sigma_churn: 0.30 }
+    };
+    function applyPreset(name) {
+      const p = PRESETS[name] || PRESETS.typical;
+      state.turbulence_preset = name;
+      state.sigma_conv  = p.sigma_conv;
+      state.sigma_cac   = p.sigma_cac;
+      state.sigma_churn = p.sigma_churn;
+      // reflect in select + rerender
+      const sel = document.getElementById('turbulence_preset');
+      if (sel) sel.value = name;
+      render();
     }
 
     function resetDefaults() {
       Object.assign(state, { ...defaults });
-      ['tam','sam_pct','sam_growth','months','price','unit_cost','fixed_cost','ad_spend','base_cac',
-       'conv_rate','k_factor','retention','units_per','elasticity','price_baseline',
-       'seed','runs','seasonality','channel_eff'
+      [
+        'tam','sam_pct','sam_growth','months','price','unit_cost','fixed_cost','ad_spend','base_cac',
+        'conv_rate','k_factor','retention','units_per','elasticity','price_baseline',
+        'seed','runs','seasonality','channel_eff'
       ].forEach(id => bindInput(id, id));
       const ab = document.getElementById('auto_baseline');
       if (ab) ab.checked = state.auto_baseline;
+      // preset select
+      const sel = document.getElementById('turbulence_preset');
+      if (sel) {
+        sel.value = state.turbulence_preset;
+        sel.addEventListener('change', () => applyPreset(sel.value));
+      }
       render();
     }
 
@@ -722,7 +723,7 @@
       const samGMonthly = Math.pow(1 + samGAnnual, 1/12) - 1;
       return {
         tam: Number(state.tam),
-        sam0: Math.round(Number(state.tam) * (Number(state.sam_pct)/100)), // base month SAM
+        sam0: Math.round(Number(state.tam) * (Number(state.sam_pct)/100)),
         sam_growth_m: samGMonthly,
         months: Number(state.months),
         price: Number(state.price),
@@ -739,7 +740,12 @@
         elasticity: Number(state.elasticity),
         runs: Math.max(1, Math.round(Number(state.runs))),
         price_baseline: Number(state.price_baseline),
-        seed: Math.floor(Number(state.seed)) >>> 0
+        seed: Math.floor(Number(state.seed)) >>> 0,
+
+        // σ from preset
+        sigma_conv:  Number(state.sigma_conv),
+        sigma_cac:   Number(state.sigma_cac),
+        sigma_churn: Number(state.sigma_churn)
       };
     }
 
@@ -751,23 +757,21 @@
       const beMonths = new Array(params.runs).fill(Infinity);
       const cumAcqRuns = Array.from({length: months}, () => new Array(params.runs).fill(0)); // cumulative customers
 
-      // Precompute SAM curve over time (deterministic)
+      // SAM curve (deterministic)
       const samCurve = Array.from({length: months}, (_,m)=> Math.max(0, Math.round(params.sam0 * Math.pow(1 + params.sam_growth_m, m))));
 
       for (let run = 0; run < params.runs; run++) {
         const rng = mulberry32((params.seed + run) >>> 0);
-
-        let active = 0;
-        let acquiredTotal = 0;
-        let cumProfitThisRun = 0;
+        let active = 0, acquiredTotal = 0, cumProfitThisRun = 0;
 
         for (let m = 0; m < months; m++) {
           const samNow = samCurve[m];
           const season = 1 + params.seasonality * Math.sin(2 * Math.PI * ((m % 12) / 12));
 
-          const convNoise  = lognormalNoise(rng, 0.25);
-          const cacNoise   = lognormalNoise(rng, 0.20);
-          const churnNoise = lognormalNoise(rng, 0.15);
+          // noise with selected σ
+          const convNoise  = lognormalNoise(rng, params.sigma_conv);
+          const cacNoise   = lognormalNoise(rng, params.sigma_cac);
+          const churnNoise = lognormalNoise(rng, params.sigma_churn);
 
           const priceFactor = Math.pow(params.price / params.price_baseline, params.elasticity);
 
@@ -889,8 +893,9 @@
       document.getElementById('sum_sim_runs').textContent = String(p.runs);
       document.getElementById('sum_sim_season').textContent = '±' + Math.round(p.seasonality*100) + '%';
       document.getElementById('sum_sim_channel').textContent = (Math.round(p.channel_eff*100)/100).toFixed(2) + '×';
+      document.getElementById('sum_sim_sigmas').textContent = `${p.sigma_conv.toFixed(2)} / ${p.sigma_cac.toFixed(2)} / ${p.sigma_churn.toFixed(2)}`;
 
-      // Chips (collapsed summaries)
+      // Chips
       const chip = (label, val) => `<span class="chip"><b>${label}</b> ${val}</span>`;
       document.getElementById('chip_mkt').innerHTML =
         chip('TAM', fmt.num(p.tam)) +
@@ -914,7 +919,8 @@
         chip('Seed', p.seed) +
         chip('Runs', p.runs) +
         chip('Season', '±'+Math.round(p.seasonality*100)+'%') +
-        chip('Eff', (Math.round(p.channel_eff*100)/100).toFixed(2)+'×');
+        chip('Eff', (Math.round(p.channel_eff*100)/100).toFixed(2)+'×') +
+        chip('σ', `${p.sigma_conv.toFixed(2)}/${p.sigma_cac.toFixed(2)}/${p.sigma_churn.toFixed(2)}`);
     }
 
     function render() {
@@ -951,12 +957,10 @@
         [{ name:'P10', data:lastResult.p10 }, { name:'P50', data:lastResult.p50 }, { name:'P90', data:lastResult.p90 }],
         { zeroLine:false }
       );
-
       drawLineChart(cashCanvas, lastResult.labels,
         [{ data:lastResult.cumCashP10 }, { data:lastResult.cumCashP50 }, { data:lastResult.cumCashP90 }],
         { zeroLine:true, yLabelZero:'$0' }
       );
-
       drawLineChart(custCanvas, lastResult.labels,
         [{ data:lastResult.custP10 }, { data:lastResult.custP50 }, { data:lastResult.custP90 }],
         {
@@ -965,7 +969,6 @@
           overlay: { data: lastResult.samCurve, label: 'SAM (ceiling)' }
         }
       );
-
       drawHistogram2(histCanvas, lastResult.profitTotals);
 
       // Profit percentiles table
@@ -999,6 +1002,13 @@
       'tam','sam_pct','sam_growth','months','price','unit_cost','fixed_cost','ad_spend','base_cac','conv_rate',
       'k_factor','retention','units_per','elasticity','price_baseline','seed','runs','seasonality','channel_eff'
     ].forEach(id => bindInput(id, id));
+
+    // Preset select
+    const selPreset = document.getElementById('turbulence_preset');
+    if (selPreset) {
+      selPreset.value = state.turbulence_preset;
+      selPreset.addEventListener('change', () => applyPreset(selPreset.value));
+    }
 
     document.getElementById('btn-run').addEventListener('click', render);
     document.getElementById('btn-reset').addEventListener('click', resetDefaults);
@@ -1066,7 +1076,8 @@
 
     // Init
     resetDefaults();
+    // enforce default preset on first load
+    applyPreset(state.turbulence_preset);
   </script>
 </body>
 </html>
-
