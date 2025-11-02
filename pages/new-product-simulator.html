@@ -136,6 +136,8 @@
             <div class="summary-item">TAM: <b id="sum_mkt_tam">—</b></div>
             <div class="summary-item">SAM now: <b id="sum_mkt_sam">—</b> (<span id="sum_mkt_share">—</span>)</div>
             <div class="summary-item">SAM @ horizon: <b id="sum_mkt_sam_end">—</b></div>
+            <div class="summary-item">SOM now: <b id="sum_mkt_som">—</b></div>
+            <div class="summary-item">SOM @ horizon: <b id="sum_mkt_som_end">—</b></div>
             <div class="summary-item">Horizon: <b id="sum_mkt_horizon">—</b> • SAM growth: <b id="sum_mkt_g">—</b></div>
           </div>
           <div class="section-body">
@@ -157,6 +159,14 @@
             </div>
             <div class="control">
               <div>
+                <label for="som_pct">Obtainable Share (SOM % of SAM)<span class="info" title="Serviceable Obtainable Market: near-term obtainable portion of SAM given resources and constraints.">ⓘ</span></label>
+                <small>Obtainable portion (%)</small>
+              </div>
+              <input class="number" id="som_pct_n" type="number" min="1" max="100" step="1" />
+              <input id="som_pct" type="range" min="1" max="100" step="1" />
+            </div>
+            <div class="control">
+              <div>
                 <label for="sam_growth">SAM Growth (annual %)<span class="info" title="Annual growth of SAM. Applied monthly as (1+g)^(1/12)-1.">ⓘ</span></label>
                 <small>-50% to 100% / yr</small>
               </div>
@@ -174,65 +184,7 @@
           </div>
         </details>
 
-        <!-- CAC -->
-        <details class="module" open>
-          <summary>
-            <span class="sum-title">CAC</span>
-            <span class="chipset" id="chip_cac"></span>
-          </summary>
-          <div class="summary-grid">
-            <div class="summary-item">Est. CAC: <b id="sum_cac_cac">—</b></div>
-            <div class="summary-item">CPL: <b id="sum_cac_cpl">—</b> • Conv (eff.): <b id="sum_cac_conv">—</b></div>
-            <div class="summary-item">Paid visits/mo: <b id="sum_cac_visits">—</b> • Paid cust./mo: <b id="sum_cac_paidcust">—</b></div>
-            <div class="summary-item">K-Factor: <b id="sum_cac_k">—</b> • Churn/mo: <b id="sum_cac_churn">—</b></div>
-          </div>
-          <div class="section-body">
-            <div class="control">
-              <div>
-                <label for="ad_spend">Ad Spend / mo ($)<span class="info" title="Monthly paid marketing budget.">ⓘ</span></label>
-                <small>Budget for paid acquisition</small>
-              </div>
-              <input class="number" id="ad_spend_n" type="number" min="0" step="100" />
-              <input id="ad_spend" type="range" min="0" max="200000" step="100" />
-            </div>
-            <div class="control">
-              <div>
-                <label for="base_cac">Cost per Lead/Visit (CPL $)<span class="info" title="Average cost to generate a lead/visit. CAC ≈ CPL / conversion.">ⓘ</span></label>
-                <small>Paid traffic cost per lead</small>
-              </div>
-              <input class="number" id="base_cac_n" type="number" min="0.5" step="0.1" />
-              <input id="base_cac" type="range" min="0.5" max="100" step="0.1" />
-            </div>
-            <div class="control">
-              <div>
-                <label for="conv_rate">Baseline Conversion (%)<span class="info" title="Visitor → customer (before seasonality & elasticity).">ⓘ</span></label>
-                <small>Visitor → customer</small>
-              </div>
-              <input class="number" id="conv_rate_n" type="number" min="0.01" max="100" step="0.01" />
-              <input id="conv_rate" type="range" min="0.01" max="20" step="0.01" />
-            </div>
-            <div class="row2">
-              <div class="control">
-                <div>
-                  <label for="k_factor">Viral K-Factor<span class="info" title="New customers per active per month via referrals (customers, not prospects).">ⓘ</span></label>
-                  <small>Organic customers per active</small>
-                </div>
-                <input class="number" id="k_factor_n" type="number" min="0" max="1" step="0.01" />
-                <input id="k_factor" type="range" min="0" max="1" step="0.01" />
-              </div>
-              <div class="control">
-                <div>
-                  <label for="retention">Avg Retention (months)<span class="info" title="Average active lifetime; churn ≈ 1/retention per month.">ⓘ</span></label>
-                  <small>Customer lifetime</small>
-                </div>
-                <input class="number" id="retention_n" type="number" min="1" max="60" step="1" />
-                <input id="retention" type="range" min="1" max="60" step="1" />
-              </div>
-            </div>
-          </div>
-        </details>
-
-        <!-- Pricing -->
+        <!-- Pricing (moved before ROAS) -->
         <details class="module" open>
           <summary>
             <span class="sum-title">Pricing</span>
@@ -304,6 +256,64 @@
               </label>
               <div class="btnbar">
                 <button id="btn-set-price-baseline" class="secondary" title="Set current price as elasticity baseline">Set current price as baseline</button>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <!-- ROAS (renamed from CAC) -->
+        <details class="module" open>
+          <summary>
+            <span class="sum-title">ROAS (Return on Ad Spend)</span>
+            <span class="chipset" id="chip_roas"></span>
+          </summary>
+          <div class="summary-grid">
+            <div class="summary-item">Est. CAC: <b id="sum_cac_cac">—</b></div>
+            <div class="summary-item">CPL: <b id="sum_cac_cpl">—</b> • Conv (eff.): <b id="sum_cac_conv">—</b></div>
+            <div class="summary-item">Paid visits/mo: <b id="sum_cac_visits">—</b> • Paid cust./mo: <b id="sum_cac_paidcust">—</b></div>
+            <div class="summary-item">K-Factor: <b id="sum_cac_k">—</b> • Churn/mo: <b id="sum_cac_churn">—</b></div>
+          </div>
+          <div class="section-body">
+            <div class="control">
+              <div>
+                <label for="ad_spend">Ad Spend / mo ($)<span class="info" title="Monthly paid marketing budget.">ⓘ</span></label>
+                <small>Budget for paid acquisition</small>
+              </div>
+              <input class="number" id="ad_spend_n" type="number" min="0" step="100" />
+              <input id="ad_spend" type="range" min="0" max="200000" step="100" />
+            </div>
+            <div class="control">
+              <div>
+                <label for="base_cac">Cost per Lead/Visit (CPL $)<span class="info" title="Average cost to generate a lead/visit. CAC ≈ CPL / conversion.">ⓘ</span></label>
+                <small>Paid traffic cost per lead</small>
+              </div>
+              <input class="number" id="base_cac_n" type="number" min="0.5" step="0.1" />
+              <input id="base_cac" type="range" min="0.5" max="100" step="0.1" />
+            </div>
+            <div class="control">
+              <div>
+                <label for="conv_rate">Baseline Conversion (%)<span class="info" title="Visitor → customer (before seasonality & elasticity).">ⓘ</span></label>
+                <small>Visitor → customer</small>
+              </div>
+              <input class="number" id="conv_rate_n" type="number" min="0.01" max="100" step="0.01" />
+              <input id="conv_rate" type="range" min="0.01" max="20" step="0.01" />
+            </div>
+            <div class="row2">
+              <div class="control">
+                <div>
+                  <label for="k_factor">Viral K-Factor<span class="info" title="New customers per active per month via referrals (customers, not prospects).">ⓘ</span></label>
+                  <small>Organic customers per active</small>
+                </div>
+                <input class="number" id="k_factor_n" type="number" min="0" max="1" step="0.01" />
+                <input id="k_factor" type="range" min="0" max="1" step="0.01" />
+              </div>
+              <div class="control">
+                <div>
+                  <label for="retention">Avg Retention (months)<span class="info" title="Average active lifetime; churn ≈ 1/retention per month.">ⓘ</span></label>
+                  <small>Customer lifetime</small>
+                </div>
+                <input class="number" id="retention_n" type="number" min="1" max="60" step="1" />
+                <input id="retention" type="range" min="1" max="60" step="1" />
               </div>
             </div>
           </div>
@@ -397,7 +407,7 @@
           <div class="kpi"><div class="label">CAC (est.)
             <span class="info" title="Estimated CAC at current settings (no randomness): CAC ≈ CPL / conversion. CPL = base CPL ÷ channel efficiency. Conversion adjusts with price elasticity.">ⓘ</span>
           </div><div id="kpi_cac" class="value">—</div><div class="delta">avg cost per acquired customer</div></div>
-          <div class="kpi"><div class="label">LTV:CAC (est.)</div><div id="kpi_ltv_cac" class="value">—</div><div class="delta">cohort LTV / blended CAC</div></div>
+          <div class="kpi"><div class="label">Market Share (SOM)</div><div id="kpi_som_share" class="value">—</div><div class="delta">P50 customers / SOM @ horizon</div></div>
           <div class="kpi"><div class="label">Payback (months)</div><div id="kpi_payback" class="value">—</div><div class="delta">CAC / monthly margin</div></div>
         </div>
       </div>
@@ -419,7 +429,7 @@
       </div>
 
       <div class="card pad">
-        <h2>Customers vs SAM (P10 • P50 • P90)</h2>
+        <h2>Customers vs SOM (P10 • P50 • P90)</h2>
         <div class="chart"><canvas id="chart_customers" width="1280" height="300"></canvas></div>
       </div>
 
@@ -488,7 +498,7 @@
       return { priceFactor, convEff, cpl, cac, unitMargin, gmPct, monthlyMargin, ltvCac, payback, visits, paidCustomers, churnRate };
     }
 
-    // Draw line chart with optional overlay (e.g., SAM)
+    // ---------- Charts ----------
     function drawLineChart(canvas, labels, seriesList, opts={}) {
       const dpr = window.devicePixelRatio || 1;
       const rect = canvas.getBoundingClientRect();
@@ -511,7 +521,6 @@
       // axes
       ctx.strokeStyle = '#444'; ctx.beginPath(); ctx.moveTo(pad, pad/2); ctx.lineTo(pad, H-pad); ctx.lineTo(W-pad/2, H-pad); ctx.stroke();
 
-      // zero line
       if (opts.zeroLine) {
         const y0 = ys(0);
         if (y0 >= pad/2 && y0 <= H - pad) {
@@ -623,6 +632,7 @@
     const defaults = {
       tam: 500000,
       sam_pct: 30,
+      som_pct: 50,          // NEW: SOM % of SAM
       sam_growth: 5,
       months: 24,
 
@@ -657,7 +667,6 @@
 
     const state = { ...defaults };
 
-    // Bind helper
     function bindInput(id, key) {
       const r = document.getElementById(id);
       const n = document.getElementById(id + '_n');
@@ -677,11 +686,10 @@
         const v = Number(n.value);
         if (!isNaN(v)) { updateAll(v); render(); } else { updateAll(state[key]); }
       });
-      // Initialize
       updateAll(state[key]);
     }
 
-    // Apply turbulence preset
+    // Turbulence presets
     const PRESETS = {
       calm:     { sigma_conv: 0.10, sigma_cac: 0.10, sigma_churn: 0.08 },
       typical:  { sigma_conv: 0.25, sigma_cac: 0.20, sigma_churn: 0.15 },
@@ -693,7 +701,6 @@
       state.sigma_conv  = p.sigma_conv;
       state.sigma_cac   = p.sigma_cac;
       state.sigma_churn = p.sigma_churn;
-      // reflect in select + rerender
       const sel = document.getElementById('turbulence_preset');
       if (sel) sel.value = name;
       render();
@@ -702,13 +709,12 @@
     function resetDefaults() {
       Object.assign(state, { ...defaults });
       [
-        'tam','sam_pct','sam_growth','months','price','unit_cost','fixed_cost','ad_spend','base_cac',
+        'tam','sam_pct','som_pct','sam_growth','months','price','unit_cost','fixed_cost','ad_spend','base_cac',
         'conv_rate','k_factor','retention','units_per','elasticity','price_baseline',
         'seed','runs','seasonality','channel_eff'
       ].forEach(id => bindInput(id, id));
       const ab = document.getElementById('auto_baseline');
       if (ab) ab.checked = state.auto_baseline;
-      // preset select
       const sel = document.getElementById('turbulence_preset');
       if (sel) {
         sel.value = state.turbulence_preset;
@@ -721,9 +727,13 @@
       const seasonAmp = Math.max(0, Math.min(0.5, Number(state.seasonality)/100));
       const samGAnnual = Number(state.sam_growth) / 100;
       const samGMonthly = Math.pow(1 + samGAnnual, 1/12) - 1;
+      const somPct = Math.max(0, Math.min(1, Number(state.som_pct)/100));
+      const sam0 = Math.round(Number(state.tam) * (Number(state.sam_pct)/100));
       return {
         tam: Number(state.tam),
-        sam0: Math.round(Number(state.tam) * (Number(state.sam_pct)/100)),
+        sam0,
+        som_pct: somPct,
+        som0: Math.round(sam0 * somPct),
         sam_growth_m: samGMonthly,
         months: Number(state.months),
         price: Number(state.price),
@@ -741,8 +751,6 @@
         runs: Math.max(1, Math.round(Number(state.runs))),
         price_baseline: Number(state.price_baseline),
         seed: Math.floor(Number(state.seed)) >>> 0,
-
-        // σ from preset
         sigma_conv:  Number(state.sigma_conv),
         sigma_cac:   Number(state.sigma_cac),
         sigma_churn: Number(state.sigma_churn)
@@ -755,20 +763,20 @@
       const cumCashRuns = Array.from({length: months}, () => new Array(params.runs).fill(0));
       const profitTotals = new Array(params.runs).fill(0);
       const beMonths = new Array(params.runs).fill(Infinity);
-      const cumAcqRuns = Array.from({length: months}, () => new Array(params.runs).fill(0)); // cumulative customers
+      const cumAcqRuns = Array.from({length: months}, () => new Array(params.runs).fill(0));
 
-      // SAM curve (deterministic)
+      // Ceilings over time
       const samCurve = Array.from({length: months}, (_,m)=> Math.max(0, Math.round(params.sam0 * Math.pow(1 + params.sam_growth_m, m))));
+      const somCurve = samCurve.map(s => Math.round(s * params.som_pct));
 
       for (let run = 0; run < params.runs; run++) {
         const rng = mulberry32((params.seed + run) >>> 0);
         let active = 0, acquiredTotal = 0, cumProfitThisRun = 0;
 
         for (let m = 0; m < months; m++) {
-          const samNow = samCurve[m];
+          const somNow = somCurve[m];
           const season = 1 + params.seasonality * Math.sin(2 * Math.PI * ((m % 12) / 12));
 
-          // noise with selected σ
           const convNoise  = lognormalNoise(rng, params.sigma_conv);
           const cacNoise   = lognormalNoise(rng, params.sigma_cac);
           const churnNoise = lognormalNoise(rng, params.sigma_churn);
@@ -780,7 +788,7 @@
           const cac  = Math.max(0.1, (params.base_cac / params.channel_eff) * cacNoise);
 
           const paidProspects = params.ad_spend / cac;
-          const remaining = Math.max(0, samNow - acquiredTotal);
+          const remaining = Math.max(0, somNow - acquiredTotal);
 
           const organicCustomers = params.k_factor * active;
           const paidCustomers = Math.min(paidProspects, remaining) * conv;
@@ -846,7 +854,7 @@
         labels, p10, p50, p90,
         cumCashP10, cumCashP50, cumCashP90,
         custP10, custP50, custP90,
-        samCurve,
+        samCurve, somCurve,
         profitTotals, profitP10, profitP50, profitP90,
         beProb, beMed, beP90, expectedRevenue, expectedProfit, roi
       };
@@ -860,35 +868,38 @@
     let lastResult = null;
 
     function updateModuleSummaries(p) {
-      // Market
       const samEnd = Math.round(p.sam0 * Math.pow(1 + p.sam_growth_m, p.months-1));
+      const somNow = Math.round(p.sam0 * p.som_pct);
+      const somEnd = Math.round(samEnd * p.som_pct);
+
       document.getElementById('sum_mkt_tam').textContent = fmt.num(p.tam);
       document.getElementById('sum_mkt_sam').textContent = fmt.num(p.sam0);
       document.getElementById('sum_mkt_share').textContent = fmt.pct1(p.sam0 / Math.max(1, p.tam));
       document.getElementById('sum_mkt_sam_end').textContent = fmt.num(samEnd);
+      document.getElementById('sum_mkt_som').textContent = fmt.num(somNow);
+      document.getElementById('sum_mkt_som_end').textContent = fmt.num(somEnd);
       document.getElementById('sum_mkt_horizon').textContent = p.months + ' mo';
       document.getElementById('sum_mkt_g').textContent = (Math.round((Math.pow(1 + p.sam_growth_m,12)-1)*1000)/10).toFixed(1) + '%/yr';
 
-      // Deterministic derived metrics
       const d = computeDeterministic(p);
 
-      // CAC
+      // ROAS module summaries (IDs kept for compatibility)
       document.getElementById('sum_cac_cac').textContent = isFinite(d.cac) ? fmt.cur0(d.cac) : '∞';
       document.getElementById('sum_cac_cpl').textContent = fmt.cur0(d.cpl);
       document.getElementById('sum_cac_conv').textContent = fmt.pct1(d.convEff);
       document.getElementById('sum_cac_visits').textContent = fmt.num(Math.round(d.visits));
       document.getElementById('sum_cac_paidcust').textContent = fmt.num(Math.round(d.paidCustomers));
       document.getElementById('sum_cac_k').textContent = (Math.round(p.k_factor*100)/100).toFixed(2);
-      document.getElementById('sum_cac_churn').textContent = fmt.pct1(d.churnRate);
+      document.getElementById('sum_cac_churn').textContent = fmt.pct1(clamp(1 / p.retention, 0.001, 0.95));
 
-      // Pricing
+      // Pricing summaries
       document.getElementById('sum_pri_unit_margin').textContent = fmt.cur0(d.unitMargin);
       document.getElementById('sum_pri_gm').textContent = fmt.pct1(d.gmPct);
       document.getElementById('sum_pri_mm').textContent = fmt.cur0(d.monthlyMargin);
       document.getElementById('sum_pri_opex').textContent = fmt.cur0(p.fixed_cost + p.ad_spend);
       document.getElementById('sum_pri_baseline').textContent = '$' + p.price_baseline + (document.getElementById('auto_baseline').checked ? ' (auto)' : '');
 
-      // Simulation
+      // Simulation summaries
       document.getElementById('sum_sim_seed').textContent = String(p.seed);
       document.getElementById('sum_sim_runs').textContent = String(p.runs);
       document.getElementById('sum_sim_season').textContent = '±' + Math.round(p.seasonality*100) + '%';
@@ -900,20 +911,21 @@
       document.getElementById('chip_mkt').innerHTML =
         chip('TAM', fmt.num(p.tam)) +
         chip('SAM', fmt.num(p.sam0)) +
+        chip('SOM', fmt.num(somNow)) +
         chip('H', p.months + 'm') +
         chip('gSAM/yr', (Math.round((Math.pow(1+p.sam_growth_m,12)-1)*1000)/10).toFixed(1)+'%');
-
-      document.getElementById('chip_cac').innerHTML =
-        chip('CPL', fmt.cur0(d.cpl)) +
-        chip('Conv', fmt.pct1(d.convEff)) +
-        chip('CAC', isFinite(d.cac)?fmt.cur0(d.cac):'∞') +
-        chip('K', p.k_factor.toFixed(2));
 
       document.getElementById('chip_pri').innerHTML =
         chip('P', '$'+p.price) +
         chip('COGS', '$'+p.unit_cost) +
         chip('GM', fmt.pct1(d.gmPct)) +
         chip('MM/active', fmt.cur0(d.monthlyMargin));
+
+      document.getElementById('chip_roas').innerHTML =
+        chip('CPL', fmt.cur0(d.cpl)) +
+        chip('Conv', fmt.pct1(d.convEff)) +
+        chip('CAC', isFinite(d.cac)?fmt.cur0(d.cac):'∞') +
+        chip('K', p.k_factor.toFixed(2));
 
       document.getElementById('chip_sim').innerHTML =
         chip('Seed', p.seed) +
@@ -949,8 +961,12 @@
 
       const d = computeDeterministic(p);
       document.getElementById('kpi_cac').textContent = (isFinite(d.cac)) ? fmt.cur0(d.cac) : '—';
-      document.getElementById('kpi_ltv_cac').textContent = (d.ltvCac && isFinite(d.ltvCac)) ? (d.ltvCac.toFixed(1) + '×') : '—';
       document.getElementById('kpi_payback').textContent = (isFinite(d.payback)) ? d.payback.toFixed(1) : '∞';
+
+      // SOM share KPI (P50 at horizon)
+      const somH = (lastResult.somCurve && lastResult.somCurve.length) ? lastResult.somCurve[lastResult.somCurve.length-1] : 0;
+      const shareP50 = somH > 0 ? (lastResult.custP50[lastResult.custP50.length-1] / somH) : 0;
+      document.getElementById('kpi_som_share').textContent = fmt.pct1(shareP50);
 
       // Charts
       drawLineChart(lineCanvas, lastResult.labels,
@@ -966,7 +982,7 @@
         {
           zeroLine:false,
           yFormatter: (v)=> (v>=1000 ? Math.round(v/1000)+'k' : Math.round(v)),
-          overlay: { data: lastResult.samCurve, label: 'SAM (ceiling)' }
+          overlay: { data: lastResult.somCurve, label: 'SOM (ceiling)' }
         }
       );
       drawHistogram2(histCanvas, lastResult.profitTotals);
@@ -980,7 +996,7 @@
         <tr><td>Profit P90</td><td>${fmt.cur0(lastResult.profitP90)}</td></tr>
       `;
 
-      // Insights (quick)
+      // Insights
       const insights = [];
       if (lastResult.beProb === 0) {
         insights.push('Break-even is <b>0%</b> under current settings. Check CPL, conversion, and gross margin vs fixed+ad spend.');
@@ -990,20 +1006,19 @@
       } else {
         insights.push(`>50% chance to break even by <b>M${Math.round(lastResult.beMed)}</b> (P90 by M${Math.round(lastResult.beP90)}).`);
       }
+      insights.push(`At horizon, P50 captures <b>${fmt.pct1(shareP50)}</b> of <b>SOM</b>. Adjust <b>SOM%</b> or acquisition levers to hit target share.`);
       if (p.elasticity < -1.2) insights.push(`High demand elasticity (${p.elasticity}). Consider smaller price moves.`);
       if (p.elasticity > -0.6) insights.push(`Low elasticity (${p.elasticity}). Potential pricing power.`);
       if (p.k_factor >= 0.05) insights.push(`Viral growth (K=${p.k_factor.toFixed(2)}) amplifies acquisition as active base grows.`);
-      if (d.ltvCac && d.ltvCac < 3) insights.push(`LTV:CAC is <b>${d.ltvCac.toFixed(1)}×</b> with payback <b>${isFinite(d.payback)?d.payback.toFixed(1):'∞'} months</b>. Target ≥ 3× or faster payback.`);
       document.getElementById('insights').innerHTML = insights.map(x => `<div>• ${x}</div>`).join('');
     }
 
     // Wiring
     [
-      'tam','sam_pct','sam_growth','months','price','unit_cost','fixed_cost','ad_spend','base_cac','conv_rate',
+      'tam','sam_pct','som_pct','sam_growth','months','price','unit_cost','fixed_cost','ad_spend','base_cac','conv_rate',
       'k_factor','retention','units_per','elasticity','price_baseline','seed','runs','seasonality','channel_eff'
     ].forEach(id => bindInput(id, id));
 
-    // Preset select
     const selPreset = document.getElementById('turbulence_preset');
     if (selPreset) {
       selPreset.value = state.turbulence_preset;
@@ -1069,14 +1084,13 @@
       drawLineChart(cashCanvas, lastResult.labels, [{data:lastResult.cumCashP10},{data:lastResult.cumCashP50},{data:lastResult.cumCashP90}], {zeroLine:true});
       drawLineChart(custCanvas, lastResult.labels, [{data:lastResult.custP10},{data:lastResult.custP50},{data:lastResult.custP90}], {
         yFormatter:(v)=> (v>=1000 ? Math.round(v/1000)+'k' : Math.round(v)),
-        overlay:{ data:lastResult.samCurve, label:'SAM (ceiling)' }
+        overlay:{ data:lastResult.somCurve, label:'SOM (ceiling)' }
       });
       drawHistogram2(histCanvas, lastResult.profitTotals);
     });
 
     // Init
     resetDefaults();
-    // enforce default preset on first load
     applyPreset(state.turbulence_preset);
   </script>
 </body>
