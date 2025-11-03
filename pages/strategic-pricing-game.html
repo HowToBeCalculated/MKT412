@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Strategic Pricing Game — Price It Right!</title>
+<style>
+  :root{
+    --bg:#1a1a1a;      /* Bryant black */
+    --accent:#e6a700;  /* Bryant gold */
+    --panel:#e0e0e0;   /* Bryant light gray */
+    --ink:#111;
+    --ink-soft:#333;
+    --ink-on-dark:#f2f2f2;
+    --ok:#2d8a34;
+    --warn:#b85c00;
+    --bad:#b81f24;
+    --muted:#777;
+    --card-radius:14px;
+    --shadow: 0 6px 24px rgba(0,0,0,0.25);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--ink-on-dark);
+    font:16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  }
+
+  header{
+    padding:20px clamp(16px,4vw,48px);
+    border-bottom:1px solid rgba(255,255,255,0.1);
+    position:sticky; top:0; backdrop-filter: blur(6px);
+    background:linear-gradient(to bottom, rgba(26,26,26,0.95), rgba(26,26,26,0.75));
+    z-index:9;
+  }
+  header h1{ margin:0 0 4px; font-size:clamp(22px,3vw,30px); letter-spacing:0.2px}
+  header p{ margin:0; color:#d6d6d6 }
+
+  .wrap{
+    display:grid; gap:18px;
+    grid-template-columns: 360px 1fr;
+    padding:18px clamp(16px,4vw,48px) 36px;
+  }
+  @media (max-width: 1100px){
+    .wrap{ grid-template-columns: 1fr; }
+  }
+
+  .card{
+    background:var(--panel);
+    color:var(--ink);
+    border-radius:var(--card-radius);
+    box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+  .card header{
+    position:relative;
+    padding:12px 16px; background:var(--accent);
+    color:#111; border-bottom:none;
+  }
+  .card header h2{
+    margin:0; font-size:18px; letter-spacing:0.2px;
+  }
+  .card .body{ padding:16px; }
+
+  .controls .row{
+    display:grid; gap:8px;
+    grid-template-columns: 1fr 110px;
+    align-items:center;
+    margin-bottom:14px;
+  }
+  .controls label{ font-weight:600; color:var(--ink-soft) }
+  .controls output{
+    display:inline-block; min-width:96px; text-align:right;
+    font-variant-numeric: tabular-nums; font-weight:700;
+  }
+  input[type="range"]{
+    width:100%;
+    appearance:none; height:8px; border-radius:6px; background:#cfcfcf; outline:none;
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:20px; height:20px; border-radius:50%;
+    background:var(--accent); border:2px solid #111; box-shadow:0 1px 3px rgba(0,0,0,0.3);
+    cursor:pointer;
+  }
+  .btnbar{ display:flex; gap:12px; flex-wrap:wrap; margin-top:10px }
+  button{
+    appearance:none; border:none; cursor:pointer;
+    background:var(--accent); color:#111; font-weight:700;
+    padding:10px 14px; border-radius:10px; box-shadow:var(--shadow);
+  }
+  button.secondary{ background:#fff; color:#111; border:2px solid var(--accent); }
+  button.ghost{ background:transparent; color:#111; border:2px solid #111; }
+  button:disabled{ opacity:0.5; cursor:not-allowed; }
+
+  .grid-2{
+    display:grid; gap:18px; grid-template-columns: 1fr 1fr;
+  }
+  @media (max-width: 1200px){
+    .grid-2{ grid-template-columns:1fr; }
+  }
+
+  .kpi{
+    display:grid; grid-template-columns: repeat(3,minmax(0,1fr));
+    gap:10px; margin-top:2px;
+  }
+  .kpi .pill{
+    background:#fff; border:1px solid #ddd; border-radius:12px; padding:10px;
+    display:flex; flex-direction:column; gap:4px; min-height:68px;
+  }
+  .kpi .pill b{ font-size:18px; font-variant-numeric:tabular-nums }
+  .kpi .pill small{ color:#666; text-transform:uppercase; letter-spacing:0.6px }
+
+  .mini{
+    display:grid; grid-template-columns: repeat(3, 1fr); gap:10px;
+    margin: 8px 0 2px;
+  }
+  .mini .chip{
+    background:#f8f8f8; border:1px solid #ddd; border-radius:10px; padding:10px;
+    font-variant-numeric: tabular-nums;
+  }
+  .mini .chip b{ color:#111 }
+
+  /* Higher-res canvases (intrinsic height bumped; Hi-DPI scaling handled in JS) */
+  canvas{ width:100%; height:380px; background:#fff; border-radius:12px; border:1px solid #ddd }
+  #explorerChart{ height:340px }
+
+  .table{
+    overflow:auto; border:1px solid #ddd; border-radius:12px; background:#fff;
+  }
+  table{ width:100%; border-collapse:collapse; font-size:14px }
+  th, td{ padding:10px 12px; border-bottom:1px solid #eee; text-align:right; font-variant-numeric:tabular-nums }
+  th{ background:#fafafa; position:sticky; top:0; text-align:right }
+  td:first-child, th:first-child{ text-align:left }
+  tfoot td{ font-weight:700; background:#fafafa }
+
+  details{
+    margin-top:8px;
+    background:#fff; border:1px solid #ddd; border-radius:10px; padding:10px 14px;
+  }
+  details summary{ cursor:pointer; font-weight:700 }
+  .note{ color:#d4d4d4; font-size:13px; margin-top:10px }
+  .insights{
+    background:#fff; border:1px solid #ddd; border-radius:12px; padding:14px;
+  }
+  .insights h3{ margin:0 0 8px 0 }
+  .insights ul{ margin:0; padding-left:20px }
+  .insights li{ margin:6px 0 }
+  footer{ color:#bfbfbf; font-size:13px; padding:18px clamp(16px,4vw,48px) 40px }
+  .tag{
+    display:inline-block; background:#111; color:#fff; padding:2px 8px; border-radius:10px;
+    font-size:12px; margin-left:6px;
+  }
+
+  /* Info hovers / tooltips */
+  .info{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:18px; height:18px; border-radius:50%;
+    background:#111; color:#fff; font-weight:800; font-size:12px;
+    margin-left:6px; cursor:help; position:relative; outline:none;
+  }
+  .info:focus{ box-shadow:0 0 0 2px #111, 0 0 0 4px var(--accent); }
+  .info::before{ content:'i'; line-height:18px }
+  .info::after{
+    content:attr(data-tip);
+    display:none; position:absolute; left:0; top:120%;
+    min-width:240px; max-width:320px;
+    background:#111; color:#fff; padding:10px 12px; border-radius:10px;
+    box-shadow:var(--shadow); z-index:10; white-space:normal;
+  }
+  .info:hover::after, .info:focus::after{ display:block; }
+  .info::after b{ color:var(--accent); }
+
+  /* Explorer segmented control */
+  .seg{
+    display:inline-flex; border:1.5px solid #bbb; border-radius:10px; overflow:hidden;
+    background:#fff;
+  }
+  .seg button{
+    background:transparent; border:none; padding:8px 10px; font-weight:700; color:#111; box-shadow:none;
+  }
+  .seg button.active{ background:var(--accent); }
+
+  /* Legend for segment drilldown */
+  .legend{ display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin:6px 0 0; color:#333; font-size:13px }
+  .legend .item{ display:inline-flex; align-items:center; gap:6px }
+  .legend .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; border:1px solid #555 }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Price It Right! <span class="tag">Strategic Pricing Game</span></h1>
+    <p>Set price and promotion each round. Compete against two AI rivals across three market segments. Maximize profit in five rounds.</p>
+  </header>
+
+  <div class="wrap">
+    <!-- LEFT COLUMN: Controls + Explorer -->
+    <div style="display:flex; flex-direction:column; gap:18px">
+
+      <!-- Controls -->
+      <section class="card controls">
+        <header><h2>Your Decisions (per round)</h2></header>
+        <div class="body">
+          <div class="row">
+            <label for="price">Unit Price
+              <span class="info" tabindex="0" role="button"
+                data-tip="Set the per‑unit selling price. Higher prices increase margin but reduce demand via price elasticity and a <b>no‑purchase</b> option that grows when market prices are high."></span>
+            </label>
+            <output id="priceOut">$55</output>
+            <input id="price" type="range" min="35" max="90" step="1" value="55" />
+          </div>
+          <div class="row">
+            <label for="promo">Promotion Spend
+              <span class="info" tabindex="0" role="button"
+                data-tip="<b>Promotion</b> raises awareness/consideration with diminishing returns via ln(1 + promo/scale), and also builds <b>Brand Equity</b> that carries over."></span>
+            </label>
+            <output id="promoOut">$40,000</output>
+            <input id="promo" type="range" min="0" max="120000" step="5000" value="40000" />
+          </div>
+
+          <div class="mini" aria-label="Reference metrics">
+            <div class="chip"><b>Cost / unit:</b> <span id="costUnit">$32</span></div>
+            <div class="chip"><b>Rounds:</b> <span id="roundLabel">0 / 5</span></div>
+            <div class="chip"><b>Seed:</b> <span id="seedLabel">auto</span></div>
+          </div>
+
+          <div class="btnbar">
+            <button id="simulateBtn">Simulate Round</button>
+            <button id="resetBtn" class="secondary">Reset Game</button>
+            <button id="exportBtn" class="ghost" disabled>Export CSV</button>
+          </div>
+
+          <details>
+            <summary>What’s going on under the hood?</summary>
+            <p style="margin:8px 0">
+              Demand is segment-based (Value Seekers, Pragmatists, Brand-Focused). A firm’s attractiveness in a segment multiplies:
+              <b>baseline preference</b> × <b>price term</b> (elasticity vs. segment reference price) ×
+              <b>promotion lift</b> (log diminishing returns) × <b>brand equity</b> carryover.
+            </p>
+            <p style="margin:8px 0">
+              We also include a <b>no‑purchase</b> option that captures a larger share when the segment’s
+              <i>average market price</i> rises above its reference price. This shrinks category demand at high prices and creates a realistic interior profit optimum.
+            </p>
+          </details>
+
+          <p class="note">Tip: Premium pricing needs brand support; low prices trade margin for volume. Try skimming vs. penetration across rounds.</p>
+        </div>
+      </section>
+
+      <!-- Demand Curve Explorer -->
+      <section class="card">
+        <header><h2>Demand Curve Explorer</h2></header>
+        <div class="body">
+          <div class="mini" style="grid-template-columns: 1.25fr 1fr 1fr">
+            <div class="chip">
+              <b>Mode:</b>
+              <span class="seg" aria-label="Explorer mode">
+                <button id="modeUnits"  class="active" type="button">Units</button>
+                <button id="modeProfit" type="button">Profit</button>
+                <button id="modeSegments" type="button">Segments</button>
+              </span>
+            </div>
+            <div class="chip"><b>At current price:</b> <span id="explNow"></span></div>
+            <div class="chip">
+              <b>Elasticity</b>
+              <span class="info" tabindex="0" role="button"
+                data-tip="<b>Price Elasticity of Demand</b> ≈ (%ΔQ / %ΔP) at the current price, with a local ΔP. Values &lt; -1 are elastic; between 0 and -1 are inelastic."></span>
+              : <span id="explElasticity">–</span>
+            </div>
+          </div>
+
+          <canvas id="explorerChart" aria-label="Demand curve"></canvas>
+
+          <!-- Legend for Segments -->
+          <div id="segLegend" class="legend" aria-hidden="true"></div>
+
+          <!-- Current price breakdown by segment -->
+          <div id="segNow" class="mini" style="margin-top:8px; display:none">
+            <div class="chip"><b>Value Seekers:</b> <span id="segNow_value">–</span></div>
+            <div class="chip"><b>Pragmatists:</b> <span id="segNow_prag">–</span></div>
+            <div class="chip"><b>Brand‑Focused:</b> <span id="segNow_brand">–</span></div>
+          </div>
+
+          <p class="note">
+            Predictions assume your current <b>Promotion</b> and <b>Brand Equity</b>, rival price reactions to each hypothetical price, and include the <b>no‑purchase</b> option (no randomness).
+          </p>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- RIGHT COLUMN: Dashboard & Charts -->
+    <section class="card">
+      <header><h2>Round Results & Dashboard</h2></header>
+      <div class="body">
+        <div class="kpi">
+          <div class="pill">
+            <small>Profit (this round)</small>
+            <b id="kpiProfit">$0</b>
+            <span id="kpiProfitDelta" class="muted"></span>
+          </div>
+          <div class="pill">
+            <small>Market Share
+              <span class="info" tabindex="0" role="button"
+                data-tip="<b>Market Share</b> = your units ÷ total <i>purchased</i> units this round (excludes the no‑purchase option)."></span>
+            </small>
+            <b id="kpiShare">0%</b>
+          </div>
+          <div class="pill">
+            <small>Units Sold</small>
+            <b id="kpiUnits">0</b>
+          </div>
+        </div>
+
+        <div class="mini">
+          <div class="chip"><b>Avg. Market Price</b>
+            <span class="info" tabindex="0" role="button"
+              data-tip="<b>Unit‑weighted mean price</b> across firms: Σ(priceᵢ×unitsᵢ) ÷ Σ(unitsᵢ). Excludes no‑purchase."></span>:
+            <span id="avgPrice">$0</span>
+          </div>
+          <div class="chip"><b>Revenue (you):</b> <span id="kpiRevenue">$0</span></div>
+          <div class="chip"><b>Brand Equity (you)</b>
+            <span class="info" tabindex="0" role="button"
+              data-tip="<b>Brand Equity</b> is a stock of preference built by promotion with carryover:<br>brandₜ = 0.75 × brandₜ₋₁ + 0.25 × ln(1 + promo/50,000), capped at 2.0. Higher brand boosts demand and supports higher prices."></span>:
+            <span id="kpiBrand">0.00</span>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:10px">
+          <div>
+            <h3 style="margin:4px 0 8px">Profit over Time</h3>
+            <canvas id="profitChart" aria-label="Profit chart"></canvas>
+          </div>
+          <div>
+            <h3 style="margin:4px 0 8px">Market Share over Time</h3>
+            <canvas id="shareChart" aria-label="Share chart"></canvas>
+          </div>
+        </div>
+
+        <div class="insights" style="margin-top:12px">
+          <h3>Instructor Notes & Feedback</h3>
+          <ul id="insightsList">
+            <li>Adjust your price and promotion, then click <b>Simulate Round</b>.</li>
+          </ul>
+        </div>
+
+        <div class="table" style="margin-top:14px">
+          <table id="resultsTable" aria-label="Round-by-round results">
+            <thead>
+              <tr>
+                <th>Round</th>
+                <th>Your Price</th>
+                <th>Your Promo</th>
+                <th>Your Units</th>
+                <th>Your Revenue</th>
+                <th>Your Profit</th>
+                <th>Your Share</th>
+                <th>AggressiveCo Price</th>
+                <th>PremiumCo Price</th>
+                <th>Avg Market Price</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+            <tfoot>
+              <tr>
+                <td colspan="10" style="text-align:left">Goal: highest cumulative profit after 5 rounds.</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    © Strategic Pricing Game for classroom use. Modify constants in the script for different markets (segment sizes, costs, elasticities).
+  </footer>
+
+<script>
+/* =========================
+   Utility & Formatting
+========================= */
+const fmtCur = n => n.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0});
+const fmtCur0 = fmtCur;
+const fmtInt = n => Math.round(n).toLocaleString('en-US');
+const fmtPct1 = n => (n*100).toFixed(1) + '%';
+const clamp = (x,min,max)=> Math.max(min, Math.min(max,x));
+function randomNormal(mu=0, sigma=1){
+  let u=0, v=0; while(u===0) u=Math.random(); while(v===0) v=Math.random();
+  return mu + sigma * Math.sqrt(-2.0*Math.log(u)) * Math.cos(2*Math.PI*v);
+}
+
+/* Hi‑DPI canvas prepare: sets pixel size to devicePixelRatio and returns {ctx,W,H} in CSS pixels */
+function prepareCanvas(canvas){
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  const W = Math.max(300, Math.floor(rect.width));
+  const H = Math.max(180, Math.floor(rect.height));
+  canvas.width = Math.floor(W * dpr);
+  canvas.height = Math.floor(H * dpr);
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0); // draw in CSS px coordinates
+  return {ctx,W,H};
+}
+
+/* =========================
+   Model Parameters
+========================= */
+const MAX_ROUNDS = 5;
+
+// Segments
+const SEGMENTS = [
+  { id:'value',  name:'Value Seekers',  baseSize:4000, elasticity:2.0, refPrice:50, brandWeight:0.8, promoWeight:0.7 },
+  { id:'prag',   name:'Pragmatists',    baseSize:3000, elasticity:1.2, refPrice:55, brandWeight:1.0, promoWeight:0.8 },
+  { id:'brand',  name:'Brand-Focused',  baseSize:3000, elasticity:0.7, refPrice:65, brandWeight:1.2, promoWeight:1.0 }
+];
+
+// Weighted reference price across segments (used to anchor competitor behavior)
+const REF_AVG = SEGMENTS.reduce((s,seg)=>s+seg.baseSize*seg.refPrice,0) / SEGMENTS.reduce((s,seg)=>s+seg.baseSize,0);
+
+// Segment colors (Bryant palette + neutrals)
+const SEG_COLORS = { value:'#e6a700', prag:'#333333', brand:'#7a7a7a' };
+
+// Firms
+function makeFirm(key, name, price, cost, promo, basePrefs){
+  return { key, name, price, cost, promo, brandEq:0.0, basePrefs: {...basePrefs}, lastShare:null, lastProfit:null };
+}
+const player0   = makeFirm('you','You',55,32,40000,{value:1.00, prag:1.00, brand:1.00});
+const aggress0  = makeFirm('agg','AggressiveCo',47,30,40000,{value:1.05, prag:0.98, brand:0.92});
+const premium0  = makeFirm('pre','PremiumCo',70,38,80000,{value:0.95, prag:1.00, brand:1.10});
+
+// Brand equity dynamics
+const BRAND_DECAY = 0.75;
+const BRAND_FROM_PROMO = 0.25;
+const BRAND_PROMO_SCALE = 50000;
+const BRAND_CAP = 2.0;
+
+// Utility multipliers
+const K_PROMO = 0.12;
+const PROMO_SCALE = 10000;
+const K_BRAND = 0.25;
+
+// Randomness
+const SIZE_NOISE_SIGMA = 0.05;
+
+/* --- NEW: Outside (no‑purchase) option controls category shrink/expand --- */
+const OUTSIDE = {
+  base: 1.15,           // baseline "no‑purchase" attractiveness when avg price = ref price
+  sens: 8.0,            // responsiveness to avgPrice/refPrice (higher => stronger shrink at high prices)
+  segWeight: {          // segment-specific sensitivity multipliers
+    value: 1.3,
+    prag: 1.0,
+    brand: 0.7
+  }
+};
+
+// State
+let state = null;
+let lastProfitSeries = [], lastShareSeries = [];
+
+function initState(){
+  state = {
+    round:0,
+    firms: {
+      you: JSON.parse(JSON.stringify(player0)),
+      agg: JSON.parse(JSON.stringify(aggress0)),
+      pre: JSON.parse(JSON.stringify(premium0)),
+    },
+    history: [],
+    seed: Math.floor(Math.random()*1e6)
+  };
+
+  // UI init
+  setPrice(player0.price);
+  setPromo(player0.promo);
+  updateMini();
+  updateKPI(0,0,0,0,0);
+  updateInsights([
+    "Demand is split across three segments with different elasticities.",
+    "AggressiveCo tends to undercut your price; PremiumCo blends market anchoring with a premium.",
+    "A no‑purchase option makes total demand shrink when average prices get high. Aim for an interior optimum."
+  ]);
+  lastProfitSeries = []; lastShareSeries = [];
+  drawCharts(lastProfitSeries, lastShareSeries);
+  refreshTable();
+  document.getElementById('exportBtn').disabled = true;
+  document.getElementById('simulateBtn').disabled = false;
+
+  explorer.mode = 'units';
+  setExplorerModeButtons();
+  renderSegmentLegend();
+  updateExplorer();
+}
+
+/* =========================
+   Competitor strategies (anchored)
+========================= */
+function chooseAggressivePrice(playerPrice, firm){
+  // Undercuts you but is anchored to market reference; won’t float endlessly upward with you.
+  const anchor = Math.max(REF_AVG * 0.95, firm.cost + 5); // ~53 given defaults
+  const target = Math.min(playerPrice * 0.95, anchor);
+  return Math.round(Math.max(firm.cost + 5, target));
+}
+function choosePremiumPrice(playerPrice, firm){
+  // Blends your price with a market anchor, with a cap. Keeps a premium but won’t chase you to extremes.
+  const anchor = Math.max(REF_AVG * 1.15, 70);            // ~64.4 baseline, floor 70
+  const blended = 0.6 * playerPrice + 0.4 * anchor;       // partial follow
+  const capped   = Math.min(blended, 85);                  // cap prevents runaway
+  return Math.round(Math.max(firm.cost + 10, capped));
+}
+function adjustCompetitorPromo(firm){
+  if (firm.lastShare === null){ return firm.promo; }
+  let p = firm.promo;
+  if (firm.key==='agg'){
+    if (firm.lastShare < 0.25) p *= 1.25;
+    else if (firm.lastShare > 0.38) p *= 0.90;
+    p = clamp(p, 20000, 100000);
+  } else if (firm.key==='pre'){
+    if (firm.lastShare < 0.30) p *= 1.15;
+    else p *= 0.98;
+    p = clamp(p, 40000, 120000);
+  }
+  return Math.round(p/1000)*1000;
+}
+
+/* =========================
+   Demand model
+========================= */
+function firmScoreInSegment(firm, seg){
+  const base = firm.basePrefs[seg.id] ?? 1.0;
+  const priceTerm = Math.exp( - seg.elasticity * (firm.price/seg.refPrice - 1) );
+  const promoTerm = 1 + (K_PROMO * seg.promoWeight * Math.log(1 + firm.promo / PROMO_SCALE));
+  const brandTerm = 1 + (K_BRAND * seg.brandWeight * firm.brandEq);
+  return base * priceTerm * promoTerm * brandTerm;
+}
+function outsideScore(avgPriceSeg, seg){
+  const rel = (avgPriceSeg / seg.refPrice) - 1; // >0 when avg price above reference
+  const w = OUTSIDE.segWeight[seg.id] || 1.0;
+  return OUTSIDE.base * Math.exp(OUTSIDE.sens * w * rel);
+}
+
+/* =========================
+   Round Simulation  (now includes no‑purchase option)
+========================= */
+function simulateRound(decision){
+  state.firms.you.price = decision.price;
+  state.firms.you.promo = decision.promo;
+
+  state.firms.agg.price = chooseAggressivePrice(state.firms.you.price, state.firms.agg);
+  state.firms.pre.price = choosePremiumPrice(state.firms.you.price, state.firms.pre);
+  state.firms.agg.promo = adjustCompetitorPromo(state.firms.agg);
+  state.firms.pre.promo = adjustCompetitorPromo(state.firms.pre);
+
+  const firmsArr = [state.firms.you, state.firms.agg, state.firms.pre];
+  let totals = { units:{}, revenue:{}, profit:{}, share:{} };
+  let totalUnitsMarket = 0;
+  let priceWeightedUnits = 0;
+
+  for (const f of firmsArr){
+    totals.units[f.key] = 0; totals.revenue[f.key] = 0; totals.profit[f.key] = 0; totals.share[f.key] = 0;
+  }
+
+  for (const seg of SEGMENTS){
+    const size = Math.max(0, seg.baseSize * (1 + randomNormal(0, SIZE_NOISE_SIGMA)));
+
+    // Firm scores for this segment
+    const scores = firmsArr.map(f => firmScoreInSegment(f, seg));
+    const sumScores = scores.reduce((a,b)=>a+b,0) || 1e-9;
+
+    // Approximate segment average price by score-weighting firm prices
+    const avgPriceSeg = (state.firms.you.price * scores[0] + state.firms.agg.price * scores[1] + state.firms.pre.price * scores[2]) / sumScores;
+
+    // No‑purchase score grows with avg price vs ref
+    const sOutside = outsideScore(avgPriceSeg, seg);
+    const denom = sumScores + sOutside;
+
+    // Allocation (firms + outside)
+    for (let i=0;i<firmsArr.length;i++){
+      const f = firmsArr[i];
+      const units = (scores[i] / denom) * size;
+      totals.units[f.key] += units;
+      totalUnitsMarket += units;               // excludes no‑purchase
+      totals.revenue[f.key] += units * f.price;
+      totals.profit[f.key]  += (f.price - f.cost) * units;
+      priceWeightedUnits += f.price * units;
+    }
+    // (We could track outside units if you want to show Category Purchase Rate later.)
+  }
+
+  for (const f of firmsArr){
+    totals.profit[f.key] -= f.promo;
+    totals.share[f.key] = totalUnitsMarket>0 ? (totals.units[f.key] / totalUnitsMarket) : 0;
+  }
+  const avgMarketPrice = totalUnitsMarket>0 ? priceWeightedUnits / totalUnitsMarket : 0;
+
+  for (const f of firmsArr){
+    const add = BRAND_FROM_PROMO * Math.log(1 + f.promo / BRAND_PROMO_SCALE);
+    f.brandEq = clamp(BRAND_DECAY * f.brandEq + add, 0, BRAND_CAP);
+  }
+
+  state.round += 1;
+  const summary = {
+    round: state.round,
+    price_you: state.firms.you.price,
+    promo_you: state.firms.you.promo,
+    units_you: totals.units.you,
+    revenue_you: totals.revenue.you,
+    profit_you: totals.profit.you,
+    share_you: totals.share.you,
+    price_agg: state.firms.agg.price,
+    price_pre: state.firms.pre.price,
+    units_agg: totals.units.agg,
+    units_pre: totals.units.pre,
+    share_agg: totals.share.agg,
+    share_pre: totals.share.pre,
+    avg_price: avgMarketPrice,
+    brand_you: state.firms.you.brandEq,
+    brand_agg: state.firms.agg.brandEq,
+    brand_pre: state.firms.pre.brandEq,
+  };
+  state.history.push(summary);
+
+  state.firms.agg.lastShare = totals.share.agg; state.firms.pre.lastShare = totals.share.pre;
+  state.firms.agg.lastProfit = totals.profit.agg; state.firms.pre.lastProfit = totals.profit.pre;
+
+  return summary;
+}
+
+/* =========================
+   Explorer (deterministic predictions, includes no‑purchase)
+========================= */
+function predictAtPrice(price){
+  const you = {...state.firms.you};
+  const agg = {...state.firms.agg};
+  const pre = {...state.firms.pre};
+
+  you.price = price;
+  you.promo = Number(document.getElementById('promo').value);
+  agg.price = chooseAggressivePrice(you.price, agg);
+  pre.price = choosePremiumPrice(you.price, pre);
+
+  const firmsArr = [you, agg, pre];
+  let totals = {units:{you:0,agg:0,pre:0}};
+  let totalUnitsMarket = 0;
+  let priceWeightedUnits = 0;
+
+  for (const seg of SEGMENTS){
+    const size = seg.baseSize; // deterministic
+    const scores = firmsArr.map(f => firmScoreInSegment(f, seg));
+    const sumScores = scores.reduce((a,b)=>a+b,0) || 1e-9;
+    const avgPriceSeg = (you.price*scores[0] + agg.price*scores[1] + pre.price*scores[2]) / sumScores;
+    const sOutside = outsideScore(avgPriceSeg, seg);
+    const denom = sumScores + sOutside;
+
+    for (let i=0;i<firmsArr.length;i++){
+      const f = firmsArr[i];
+      const units = (scores[i] / denom) * size;
+      totals.units[f.key] += units;
+      totalUnitsMarket += units;
+      priceWeightedUnits += f.price * units;
+    }
+  }
+
+  const yourUnits = totals.units.you;
+  const yourProfit = (you.price - you.cost) * yourUnits - you.promo;
+  const share = totalUnitsMarket>0 ? yourUnits/totalUnitsMarket : 0;
+  const avgPrice = totalUnitsMarket>0 ? priceWeightedUnits / totalUnitsMarket : 0;
+  return { units: yourUnits, profit: yourProfit, share, avgPrice };
+}
+
+/* Per‑segment contribution at a hypothetical price (includes no‑purchase) */
+function predictUnitsBySegmentAtPrice(price){
+  const you = {...state.firms.you};
+  const agg = {...state.firms.agg};
+  const pre = {...state.firms.pre};
+  you.price = price;
+  you.promo = Number(document.getElementById('promo').value);
+  agg.price = chooseAggressivePrice(you.price, agg);
+  pre.price = choosePremiumPrice(you.price, pre);
+
+  const result = { value:0, prag:0, brand:0, total:0 };
+  for (const seg of SEGMENTS){
+    const size = seg.baseSize;
+    const sYou = firmScoreInSegment(you, seg);
+    const sAgg = firmScoreInSegment(agg, seg);
+    const sPre = firmScoreInSegment(pre, seg);
+    const sumScores = sYou + sAgg + sPre || 1e-9;
+    const avgPriceSeg = (you.price*sYou + agg.price*sAgg + pre.price*sPre) / sumScores;
+    const sOutside = outsideScore(avgPriceSeg, seg);
+    const denom = sumScores + sOutside;
+
+    const unitsYouSeg = (sYou / denom) * size;
+    result[seg.id] += unitsYouSeg;
+    result.total += unitsYouSeg;
+  }
+  return result;
+}
+
+const explorer = { mode:'units' };
+
+/* =========================
+   UI Wiring & Elements
+========================= */
+const els = {
+  price: document.getElementById('price'),
+  priceOut: document.getElementById('priceOut'),
+  promo: document.getElementById('promo'),
+  promoOut: document.getElementById('promoOut'),
+  roundLabel: document.getElementById('roundLabel'),
+  seedLabel: document.getElementById('seedLabel'),
+  costUnit: document.getElementById('costUnit'),
+  simulateBtn: document.getElementById('simulateBtn'),
+  resetBtn: document.getElementById('resetBtn'),
+  exportBtn: document.getElementById('exportBtn'),
+
+  kpiProfit: document.getElementById('kpiProfit'),
+  kpiProfitDelta: document.getElementById('kpiProfitDelta'),
+  kpiShare: document.getElementById('kpiShare'),
+  kpiUnits: document.getElementById('kpiUnits'),
+  kpiRevenue: document.getElementById('kpiRevenue'),
+  kpiBrand: document.getElementById('kpiBrand'),
+  avgPrice: document.getElementById('avgPrice'),
+
+  insightsList: document.getElementById('insightsList'),
+
+  profitChart: document.getElementById('profitChart'),
+  shareChart: document.getElementById('shareChart'),
+  resultsTable: document.getElementById('resultsTable').querySelector('tbody'),
+
+  explorerChart: document.getElementById('explorerChart'),
+  modeUnits: document.getElementById('modeUnits'),
+  modeProfit: document.getElementById('modeProfit'),
+  modeSegments: document.getElementById('modeSegments'),
+  explNow: document.getElementById('explNow'),
+  explElasticity: document.getElementById('explElasticity'),
+  segLegend: document.getElementById('segLegend'),
+  segNowBox: document.getElementById('segNow'),
+  segNow_value: document.getElementById('segNow_value'),
+  segNow_prag: document.getElementById('segNow_prag'),
+  segNow_brand: document.getElementById('segNow_brand')
+};
+
+function setPrice(v){ els.price.value = v; els.priceOut.textContent = fmtCur0(Number(v)); }
+function setPromo(v){ els.promo.value = v; els.promoOut.textContent = fmtCur0(Number(v)); }
+function updateMini(){
+  els.roundLabel.textContent = `${state.round} / ${MAX_ROUNDS}`;
+  els.seedLabel.textContent = state.seed;
+  els.costUnit.textContent = fmtCur0(state.firms.you.cost);
+}
+function updateKPI(profit, share, units, revenue, brand, avgPrice=0){
+  els.kpiProfit.textContent = fmtCur0(profit);
+  const prev = state.history.length>1 ? state.history[state.history.length-2].profit_you : null;
+  if (prev!==null){
+    const diff = profit - prev;
+    els.kpiProfitDelta.textContent = (diff>=0? '▲ +' : '▼ ') + fmtCur0(Math.abs(diff)) + ' vs prior';
+    els.kpiProfitDelta.style.color = diff>=0 ? 'var(--ok)' : 'var(--bad)';
+  } else { els.kpiProfitDelta.textContent = ''; }
+  els.kpiShare.textContent = fmtPct1(share);
+  els.kpiUnits.textContent = fmtInt(units);
+  els.kpiRevenue.textContent = fmtCur0(revenue);
+  els.kpiBrand.textContent = brand.toFixed(2);
+  els.avgPrice.textContent = avgPrice ? fmtCur0(avgPrice) : '$0';
+}
+function updateInsights(lines){ els.insightsList.innerHTML = lines.map(l=>`<li>${l}</li>`).join(''); }
+
+function addInsightFromRound(s){
+  const insights = [];
+  const price = s.price_you;
+  const avg = s.avg_price;
+  const brand = s.brand_you;
+  const promo = s.promo_you;
+  const marginPerUnit = price - state.firms.you.cost;
+
+  if (avg>0){
+    const deltaPct = (price-avg)/avg;
+    if      (deltaPct > 0.08) insights.push(`Your price was <b>${(deltaPct*100).toFixed(0)}%</b> above market average — the no‑purchase share likely grew and Value Seekers shifted away.`);
+    else if (deltaPct < -0.08) insights.push(`Your price was <b>${Math.abs(deltaPct*100).toFixed(0)}%</b> below market average — good for volume, but watch margin per unit (${fmtCur0(marginPerUnit)}).`);
+    else insights.push(`Your price was close to market average — execution (promotion & brand) drove outcomes this round.`);
+  }
+  if (brand < 0.25 && price > avg){ insights.push(`Premium pricing without brand support: brand equity is <b>${brand.toFixed(2)}</b>. Consider sustained promotion to support higher WTP.`); }
+  if (promo === 0 && price >= avg){ insights.push(`No promotion with at/above‑average price can depress demand in Brand‑Focused segments.`); }
+  const prev = state.history.length>1 ? state.history[state.history.length-2] : null;
+  if (prev && s.profit_you < prev.profit_you){ insights.push(`Profit fell vs. last round by ${fmtCur0(prev.profit_you - s.profit_you)}. Diagnose: price change, rival anchoring, or growing no‑purchase share.`); }
+  if (marginPerUnit < 8){ insights.push(`Thin margins: margin per unit is ${fmtCur0(marginPerUnit)} — consider nudging price up or trimming promo.`); }
+  if (!insights.length) insights.push('Solid execution — iterate and test a different price/promo pair to probe elasticity.');
+  updateInsights(insights);
+}
+
+/* =========================
+   Drawing (Hi‑DPI aware)
+========================= */
+function drawLineChart(canvas, series, labels, opts={}){
+  const {ctx,W,H} = prepareCanvas(canvas);
+  const pad = {l:56, r:16, t:28, b:44};
+  const plotW = W - pad.l - pad.r;
+  const plotH = H - pad.t - pad.b;
+
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle = '#ddd'; ctx.strokeRect(0,0,W,H);
+
+  if (!series.length){
+    ctx.fillStyle = '#888'; ctx.font = '14px system-ui';
+    ctx.fillText('No data yet — run a round to see results.', pad.l, pad.t + 20);
+    return;
+  }
+
+  const minY = Math.min(...series), maxY = Math.max(...series);
+  const ySpan = (maxY - minY) || 1, yPad = ySpan * 0.1;
+  const y0 = minY - yPad, y1 = maxY + yPad;
+
+  // grid + axes
+  ctx.strokeStyle = '#eee'; ctx.lineWidth = 1;
+  const ticks = 5; ctx.font = '12px system-ui'; ctx.fillStyle = '#444';
+  for (let i=0;i<=ticks;i++){
+    const t = i/ticks, y = pad.t + plotH - t*plotH;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W - pad.r, y); ctx.stroke();
+    const val = y0 + t*(y1-y0);
+    ctx.fillText((opts.yFmt ? opts.yFmt(val) : val.toFixed(0)), 8, y+4);
+  }
+  for (let i=0;i<labels.length;i++){
+    const x = pad.l + (i/(Math.max(1,labels.length-1))) * plotW;
+    ctx.fillText(labels[i], x-6, H - 12);
+  }
+
+  // data line
+  ctx.strokeStyle = '#e6a700'; ctx.lineWidth = 2.5; ctx.beginPath();
+  for (let i=0;i<series.length;i++){
+    const x = pad.l + (i/(Math.max(1,series.length-1))) * plotW;
+    const y = pad.t + (1 - (series[i]-y0)/(y1-y0)) * plotH;
+    if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+
+  // points
+  ctx.fillStyle = '#111';
+  for (let i=0;i<series.length;i++){
+    const x = pad.l + (i/(Math.max(1,series.length-1))) * plotW;
+    const y = pad.t + (1 - (series[i]-y0)/(y1-y0)) * plotH;
+    ctx.beginPath(); ctx.arc(x,y,3.5,0,Math.PI*2); ctx.fill();
+  }
+
+  if (opts.title){ ctx.fillStyle = '#111'; ctx.font = 'bold 14px system-ui'; ctx.fillText(opts.title, pad.l, pad.t - 8); }
+}
+
+/* Multi-line XY for segment drilldown */
+function drawMultiLineXY(canvas, xs, seriesByKey, opts={}){
+  const {ctx,W,H} = prepareCanvas(canvas);
+  const pad = {l:56, r:16, t:28, b:44};
+  const plotW = W - pad.l - pad.r;
+  const plotH = H - pad.t - pad.b;
+
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle = '#ddd'; ctx.strokeRect(0,0,W,H);
+
+  const keys = Object.keys(seriesByKey);
+  if (!keys.length || !xs.length) return;
+
+  // min/max across all series
+  let minY = Infinity, maxY = -Infinity;
+  keys.forEach(k => {
+    const ys = seriesByKey[k]; if (!ys || !ys.length) return;
+    const mn = Math.min(...ys), mx = Math.max(...ys);
+    if (mn < minY) minY = mn; if (mx > maxY) maxY = mx;
+  });
+  if (!isFinite(minY) || !isFinite(maxY)) {minY=0; maxY=1;}
+  const ySpan = (maxY - minY) || 1, yPad = ySpan * 0.1;
+  const y0 = minY - yPad, y1 = maxY + yPad;
+
+  // grid + axes
+  ctx.strokeStyle = '#eee'; ctx.lineWidth = 1;
+  const ticks = 5; ctx.font = '12px system-ui'; ctx.fillStyle = '#444';
+  for (let i=0;i<=ticks;i++){
+    const t = i/ticks, y = pad.t + plotH - t*plotH;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W - pad.r, y); ctx.stroke();
+    const val = y0 + t*(y1-y0);
+    ctx.fillText((opts.yFmt ? opts.yFmt(val) : val.toFixed(0)), 8, y+4);
+  }
+  for (let i=0;i<=ticks;i++){
+    const t = i/ticks, x = pad.l + t*plotW;
+    ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, H - pad.b); ctx.stroke();
+    const val = xs[0] + t*(xs[xs.length-1]-xs[0]);
+    ctx.fillText((opts.xFmt ? opts.xFmt(val) : val.toFixed(0)), x-10, H - 12);
+  }
+
+  // series lines
+  keys.forEach(k=>{
+    const color = SEG_COLORS[k] || '#000';
+    const ys = seriesByKey[k];
+    ctx.strokeStyle = color; ctx.lineWidth = 2.2; ctx.beginPath();
+    for (let i=0;i<xs.length;i++){
+      const x = pad.l + ((xs[i]-xs[0])/(xs[xs.length-1]-xs[0])) * plotW;
+      const y = pad.t + (1 - (ys[i]-y0)/(y1-y0)) * plotH;
+      if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+    // points
+    ctx.fillStyle = color;
+    for (let i=0;i<xs.length;i++){
+      const x = pad.l + ((xs[i]-xs[0])/(xs[xs.length-1]-xs[0])) * plotW;
+      const y = pad.t + (1 - (ys[i]-y0)/(y1-y0)) * plotH;
+      ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill();
+    }
+  });
+
+  // current price marker
+  if (opts.currentX !== undefined){
+    const x = pad.l + ((opts.currentX - xs[0])/(xs[xs.length-1]-xs[0])) * plotW;
+    ctx.strokeStyle = '#111'; ctx.lineWidth = 1.5;
+    ctx.setLineDash([5,5]); ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, H - pad.b); ctx.stroke(); ctx.setLineDash([]);
+  }
+
+  if (opts.title){ ctx.fillStyle = '#111'; ctx.font = 'bold 14px system-ui'; ctx.fillText(opts.title, pad.l, pad.t - 8); }
+}
+
+/* Single series XY (Units/Profit vs price) */
+function drawXYChart(canvas, xs, ys, opts={}){
+  drawMultiLineXY(canvas, xs, {series:ys}, opts); // reuse multi-line path
+}
+
+/* Main charts */
+function drawCharts(profitSeries, shareSeries){
+  const labels = profitSeries.map((_,i)=> `R${i+1}`);
+  drawLineChart(els.profitChart, profitSeries, labels, { yFmt: v => fmtCur0(v), title: 'Profit' });
+  drawLineChart(els.shareChart, shareSeries.map(x=>x*100), labels, { yFmt: v => v.toFixed(0) + '%', title: 'Market Share' });
+}
+
+/* =========================
+   Table & Export
+========================= */
+function refreshTable(){
+  const tb = els.resultsTable;
+  tb.innerHTML = '';
+  for (const s of state.history){
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${s.round}</td>
+      <td>${fmtCur0(s.price_you)}</td>
+      <td>${fmtCur0(s.promo_you)}</td>
+      <td>${fmtInt(s.units_you)}</td>
+      <td>${fmtCur0(s.revenue_you)}</td>
+      <td><b>${fmtCur0(s.profit_you)}</b></td>
+      <td>${fmtPct1(s.share_you)}</td>
+      <td>${fmtCur0(s.price_agg)}</td>
+      <td>${fmtCur0(s.price_pre)}</td>
+      <td>${fmtCur0(s.avg_price)}</td>
+    `;
+    tb.appendChild(tr);
+  }
+}
+function exportCSV(){
+  if (!state.history.length) return;
+  const rows = [["Round","Your Price","Your Promo","Your Units","Your Revenue","Your Profit","Your Share","AggressiveCo Price","PremiumCo Price","Avg Market Price","Brand Equity (You)"]];
+  for (const s of state.history){
+    rows.push([s.round, s.price_you, s.promo_you, Math.round(s.units_you), Math.round(s.revenue_you), Math.round(s.profit_you), s.share_you.toFixed(4), s.price_agg, s.price_pre, s.avg_price.toFixed(2), s.brand_you.toFixed(3)]);
+  }
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'strategic_pricing_results.csv';
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+
+/* =========================
+   Explorer helpers & UI
+========================= */
+function buildExplorerSeries(mode){
+  const minP = Number(els.price.min), maxP = Number(els.price.max);
+  const xs = [], ys = [];
+  for (let p=minP; p<=maxP; p+=1){
+    const out = predictAtPrice(p);
+    xs.push(p);
+    ys.push(mode==='units' ? out.units : out.profit);
+  }
+  return {xs, ys};
+}
+function buildExplorerSegmentSeries(){
+  const minP = Number(els.price.min), maxP = Number(els.price.max);
+  const xs = []; const series = { value:[], prag:[], brand:[] };
+  for (let p=minP; p<=maxP; p+=1){
+    const bySeg = predictUnitsBySegmentAtPrice(p);
+    xs.push(p);
+    series.value.push(bySeg.value);
+    series.prag.push(bySeg.prag);
+    series.brand.push(bySeg.brand);
+  }
+  return {xs, series};
+}
+function elasticityAt(price){
+  const dp = 1;
+  const out0 = predictAtPrice(price);
+  const outUp = predictAtPrice(Math.min(price+dp, Number(els.price.max)));
+  const outDn = predictAtPrice(Math.max(price-dp, Number(els.price.min)));
+  const Q0 = out0.units;
+  const dQdP = (outUp.units - outDn.units)/( (Math.min(price+dp, Number(els.price.max))) - (Math.max(price-dp, Number(els.price.min))) );
+  const E = (dQdP) * (price / Math.max(1e-9, Q0)); // negative if downward sloping
+  return E;
+}
+function setExplorerModeButtons(){
+  els.modeUnits.classList.toggle('active', explorer.mode==='units');
+  els.modeProfit.classList.toggle('active', explorer.mode==='profit');
+  els.modeSegments.classList.toggle('active', explorer.mode==='segments');
+}
+function renderSegmentLegend(){
+  els.segLegend.innerHTML = `
+    <div class="item"><span class="dot" style="background:${SEG_COLORS.value}"></span> Value Seekers</div>
+    <div class="item"><span class="dot" style="background:${SEG_COLORS.prag}"></span> Pragmatists</div>
+    <div class="item"><span class="dot" style="background:${SEG_COLORS.brand}"></span> Brand‑Focused</div>
+  `;
+}
+function updateSegmentNowBox(){
+  const price = Number(els.price.value);
+  const b = predictUnitsBySegmentAtPrice(price);
+  const total = b.total || 1e-9;
+  els.segNow_value.textContent = `${fmtInt(b.value)} (${fmtPct1(b.value/total)})`;
+  els.segNow_prag.textContent  = `${fmtInt(b.prag)} (${fmtPct1(b.prag/total)})`;
+  els.segNow_brand.textContent = `${fmtInt(b.brand)} (${fmtPct1(b.brand/total)})`;
+}
+
+/* Draw explorer depending on mode */
+function updateExplorer(){
+  const mode = explorer.mode;
+  if (mode==='units' || mode==='profit'){
+    const {xs, ys} = buildExplorerSeries(mode);
+    const yFmt = mode==='units' ? v => fmtInt(v) : v => fmtCur0(v);
+    const title = mode==='units' ? 'Expected Units vs. Price' : 'Expected Profit vs. Price';
+    drawXYChart(els.explorerChart, xs, ys, { yFmt, xFmt: v => '$' + Math.round(v), title, currentX: Number(els.price.value) });
+    els.explNow.textContent = (mode==='units') ? `${fmtInt(predictAtPrice(Number(els.price.value)).units)} units`
+                                               : `${fmtCur0(predictAtPrice(Number(els.price.value)).profit)} profit`;
+    els.segLegend.setAttribute('aria-hidden','true'); els.segLegend.style.display = 'none';
+    els.segNowBox.style.display = 'none';
+  } else if (mode==='segments'){
+    const {xs, series} = buildExplorerSegmentSeries();
+    const yFmt = v => fmtInt(v);
+    drawMultiLineXY(els.explorerChart, xs, series, {
+      yFmt, xFmt: v => '$' + Math.round(v), title: 'Units vs. Price by Segment', currentX: Number(els.price.value)
+    });
+    els.explNow.textContent = `${fmtInt(predictAtPrice(Number(els.price.value)).units)} total units`;
+    els.segLegend.setAttribute('aria-hidden','false'); els.segLegend.style.display = 'flex';
+    els.segNowBox.style.display = 'grid';
+    updateSegmentNowBox();
+  }
+  const E = elasticityAt(Number(els.price.value));
+  els.explElasticity.textContent = (E<=-1) ? `${E.toFixed(2)} (elastic)` : `${E.toFixed(2)} (inelastic)`;
+}
+
+/* =========================
+   Events
+========================= */
+els.price.addEventListener('input', e => { setPrice(Number(e.target.value)); updateExplorer(); });
+els.promo.addEventListener('input', e => { setPromo(Number(e.target.value)); updateExplorer(); });
+
+els.simulateBtn.addEventListener('click', ()=>{
+  if (state.round >= MAX_ROUNDS) return;
+  const decision = { price: Number(els.price.value), promo: Number(els.promo.value) };
+  const s = simulateRound(decision);
+
+  updateKPI(s.profit_you, s.share_you, s.units_you, s.revenue_you, s.brand_you, s.avg_price);
+  addInsightFromRound(s);
+  lastProfitSeries = state.history.map(h => h.profit_you);
+  lastShareSeries  = state.history.map(h => h.share_you);
+  drawCharts(lastProfitSeries, lastShareSeries);
+  refreshTable();
+  updateMini();
+
+  updateExplorer();
+
+  if (state.round >= MAX_ROUNDS){
+    els.simulateBtn.disabled = true;
+    els.exportBtn.disabled = false;
+    const total = state.history.reduce((acc,h)=>acc+h.profit_you,0);
+    const bestRound = state.history.reduce((best,h)=> h.profit_you>best.profit_you? h:best, state.history[0]);
+    updateInsights([
+      `<b>Game over.</b> Total profit: ${fmtCur0(total)}.`,
+      `Your best round was R${bestRound.round} with profit ${fmtCur0(bestRound.profit_you)}.`,
+      `Challenge: Could a skimming (high → low) vs. penetration (low → moderate) path beat your total?`
+    ]);
+  }
+});
+els.resetBtn.addEventListener('click', initState);
+els.exportBtn.addEventListener('click', exportCSV);
+
+// Explorer mode toggle
+els.modeUnits.addEventListener('click', ()=>{ explorer.mode='units'; setExplorerModeButtons(); updateExplorer(); });
+els.modeProfit.addEventListener('click', ()=>{ explorer.mode='profit'; setExplorerModeButtons(); updateExplorer(); });
+els.modeSegments.addEventListener('click', ()=>{ explorer.mode='segments'; setExplorerModeButtons(); updateExplorer(); });
+
+// Redraw charts crisply on resize (Hi‑DPI aware)
+window.addEventListener('resize', ()=>{
+  drawCharts(lastProfitSeries, lastShareSeries);
+  updateExplorer();
+});
+
+/* Kickoff */
+initState();
+
+</script>
+</body>
+</html>
