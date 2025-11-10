@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SEO SERP Teardown Simulator — Module 8</title>
+  <style>
+    :root{
+      --black:#1a1a1a;
+      --gold:#e6a700;
+      --gray:#e0e0e0;
+      --white:#ffffff;
+      --muted:#f6f6f6;
+      --ok:#2e7d32;
+      --warn:#b36b00;
+      --bad:#b00020;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,"Helvetica Neue",Arial,"Apple Color Emoji","Segoe UI Emoji";
+      color:var(--black);
+      background:var(--muted);
+      line-height:1.35;
+    }
+    header{
+      background:linear-gradient(90deg,var(--black),#2a2a2a);
+      color:var(--gold);
+      padding:18px 20px;
+      border-bottom:4px solid var(--gold);
+    }
+    header h1{margin:0;font-size:1.4rem;letter-spacing:.3px}
+    header p{margin:.25rem 0 0;color:var(--gray)}
+    .container{
+      display:grid;
+      grid-template-columns:350px 1fr;
+      gap:18px;
+      padding:18px;
+    }
+    @media (max-width:1000px){
+      .container{grid-template-columns:1fr}
+    }
+    .panel{
+      background:var(--white);
+      border:1px solid #d9d9d9;
+      border-radius:10px;
+      padding:14px 14px 10px;
+      box-shadow:0 1px 2px rgba(0,0,0,.03);
+      margin-bottom:18px;
+    }
+    .panel h2{
+      margin:0 0 10px;
+      font-size:1.05rem;
+      color:var(--black);
+      border-left:6px solid var(--gold);
+      padding-left:8px;
+    }
+    .controls .panel label{display:block;margin:10px 0 4px;font-weight:600}
+    .controls .panel input[type="text"],
+    .controls .panel input[type="number"],
+    .controls .panel select,
+    .controls .panel textarea{
+      width:100%;padding:8px;border:1px solid #cfcfcf;border-radius:8px;background:#fff;
+    }
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .row > * {flex:1}
+    .kpi{
+      display:grid;gap:8px;
+      grid-template-columns:repeat(3,1fr);
+      margin:8px 0 6px;
+    }
+    .kpi .card{
+      background:var(--muted);
+      border:1px dashed #d0d0d0;
+      padding:10px;border-radius:8px;text-align:center;
+    }
+    .kpi .big{font-size:1.35rem;font-weight:800;color:var(--black)}
+    .btn{
+      appearance:none;border:none;background:var(--black);color:var(--gold);
+      padding:10px 12px;border-radius:8px;font-weight:700;cursor:pointer;
+    }
+    .btn.secondary{background:var(--gold);color:var(--black)}
+    .btn.ghost{background:#fff;border:1px solid var(--black);color:var(--black)}
+    .btn.small{padding:6px 8px;font-size:.9rem}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .hint{font-size:.85rem;color:#666}
+    .badge{
+      display:inline-block;background:var(--black);color:var(--gold);
+      padding:2px 8px;border-radius:999px;font-size:.75rem;margin-left:6px
+    }
+
+    /* SERP */
+    .serp{
+      background:var(--white);
+      border:1px solid #d9d9d9;border-radius:10px;padding:14px;
+      box-shadow:0 1px 2px rgba(0,0,0,.03);
+    }
+    .serp h2{margin:0 0 10px;font-size:1.1rem;color:var(--black);border-left:6px solid var(--gold);padding-left:8px}
+    .result{
+      padding:12px;border-bottom:1px solid #eee
+    }
+    .result:last-child{border-bottom:none}
+    .result .title{
+      margin:0 0 2px;font-weight:700;font-size:1.05rem;color:#1a0dab
+    }
+    .result .url{color:#006621;font-size:.85rem;margin-bottom:4px}
+    .result .snippet{color:#444}
+    .chip{display:inline-block;padding:2px 6px;border-radius:6px;background:var(--muted);font-size:.72rem;margin-right:6px;color:#333}
+    .scorebar{
+      height:8px;background:#eee;border-radius:999px;position:relative;margin-top:6px
+    }
+    .scorebar > span{
+      position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:linear-gradient(90deg,var(--gold),#ffc61a)
+    }
+    .meta{font-size:.8rem;color:#666;margin-top:6px}
+    .disclaimer{font-size:.8rem;color:#777;margin-top:8px}
+
+    details summary{cursor:pointer;font-weight:600}
+    .grid2{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+    @media (max-width:760px){.grid2{grid-template-columns:1fr}}
+
+    .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid #ddd;background:#fff;font-size:.8rem}
+    .pill input{margin:0}
+    .slider-row{display:grid;grid-template-columns:130px 1fr 48px;gap:8px;align-items:center;margin-bottom:8px}
+    .slider-row output{text-align:right;font-variant-numeric:tabular-nums}
+
+    footer{
+      margin:12px 18px 40px;color:#777;font-size:.85rem
+    }
+    footer a{color:#333}
+    .goldline{height:4px;background:var(--gold);margin:12px 0;border-radius:2px}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SEO SERP Teardown Simulator</h1>
+    <p>Adjust your page’s attributes, compare against synthetic competitors, and see a heuristic rank & CTR estimate. Built for quick in‑class use.</p>
+  </header>
+
+  <main class="container">
+    <section class="controls">
+      <div class="panel">
+        <h2>1) Choose Scenario</h2>
+        <label for="scenarioSelect">Preset scenarios</label>
+        <select id="scenarioSelect" aria-label="Scenario">
+          <!-- options populated by JS -->
+        </select>
+        <div class="row" style="margin-top:10px">
+          <div>
+            <label for="volatility">SERP volatility (randomness)</label>
+            <div class="slider-row">
+              <span class="hint">More volatility simulates news/seasonality</span>
+              <input type="range" id="volatility" min="0" max="30" value="6">
+              <output id="volOut">6%</output>
+            </div>
+          </div>
+          <div>
+            <label for="instructorMode" title="Show competitor scores & inputs">Instructor mode</label>
+            <div><input type="checkbox" id="instructorMode"> <span class="hint">Reveal competitor scores</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>2) Your Page Settings</h2>
+        <div class="slider-row">
+          <label for="intentMatch">Intent match</label>
+          <input type="range" id="intentMatch" min="0" max="100" value="65">
+          <output id="intentMatchOut">65</output>
+        </div>
+        <div class="slider-row">
+          <label for="depth">Topical depth</label>
+          <input type="range" id="depth" min="300" max="3000" value="1200" step="50">
+          <output id="depthOut">1200 words</output>
+        </div>
+        <div class="slider-row">
+          <label for="entities">Entity coverage</label>
+          <input type="range" id="entities" min="0" max="100" value="55">
+          <output id="entitiesOut">55</output>
+        </div>
+        <div class="slider-row">
+          <label for="pageSpeed">Page speed (INP)</label>
+          <input type="range" id="pageSpeed" min="0" max="100" value="60">
+          <output id="pageSpeedOut">60</output>
+        </div>
+        <div class="slider-row">
+          <label for="internalLinks">Internal links</label>
+          <input type="range" id="internalLinks" min="0" max="30" value="8">
+          <output id="internalLinksOut">8</output>
+        </div>
+        <div class="slider-row">
+          <label for="ux">UX clarity</label>
+          <input type="range" id="ux" min="0" max="100" value="60">
+          <output id="uxOut">60</output>
+        </div>
+        <div class="slider-row">
+          <label for="eeat">E‑E‑A‑T</label>
+          <input type="range" id="eeat" min="0" max="100" value="55">
+          <output id="eeatOut">55</output>
+        </div>
+
+        <details style="margin-top:8px">
+          <summary>Structured data (schema)</summary>
+          <div class="grid2" style="margin-top:8px">
+            <label class="pill"><input type="checkbox" class="schema" value="faq"> FAQ</label>
+            <label class="pill"><input type="checkbox" class="schema" value="howto"> HowTo</label>
+            <label class="pill"><input type="checkbox" class="schema" value="product"> Product</label>
+            <label class="pill"><input type="checkbox" class="schema" value="review"> Review</label>
+            <label class="pill"><input type="checkbox" class="schema" value="article"> Article</label>
+            <label class="pill"><input type="checkbox" class="schema" value="video"> Video</label>
+          </div>
+          <div class="hint" style="margin-top:6px">These don’t guarantee rich results, but they help eligibility & clarity.</div>
+        </details>
+
+        <div class="row" style="margin-top:10px">
+          <button class="btn small" id="presetBaseline">Baseline</button>
+          <button class="btn small secondary" id="presetOptimized">Optimized</button>
+          <button class="btn small ghost" id="randomize">Randomize</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>3) Score & Prediction</h2>
+        <div class="kpi">
+          <div class="card"><div class="hint">Estimated rank</div><div class="big" id="rank">–</div></div>
+          <div class="card"><div class="hint">Estimated CTR</div><div class="big" id="ctr">–</div></div>
+          <div class="card"><div class="hint">Your score</div><div class="big" id="score">–</div></div>
+        </div>
+        <div id="priorities"></div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn small" id="printBtn">Print / Save to PDF</button>
+        </div>
+        <div class="hint" style="margin-top:6px">Heuristic model for teaching—illustrates direction, not absolute truth.</div>
+      </div>
+
+      <div class="panel">
+        <h2>Instructor Tools</h2>
+        <details>
+          <summary>Show scenario JSON (read‑only)</summary>
+          <textarea id="scenarioJSON" rows="10" readonly></textarea>
+        </details>
+        <div class="row" style="margin-top:10px">
+          <button class="btn small ghost" id="resetBtn">Reset all</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="serp">
+      <h2>Simulated SERP</h2>
+      <div id="serpContainer"></div>
+      <div class="goldline"></div>
+      <p class="disclaimer">All results and scores are synthetic for classroom use. Use this to practice prioritizing improvements and discussing trade‑offs (e.g., speed vs. depth, open web vs. walled gardens/retail PDPs).</p>
+    </section>
+  </main>
+
+  <footer>
+    Built for Bryant University’s Strategic Marketing (Module 8). Colors: #1a1a1a, #e6a700, #e0e0e0.
+  </footer>
+
+<script>
+(function(){
+  const $ = (sel, root=document)=>root.querySelector(sel);
+  const $$ = (sel, root=document)=>Array.from(root.querySelectorAll(sel));
+
+  const CTR = [0.28,0.15,0.11,0.08,0.06,0.05,0.04,0.03,0.02,0.01];
+
+  // Heuristic weights sum ~1.0
+  const WEIGHTS = {
+    intent: .20,
+    depth:  .15,
+    entities: .15,
+    speed:  .10,
+    schema: .10,
+    links:  .10,
+    ux:     .10,
+    eeat:   .10
+  };
+
+  // Synthetic scenarios
+  const SCENARIOS = [
+    {
+      id:"running-shoes-flat-feet",
+      title:"Best running shoes for flat feet",
+      intent:"Commercial investigation",
+      features:["Shopping unit","People Also Ask","Review stars"],
+      competitors:[
+        {title:"Top Stability Running Shoes for Flat Feet (2025 Guide)",domain:"runnerhub.com",snippet:"Stability picks with arch support, motion control and fit tips.",m:{intent:.90,depth:.85,entities:.80,speed:.70,schema:.70,links:.75,ux:.80,eeat:.70}},
+        {title:"10 Best Shoes for Overpronation — Lab Tested",domain:"shoelab.org",snippet:"We lab-test cushioning, medial posts and durability for flat‑footed runners.",m:{intent:.88,depth:.90,entities:.82,speed:.60,schema:.60,links:.70,ux:.78,eeat:.80}},
+        {title:"Flat Feet? Here’s How to Choose Stability Shoes",domain:"stridecoach.io",snippet:"Explains pronation, arch types and gait with fit checklist.",m:{intent:.82,depth:.74,entities:.72,speed:.82,schema:.40,links:.62,ux:.76,eeat:.65}},
+        {title:"Retailer Picks: Stability & Motion Control Shoes",domain:"sportsworld.example",snippet:"Live inventory, reviews, and in‑store pickup options.",m:{intent:.86,depth:.60,entities:.70,speed:.78,schema:.85,links:.58,ux:.74,eeat:.55}},
+        {title:"Forum Community: Flat Feet Runner Thread",domain:"runforum.net",snippet:"Peer recommendations and injury prevention anecdotes.",m:{intent:.70,depth:.60,entities:.55,speed:.88,schema:.20,links:.52,ux:.68,eeat:.45}}
+      ]
+    },
+    {
+      id:"noise-cancelling-headphones-2025",
+      title:"Best noise‑cancelling headphones 2025",
+      intent:"Commercial investigation",
+      features:["Shopping unit","Top stories","PAAs"],
+      competitors:[
+        {title:"The 12 Best ANC Headphones of 2025",domain:"audioreviews.pro",snippet:"ANC performance measured with controlled noise spectrum.",m:{intent:.90,depth:.88,entities:.86,speed:.72,schema:.80,links:.78,ux:.82,eeat:.80}},
+        {title:"Editors’ Choice: Noise‑Cancelling Headphones",domain:"techscope.com",snippet:"Battery, comfort and mic quality compared across models.",m:{intent:.86,depth:.80,entities:.78,speed:.84,schema:.55,links:.70,ux:.80,eeat:.72}},
+        {title:"Headphone Finder — Pick Your Perfect ANC",domain:"soundmatch.io",snippet:"Interactive filters for budget, fit and codecs.",m:{intent:.84,depth:.65,entities:.70,speed:.76,schema:.50,links:.62,ux:.85,eeat:.60}},
+        {title:"Retailer: Top ANC Headphones with Deals",domain:"shopworld.example",snippet:"Real‑time prices, reviews and fulfillment options.",m:{intent:.88,depth:.58,entities:.64,speed:.80,schema:.86,links:.58,ux:.76,eeat:.55}},
+        {title:"What is ANC? Explainer & Buying Tips",domain:"audioacademy.org",snippet:"Demystifies feedforward/feedback hybrids and fit.",m:{intent:.76,depth:.62,entities:.60,speed:.90,schema:.35,links:.50,ux:.72,eeat:.65}}
+      ]
+    },
+    {
+      id:"credit-cards-travel-2025",
+      title:"Best travel credit cards 2025",
+      intent:"YMYL — Commercial / consideration",
+      features:["Top stories","PAAs","Local pack (banks)"],
+      competitors:[
+        {title:"Best Travel Cards for 2025 — Rewards & Perks",domain:"cardcompare.org",snippet:"Weigh sign‑ups, multipliers, transfer partners and protections.",m:{intent:.90,depth:.88,entities:.84,speed:.78,schema:.70,links:.80,ux:.78,eeat:.86}},
+        {title:"Which Travel Card Fits You?",domain:"milesmax.com",snippet:"Interactive tool based on spend patterns and destinations.",m:{intent:.86,depth:.70,entities:.75,speed:.82,schema:.50,links:.68,ux:.84,eeat:.80}},
+        {title:"Editors’ Picks: 10 Best Travel Credit Cards",domain:"fintechreview.pro",snippet:"Annual fees vs. lounge access vs. FX fees.",m:{intent:.84,depth:.76,entities:.72,speed:.76,schema:.50,links:.65,ux:.80,eeat:.78}},
+        {title:"Local Bank Travel Rewards Cards",domain:"communitybank.example",snippet:"Lower intro APR and bonus cats; branch support.",m:{intent:.70,depth:.56,entities:.50,speed:.86,schema:.45,links:.50,ux:.70,eeat:.60}},
+        {title:"Travel Hacking 101 — Start Here",domain:"awardclassroom.io",snippet:"Basics of transfers, portal redemptions and alliance charts.",m:{intent:.72,depth:.65,entities:.60,speed:.90,schema:.35,links:.55,ux:.72,eeat:.68}}
+      ]
+    }
+  ];
+
+  // Controls
+  const els = {
+    scenarioSelect: $('#scenarioSelect'),
+    volatility: $('#volatility'),
+    volOut: $('#volOut'),
+    instructorMode: $('#instructorMode'),
+    serp: $('#serpContainer'),
+    rank: $('#rank'),
+    ctr: $('#ctr'),
+    score: $('#score'),
+    priorities: $('#priorities'),
+    scenarioJSON: $('#scenarioJSON')
+  };
+
+  const inputs = {
+    intent: $('#intentMatch'),
+    depth: $('#depth'),
+    entities: $('#entities'),
+    speed: $('#pageSpeed'),
+    links: $('#internalLinks'),
+    ux: $('#ux'),
+    eeat: $('#eeat'),
+    schemaChecks: $$('.schema')
+  };
+
+  const outs = {
+    intent: $('#intentMatchOut'),
+    depth: $('#depthOut'),
+    entities: $('#entitiesOut'),
+    speed: $('#pageSpeedOut'),
+    links: $('#internalLinksOut'),
+    ux: $('#uxOut'),
+    eeat: $('#eeatOut')
+  };
+
+  function fmtPct(n){ return (n*100).toFixed(0)+'%';}
+
+  function clamp(n,min,max){ return Math.max(min,Math.min(max,n)); }
+
+  function depthScore(words){
+    // Diminishing returns; 600 good baseline, 1500 strong, 2500+ excellent
+    const w = Number(words);
+    const s = 1 - Math.exp(-w/900); // asymptote to 1
+    return clamp(s,0,1);
+  }
+
+  function linksScore(n){
+    // 0..30 -> diminishing returns; anchor quality implicit
+    const x = Number(n);
+    const s = 1 - Math.exp(-x/10);
+    return clamp(s,0,1);
+  }
+
+  function schemaScore(){
+    const checked = inputs.schemaChecks.filter(c=>c.checked).length;
+    const total = inputs.schemaChecks.length;
+    // Cap utility at 4 types
+    const s = Math.min(checked,4)/4;
+    return s;
+  }
+
+  function to01(val){ return clamp(Number(val)/100,0,1); }
+
+  function userMetrics(){
+    return {
+      intent: to01(inputs.intent.value),
+      depth: depthScore(inputs.depth.value),
+      entities: to01(inputs.entities.value),
+      speed: to01(inputs.speed.value),
+      schema: schemaScore(),
+      links: linksScore(inputs.links.value),
+      ux: to01(inputs.ux.value),
+      eeat: to01(inputs.eeat.value)
+    };
+  }
+
+  function scoreFromMetrics(m){
+    return Math.round(100*(
+      m.intent*WEIGHTS.intent +
+      m.depth *WEIGHTS.depth  +
+      m.entities*WEIGHTS.entities+
+      m.speed*WEIGHTS.speed +
+      m.schema*WEIGHTS.schema+
+      m.links*WEIGHTS.links +
+      m.ux*WEIGHTS.ux +
+      m.eeat*WEIGHTS.eeat
+    ));
+  }
+
+  function competitorScore(m){ return Math.round(100*(
+    m.intent*WEIGHTS.intent +
+    m.depth *WEIGHTS.depth  +
+    m.entities*WEIGHTS.entities+
+    m.speed*WEIGHTS.speed +
+    m.schema*WEIGHTS.schema+
+    m.links*WEIGHTS.links +
+    m.ux*WEIGHTS.ux +
+    m.eeat*WEIGHTS.eeat
+  ));}
+
+  function renderSERP(scn, showScores){
+    const frag = document.createDocumentFragment();
+    scn.competitors.forEach((c,i)=>{
+      const wrap = document.createElement('div');
+      wrap.className='result';
+      wrap.innerHTML = `
+        <div class="title">${i+1}. ${c.title}</div>
+        <div class="url">${c.domain}</div>
+        <div class="snippet">${c.snippet}</div>
+        <div class="meta"><span class="chip">${scn.features.join('</span><span class="chip">')}</span></div>
+        ${showScores ? scoreUI(c) : ''}
+      `;
+      frag.appendChild(wrap);
+    });
+    els.serp.innerHTML='';
+    els.serp.appendChild(frag);
+  }
+
+  function scoreUI(c){
+    const s = competitorScore(c.m);
+    return `
+      <div class="scorebar" title="Heuristic composite score">
+        <span style="width:${s}%"></span>
+      </div>
+      <div class="meta">Composite score: <strong>${s}/100</strong>
+      · Intent ${Math.round(c.m.intent*100)} · Depth ${Math.round(c.m.depth*100)} · Entities ${Math.round(c.m.entities*100)}
+      · Speed ${Math.round(c.m.speed*100)} · Schema ${Math.round(c.m.schema*100)} · Links ${Math.round(c.m.links*100)}
+      · UX ${Math.round(c.m.ux*100)} · E‑E‑A‑T ${Math.round(c.m.eeat*100)}</div>
+    `;
+  }
+
+  function predictRank(scn, userScore, volatilityPct){
+    // Build a score array with small noise to simulate SERP movement
+    const rand = (sd)=> (Math.random()*2-1)*sd; // uniform noise
+    const noiseSD = volatilityPct; // points
+    const compScores = scn.competitors.map(c=> competitorScore(c.m) + rand(noiseSD));
+    const combined = compScores.concat([userScore + rand(noiseSD)]);
+    const sorted = [...combined].sort((a,b)=>b-a);
+    const myIndexInSorted = sorted.indexOf(combined[combined.length-1]);
+    const rank = myIndexInSorted + 1; // 1-based
+    const ctr = CTR[Math.min(rank-1, CTR.length-1)];
+    return {rank, ctr};
+  }
+
+  function priorityAdvice(userM, scn){
+    // Compare user metrics vs top-3 average to suggest top 3 gaps by weighted impact
+    const top3 = [...scn.competitors]
+      .sort((a,b)=>competitorScore(b.m)-competitorScore(a.m))
+      .slice(0,3)
+      .map(c=>c.m);
+    const avg = Object.keys(WEIGHTS).reduce((acc,k)=>{
+      acc[k] = top3.reduce((s,m)=>s+m[k],0)/top3.length;
+      return acc;
+    },{});
+    const gaps = Object.keys(WEIGHTS).map(k=>{
+      const user = (k==='depth'? userM[k]: userM[k]); // already 0..1
+      const deficit = (avg[k]-user);
+      const impact = Math.max(0, deficit) * WEIGHTS[k];
+      return {k,deficit,impact};
+    }).filter(g=>g.deficit>0.05) // ignore tiny gaps
+      .sort((a,b)=>b.impact-a.impact)
+      .slice(0,3);
+
+    const nice = {
+      intent:"Intent match",
+      depth:"Topical depth",
+      entities:"Entity coverage",
+      speed:"Page speed (INP)",
+      schema:"Structured data",
+      links:"Internal links",
+      ux:"UX clarity",
+      eeat:"E‑E‑A‑T"
+    };
+    const list = gaps.map(g=>`<li><strong>${nice[g.k]}</strong>: you’re behind top‑ranked pages. Fix first.</li>`).join("");
+    return list ? `<ul>${list}</ul>` : `<div class="hint">No major gaps vs. top pages—nudge multiple areas or build links/content to move the needle.</div>`;
+  }
+
+  function update(){
+    // Outputs
+    outs.intent.textContent = inputs.intent.value;
+    outs.depth.textContent = inputs.depth.value + " words";
+    outs.entities.textContent = inputs.entities.value;
+    outs.speed.textContent = inputs.speed.value;
+    outs.links.textContent = inputs.links.value;
+    outs.ux.textContent = inputs.ux.value;
+    outs.eeat.textContent = inputs.eeat.value;
+    els.volOut.textContent = $('#volatility').value + '%';
+
+    const scn = currentScenario();
+    const showScores = els.instructorMode.checked;
+    renderSERP(scn, showScores);
+
+    const m = userMetrics();
+    const userScore = scoreFromMetrics(m);
+    const pred = predictRank(scn, userScore, Number($('#volatility').value));
+
+    els.rank.textContent = pred.rank + " / 10";
+    els.ctr.textContent  = Math.round(pred.ctr*1000)/10 + "%";
+    els.score.textContent= userScore + " / 100";
+    els.priorities.innerHTML = `<h3 style="margin:.25rem 0 .5rem">What to fix first</h3>${priorityAdvice(m, scn)}`;
+  }
+
+  function fillScenarioDropdown(){
+    els.scenarioSelect.innerHTML = SCENARIOS.map(s=>`<option value="${s.id}">${s.title}</option>`).join("");
+  }
+  function currentScenario(){ return SCENARIOS.find(s=>s.id===els.scenarioSelect.value); }
+
+  function setPreset(kind){
+    // Baseline vs Optimized presets
+    const base = {
+      intent: 60, depth: 900, entities: 50, speed: 55, links: 6, ux: 55, eeat: 50, schema:["faq"]
+    };
+    const opt = {
+      intent: 85, depth: 1800, entities: 80, speed: 80, links: 14, ux: 78, eeat: 80, schema:["faq","product","review","article"]
+    };
+    const p = (kind==='optimized') ? opt : base;
+    inputs.intent.value = p.intent;
+    inputs.depth.value = p.depth;
+    inputs.entities.value = p.entities;
+    inputs.speed.value = p.speed;
+    inputs.links.value = p.links;
+    inputs.ux.value = p.ux;
+    inputs.eeat.value = p.eeat;
+    inputs.schemaChecks.forEach(c=> c.checked = p.schema.includes(c.value));
+    update();
+  }
+
+  function randomize(){
+    inputs.intent.value = 50 + Math.round(Math.random()*50);
+    inputs.depth.value = 500 + Math.round(Math.random()*2500);
+    inputs.entities.value = 30 + Math.round(Math.random()*70);
+    inputs.speed.value = 40 + Math.round(Math.random()*60);
+    inputs.links.value = Math.round(Math.random()*20);
+    inputs.ux.value = 40 + Math.round(Math.random()*60);
+    inputs.eeat.value = 40 + Math.round(Math.random()*60);
+    inputs.schemaChecks.forEach(c=> c.checked = Math.random() < .4);
+    update();
+  }
+
+  function resetAll(){
+    setPreset('baseline');
+    $('#volatility').value = 6;
+    $('#instructorMode').checked = false;
+  }
+
+  function populateScenarioJSON(){
+    els.scenarioJSON.value = JSON.stringify(currentScenario(), null, 2);
+  }
+
+  // Events
+  ['input','change'].forEach(evt=>{
+    document.addEventListener(evt, e=>{
+      if (e.target === els.scenarioSelect){ populateScenarioJSON(); update(); }
+      if (e.target.matches('input,select,.schema')) update();
+      if (e.target.id==='volatility') els.volOut.textContent = e.target.value + '%';
+      if (e.target.id==='instructorMode') update();
+    });
+  });
+  $('#presetBaseline').addEventListener('click', ()=>setPreset('baseline'));
+  $('#presetOptimized').addEventListener('click', ()=>setPreset('optimized'));
+  $('#randomize').addEventListener('click', randomize);
+  $('#resetBtn').addEventListener('click', resetAll);
+  $('#printBtn').addEventListener('click', ()=>window.print());
+
+  // Init
+  fillScenarioDropdown();
+  els.scenarioSelect.value = SCENARIOS[0].id;
+  setPreset('baseline');
+  populateScenarioJSON();
+  update();
+})();</script>
+</body>
+</html>
