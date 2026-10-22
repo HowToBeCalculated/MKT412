@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Budget Allocation Challenge · MKT 412 Draft</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #151819;
+        --panel: #202627;
+        --ink: #f4f0e6;
+        --muted: #bac4c1;
+        --gold: #efc466;
+        --mint: #85d9bb;
+        --line: #3b4645;
+        --rose: #f5a1a8;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          16px/1.6 system-ui,
+          sans-serif;
+      }
+      a {
+        color: var(--gold);
+      }
+      a:hover {
+        color: #fff;
+      }
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+      button,
+      select {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #2b3434;
+        color: var(--ink);
+        padding: 0.65rem 0.9rem;
+      }
+      button {
+        cursor: pointer;
+      }
+      button:hover:not(:disabled) {
+        border-color: var(--gold);
+        background: #39423d;
+      }
+      button.primary {
+        background: var(--gold);
+        color: #211b0d;
+        border-color: var(--gold);
+        font-weight: 750;
+      }
+      button:disabled {
+        opacity: 0.45;
+        cursor: default;
+      }
+      :focus-visible {
+        outline: 3px solid var(--mint);
+        outline-offset: 4px;
+      }
+      input[type="range"] {
+        width: 100%;
+        accent-color: var(--gold);
+      }
+      input[type="checkbox"],
+      input[type="radio"] {
+        accent-color: var(--gold);
+        width: 18px;
+        height: 18px;
+        vertical-align: middle;
+        margin-right: 0.5rem;
+      }
+      label {
+        display: block;
+        margin: 0.55rem 0;
+      }
+      select {
+        max-width: 100%;
+      }
+      header,
+      main,
+      footer {
+        max-width: 1120px;
+        margin: auto;
+        padding: 24px;
+      }
+      header {
+        padding-top: 32px;
+      }
+      .top {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .badge,
+      .eyebrow {
+        font-size: 0.75rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        font-weight: 750;
+      }
+      .badge {
+        padding: 5px 12px;
+        border: 1px solid var(--gold);
+        color: var(--gold);
+        border-radius: 30px;
+      }
+      .eyebrow {
+        color: var(--mint);
+      }
+      h1 {
+        font-size: clamp(2rem, 5vw, 3.8rem);
+        line-height: 1.1;
+        letter-spacing: -0.045em;
+        margin: 26px 0 16px;
+      }
+      h2 {
+        font-size: 1.2rem;
+        line-height: 1.3;
+        margin: 0 0 14px;
+      }
+      h3 {
+        font-size: 1rem;
+        margin: 0 0 8px;
+      }
+      .intro {
+        font-size: 1.15rem;
+        color: var(--muted);
+        max-width: 780px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 24px;
+        min-width: 0;
+      }
+      .wide {
+        grid-column: 1/-1;
+      }
+      .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin: 18px 0 0;
+      }
+      .muted,
+      .note {
+        color: var(--muted);
+      }
+      .note {
+        font-size: 0.88rem;
+      }
+      .metric {
+        font-size: 2rem;
+        line-height: 1.2;
+        font-weight: 750;
+        letter-spacing: -0.04em;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+        margin: 18px 0;
+      }
+      .stat {
+        padding: 16px;
+        background: #171d1e;
+        border-radius: 10px;
+      }
+      .stat small {
+        display: block;
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+      .accent {
+        color: var(--gold);
+      }
+      .feedback {
+        border-left: 3px solid var(--mint);
+        padding: 12px 16px;
+        background: #182e28;
+        margin-top: 18px;
+      }
+      .warning {
+        border-left-color: var(--gold);
+        background: #302a1c;
+      }
+      .choice {
+        border: 1px solid var(--line);
+        padding: 12px;
+        border-radius: 8px;
+      }
+      .ad {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 20px;
+        background: #171d1e;
+      }
+      .ad h3 {
+        font-size: 1.3rem;
+      }
+      .plot {
+        width: 100%;
+        display: block;
+        background: #171d1e;
+        border-radius: 10px;
+      }
+      .legend {
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+        font-size: 0.88rem;
+      }
+      .gold {
+        color: var(--gold);
+      }
+      .mint {
+        color: var(--mint);
+      }
+      .tablewrap {
+        overflow-x: auto;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 0.9rem;
+      }
+      td,
+      th {
+        text-align: left;
+        border-bottom: 1px solid var(--line);
+        padding: 10px;
+      }
+      details {
+        margin-top: 20px;
+      }
+      summary {
+        cursor: pointer;
+        color: var(--gold);
+        font-weight: 650;
+      }
+      code {
+        color: var(--mint);
+        overflow-wrap: anywhere;
+      }
+      footer {
+        border-top: 1px solid var(--line);
+        margin-top: 30px;
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+      footer nav {
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      .track {
+        height: 12px;
+        border-radius: 6px;
+        background: #101718;
+        overflow: hidden;
+      }
+      .fill {
+        height: 100%;
+        background: var(--gold);
+        transition: width 0.25s;
+      }
+      .barrow {
+        margin: 16px 0;
+      }
+      .barrow strong {
+        float: right;
+      }
+      output {
+        font-variant-numeric: tabular-nums;
+      }
+      .steps {
+        color: var(--mint);
+        font-size: 0.88rem;
+      }
+      ul {
+        padding-left: 22px;
+      }
+      @media (max-width: 700px) {
+        header,
+        main,
+        footer {
+          padding: 18px;
+        }
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .stats {
+          grid-template-columns: 1fr;
+          gap: 8px;
+        }
+        .stat {
+          padding: 12px;
+        }
+        .panel {
+          padding: 18px;
+        }
+        .metric {
+          font-size: 1.7rem;
+        }
+        h1 {
+          margin-top: 24px;
+        }
+        .top {
+          font-size: 0.9rem;
+        }
+        button {
+          min-height: 44px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="top">
+        <a href="../index.html">← MKT 412 home</a
+        ><span class="badge">Draft · Instructor playground</span>
+      </div>
+      <p class="eyebrow" style="margin-top: 32px">03 / Resource allocation</p>
+      <h1>Budget Allocation Challenge</h1>
+      <p class="intro">
+        Every channel looks good in isolation. Spend a fixed budget, feel
+        diminishing returns, and discover how a market event changes the plan.
+      </p>
+    </header>
+    <main>
+      <div class="grid">
+        <section class="panel">
+          <h2>01 / Build your media mix</h2>
+          <p>
+            You have <strong>$10,000</strong>. Allocate it across four channels.
+            Reduce one slider to free funds for another. Sliders stop when the
+            remaining budget is used.
+          </p>
+          <div id="controls"></div>
+          <p class="note" id="remaining" aria-live="polite"></p>
+          <div class="actions">
+            <button id="launch" class="primary">
+              Launch plan & reveal event</button
+            ><button id="reset">Reset challenge</button>
+          </div>
+          <p class="note">
+            Launch several plans to compare their resilience. Each event is a
+            fictional, deterministic scenario; results are expected values, not
+            observed campaign data.
+          </p>
+        </section>
+        <section class="panel">
+          <h2>02 / Preview the tradeoffs</h2>
+          <p class="steps">Before the market event · current slider settings</p>
+          <div class="stats">
+            <div class="stat">
+              <small>Expected customers</small
+              ><output id="customers" class="metric"></output>
+            </div>
+            <div class="stat">
+              <small>Contribution after media</small
+              ><output id="profit" class="metric"></output>
+            </div>
+            <div class="stat">
+              <small>Blended acquisition cost</small
+              ><output id="cac" class="metric"></output>
+            </div>
+          </div>
+          <div id="bars"></div>
+          <p class="note">
+            Attribution assigns each modeled customer to one channel. Social
+            spending also improves email response in this simplified model.
+          </p>
+        </section>
+        <section class="panel wide">
+          <h2>03 / The market has other plans</h2>
+          <div id="event" aria-live="polite">
+            <p class="muted">
+              Launch your first plan to reveal a market event and compare it
+              with your baseline.
+            </p>
+          </div>
+          <div id="history" class="tablewrap"></div>
+          <details>
+            <summary>Instructor notes / response curves and limits</summary>
+            <p>
+              Each channel's expected customers = capacity × (1 − exp(−spend /
+              scale)). Capacity represents saturation; scale controls how
+              quickly the channel approaches it. Email capacity is multiplied by
+              1 + 0.25 × min(social spend / 3,000, 1), an invented cross-channel
+              effect. With zero email spend, email still produces zero
+              customers.
+            </p>
+            <p>
+              Contribution after media = expected customers × $45 contribution
+              per customer − media spend. The $45 includes product variable
+              costs but excludes fixed overhead. Acquisition cost = media spend
+              ÷ expected customers; zero customers displays a dash. Unspent
+              budget is not a cost. The model ignores repeat purchases, audience
+              overlap, and attribution uncertainty.
+            </p>
+            <p>
+              Launches cycle through three disclosed events: search auction
+              pressure increases search scale 70%; inbox fatigue cuts email
+              capacity 40%; creator buzz increases influencer capacity 50%. The
+              event is revealed after allocation and applies to that plan only.
+              History shows each plan under its own event, so comparisons across
+              different events are not controlled experiments.
+            </p>
+            <p>
+              Extension ideas: let students choose a customer segment, add a
+              multi-period budget, or compare every plan under the same event.
+            </p>
+          </details>
+        </section>
+      </div>
+    </main>
+    <footer>
+      <p>
+        Teaching prototype · fictional scenarios · no live data or AI service ·
+        progress resets on reload.
+      </p>
+      <nav aria-label="Other draft activities">
+        <a href="ab-test-detective.html">A/B Test Detective</a
+        ><a href="positioning-map-studio.html">Positioning Map Studio</a
+        ><a href="ai-marketing-critique-arena.html"
+          >AI Marketing Critique Arena</a
+        >
+      </nav>
+      <p>
+        Instructor / agent: see
+        <a href="../docs/draft-activities.html">the extension guide</a> for
+        editable scenarios, model assumptions, and ideas.
+      </p>
+    </footer>
+    <script>
+      "use strict";
+      // INSTRUCTOR: All coefficients are invented for discussion. Edit CHANNELS, EVENTS, and MARGIN.
+      const BUDGET = 10000,
+        MARGIN = 45;
+      const CHANNELS = [
+        { name: "Search", capacity: 180, scale: 2200 },
+        { name: "Social", capacity: 230, scale: 4000 },
+        { name: "Email", capacity: 100, scale: 900 },
+        { name: "Influencers", capacity: 190, scale: 3500 },
+      ];
+      const EVENTS = [
+        {
+          name: "Search auction pressure",
+          description:
+            "Competitor bids rise. Search now needs 70% more spending to reach the same fraction of its capacity.",
+          channel: 0,
+          scale: 1.7,
+          capacity: 1,
+        },
+        {
+          name: "Inbox fatigue",
+          description:
+            "Your email audience is less responsive. Email capacity falls 40%.",
+          channel: 2,
+          scale: 1,
+          capacity: 0.6,
+        },
+        {
+          name: "Creator buzz",
+          description:
+            "A fictional creator trend raises influencer conversion capacity 50%.",
+          channel: 3,
+          scale: 1,
+          capacity: 1.5,
+        },
+      ];
+      const $ = (id) => document.getElementById(id),
+        money = (v) =>
+          v.toLocaleString("en-US", {
+            style: "currency",
+            currency: "USD",
+            maximumFractionDigits: 0,
+          });
+      let allocation = [25, 25, 25, 25],
+        plans = [];
+      function evaluate(percent, event = null) {
+        const spend = percent.map((v) => (BUDGET * v) / 100),
+          customers = CHANNELS.map((ch, i) => {
+            let capacity = ch.capacity,
+              scale = ch.scale;
+            if (i === 2) capacity *= 1 + 0.25 * Math.min(spend[1] / 3000, 1);
+            if (event && event.channel === i) {
+              capacity *= event.capacity;
+              scale *= event.scale;
+            }
+            return capacity * (1 - Math.exp(-spend[i] / scale));
+          });
+        const total = customers.reduce((a, b) => a + b, 0),
+          cost = spend.reduce((a, b) => a + b, 0);
+        return {
+          customers,
+          total,
+          cost,
+          profit: total * MARGIN - cost,
+          cac: total ? cost / total : null,
+        };
+      }
+      function render() {
+        const base = evaluate(allocation),
+          spent = allocation.reduce((a, b) => a + b, 0);
+        CHANNELS.forEach((c, i) => {
+          $("amount-" + i).textContent =
+            `${allocation[i]}% · ${money((BUDGET * allocation[i]) / 100)}`;
+          $("spend-" + i).value = allocation[i];
+        });
+        $("remaining").textContent =
+          `${money((BUDGET * (100 - spent)) / 100)} unallocated · ${spent}% committed`;
+        $("customers").textContent = Math.round(base.total);
+        $("profit").textContent = money(base.profit);
+        $("cac").textContent = base.cac === null ? "—" : money(base.cac);
+        $("bars").innerHTML = CHANNELS.map(
+          (c, i) =>
+            `<div class="barrow"><span>${c.name}</span><strong>${base.customers[i].toFixed(1)} customers</strong><div class="track"><div class="fill" style="width:${Math.min(100, (base.customers[i] / 300) * 100)}%"></div></div></div>`,
+        ).join("");
+        $("launch").disabled = spent === 0;
+      }
+      function launch() {
+        const event = EVENTS[plans.length % EVENTS.length],
+          before = evaluate(allocation),
+          after = evaluate(allocation, event);
+        plans.push({
+          allocation: [...allocation],
+          event: event.name,
+          before,
+          after,
+        });
+        $("event").innerHTML =
+          `<p class="eyebrow">Plan ${plans.length} · Event revealed</p><h3>${event.name}</h3><p>${event.description}</p><div class="stats"><div class="stat"><small>Customers after event</small><div class="metric">${after.total.toFixed(1)}</div></div><div class="stat"><small>Contribution after event</small><div class="metric">${money(after.profit)}</div></div><div class="stat"><small>Change vs same plan's baseline</small><div class="metric">${money(after.profit - before.profit)}</div></div></div><p class="feedback">${after.profit >= 0 ? "This plan covers its media spend in the model." : "This plan does not cover its media spend in the model."} Which channel would you reduce after this event, and what would you give up elsewhere?</p>`;
+        $("history").innerHTML =
+          `<table><caption class="note">Launched plans · results remain fixed when you change the sliders. Mix order: search / social / email / influencers.</caption><thead><tr><th>Plan</th><th>Mix %</th><th>Event</th><th>Spend</th><th>Baseline contribution</th><th>After event</th></tr></thead><tbody>${plans.map((p, i) => `<tr><td>${i + 1}</td><td>${p.allocation.join(" / ")}</td><td>${p.event}</td><td>${money(p.after.cost)}</td><td>${money(p.before.profit)}</td><td>${money(p.after.profit)}</td></tr>`).join("")}</tbody></table>`;
+      }
+      $("controls").innerHTML = CHANNELS.map(
+        (c, i) =>
+          `<label for="spend-${i}">${c.name} <output id="amount-${i}" style="float:right"></output></label><input id="spend-${i}" type="range" min="0" max="100" step="5" value="25">`,
+      ).join("");
+      CHANNELS.forEach((c, i) =>
+        $("spend-" + i).addEventListener("input", () => {
+          const remaining =
+            100 - allocation.reduce((a, b, j) => a + (j === i ? 0 : b), 0);
+          allocation[i] = Math.min(Number($("spend-" + i).value), remaining);
+          render();
+        }),
+      );
+      $("launch").addEventListener("click", launch);
+      $("reset").addEventListener("click", () => {
+        allocation = [25, 25, 25, 25];
+        plans = [];
+        $("event").innerHTML =
+          '<p class="muted">Launch your first plan to reveal a market event and compare it with your baseline.</p>';
+        $("history").innerHTML = "";
+        render();
+      });
+      render();
+    </script>
+  </body>
+</html>

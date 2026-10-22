@@ -1,0 +1,638 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>AI Marketing Critique Arena · MKT 412 Draft</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #151819;
+        --panel: #202627;
+        --ink: #f4f0e6;
+        --muted: #bac4c1;
+        --gold: #efc466;
+        --mint: #85d9bb;
+        --line: #3b4645;
+        --rose: #f5a1a8;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          16px/1.6 system-ui,
+          sans-serif;
+      }
+      a {
+        color: var(--gold);
+      }
+      a:hover {
+        color: #fff;
+      }
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+      button,
+      select {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #2b3434;
+        color: var(--ink);
+        padding: 0.65rem 0.9rem;
+      }
+      button {
+        cursor: pointer;
+      }
+      button:hover:not(:disabled) {
+        border-color: var(--gold);
+        background: #39423d;
+      }
+      button.primary {
+        background: var(--gold);
+        color: #211b0d;
+        border-color: var(--gold);
+        font-weight: 750;
+      }
+      button:disabled {
+        opacity: 0.45;
+        cursor: default;
+      }
+      :focus-visible {
+        outline: 3px solid var(--mint);
+        outline-offset: 4px;
+      }
+      input[type="range"] {
+        width: 100%;
+        accent-color: var(--gold);
+      }
+      input[type="checkbox"],
+      input[type="radio"] {
+        accent-color: var(--gold);
+        width: 18px;
+        height: 18px;
+        vertical-align: middle;
+        margin-right: 0.5rem;
+      }
+      label {
+        display: block;
+        margin: 0.55rem 0;
+      }
+      select {
+        max-width: 100%;
+      }
+      header,
+      main,
+      footer {
+        max-width: 1120px;
+        margin: auto;
+        padding: 24px;
+      }
+      header {
+        padding-top: 32px;
+      }
+      .top {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .badge,
+      .eyebrow {
+        font-size: 0.75rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        font-weight: 750;
+      }
+      .badge {
+        padding: 5px 12px;
+        border: 1px solid var(--gold);
+        color: var(--gold);
+        border-radius: 30px;
+      }
+      .eyebrow {
+        color: var(--mint);
+      }
+      h1 {
+        font-size: clamp(2rem, 5vw, 3.8rem);
+        line-height: 1.1;
+        letter-spacing: -0.045em;
+        margin: 26px 0 16px;
+      }
+      h2 {
+        font-size: 1.2rem;
+        line-height: 1.3;
+        margin: 0 0 14px;
+      }
+      h3 {
+        font-size: 1rem;
+        margin: 0 0 8px;
+      }
+      .intro {
+        font-size: 1.15rem;
+        color: var(--muted);
+        max-width: 780px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 24px;
+        min-width: 0;
+      }
+      .wide {
+        grid-column: 1/-1;
+      }
+      .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin: 18px 0 0;
+      }
+      .muted,
+      .note {
+        color: var(--muted);
+      }
+      .note {
+        font-size: 0.88rem;
+      }
+      .metric {
+        font-size: 2rem;
+        line-height: 1.2;
+        font-weight: 750;
+        letter-spacing: -0.04em;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+        margin: 18px 0;
+      }
+      .stat {
+        padding: 16px;
+        background: #171d1e;
+        border-radius: 10px;
+      }
+      .stat small {
+        display: block;
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+      .accent {
+        color: var(--gold);
+      }
+      .feedback {
+        border-left: 3px solid var(--mint);
+        padding: 12px 16px;
+        background: #182e28;
+        margin-top: 18px;
+      }
+      .warning {
+        border-left-color: var(--gold);
+        background: #302a1c;
+      }
+      .choice {
+        border: 1px solid var(--line);
+        padding: 12px;
+        border-radius: 8px;
+      }
+      .ad {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 20px;
+        background: #171d1e;
+      }
+      .ad h3 {
+        font-size: 1.3rem;
+      }
+      .plot {
+        width: 100%;
+        display: block;
+        background: #171d1e;
+        border-radius: 10px;
+      }
+      .legend {
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+        font-size: 0.88rem;
+      }
+      .gold {
+        color: var(--gold);
+      }
+      .mint {
+        color: var(--mint);
+      }
+      .tablewrap {
+        overflow-x: auto;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 0.9rem;
+      }
+      td,
+      th {
+        text-align: left;
+        border-bottom: 1px solid var(--line);
+        padding: 10px;
+      }
+      details {
+        margin-top: 20px;
+      }
+      summary {
+        cursor: pointer;
+        color: var(--gold);
+        font-weight: 650;
+      }
+      code {
+        color: var(--mint);
+        overflow-wrap: anywhere;
+      }
+      footer {
+        border-top: 1px solid var(--line);
+        margin-top: 30px;
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+      footer nav {
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      .track {
+        height: 12px;
+        border-radius: 6px;
+        background: #101718;
+        overflow: hidden;
+      }
+      .fill {
+        height: 100%;
+        background: var(--gold);
+        transition: width 0.25s;
+      }
+      .barrow {
+        margin: 16px 0;
+      }
+      .barrow strong {
+        float: right;
+      }
+      output {
+        font-variant-numeric: tabular-nums;
+      }
+      .steps {
+        color: var(--mint);
+        font-size: 0.88rem;
+      }
+      ul {
+        padding-left: 22px;
+      }
+      @media (max-width: 700px) {
+        header,
+        main,
+        footer {
+          padding: 18px;
+        }
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .stats {
+          grid-template-columns: 1fr;
+          gap: 8px;
+        }
+        .stat {
+          padding: 12px;
+        }
+        .panel {
+          padding: 18px;
+        }
+        .metric {
+          font-size: 1.7rem;
+        }
+        h1 {
+          margin-top: 24px;
+        }
+        .top {
+          font-size: 0.9rem;
+        }
+        button {
+          min-height: 44px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="top">
+        <a href="../index.html">← MKT 412 home</a
+        ><span class="badge">Draft · Instructor playground</span>
+      </div>
+      <p class="eyebrow" style="margin-top: 32px">04 / Editorial judgment</p>
+      <h1>AI Marketing Critique Arena</h1>
+      <p class="intro">
+        Convincing copy can still be a weak campaign. Audit three fictional
+        briefs, match claims to evidence, and turn a shaky draft into a stronger
+        starting point.
+      </p>
+    </header>
+    <main>
+      <div class="grid">
+        <section class="panel wide">
+          <p class="steps" id="progress" aria-live="polite"></p>
+          <h2 id="brief-title"></h2>
+          <p id="brief"></p>
+          <div class="grid">
+            <article class="ad">
+              <p class="eyebrow">Campaign A</p>
+              <h3 id="headline-a"></h3>
+              <p id="copy-a"></p>
+            </article>
+            <article class="ad">
+              <p class="eyebrow">Campaign B</p>
+              <h3 id="headline-b"></h3>
+              <p id="copy-b"></p>
+            </article>
+          </div>
+        </section>
+        <section class="panel">
+          <h2>01 / Make the editorial call</h2>
+          <fieldset style="border: 0; padding: 0">
+            <legend>
+              Which draft is the stronger starting point for this brief?
+            </legend>
+            <label class="choice"
+              ><input type="radio" name="campaign" value="A" />Campaign A</label
+            ><label class="choice"
+              ><input type="radio" name="campaign" value="B" />Campaign B</label
+            >
+          </fieldset>
+          <h3 style="margin-top: 22px" id="audit-title"></h3>
+          <p class="note">
+            Select every issue supported by the text. A style preference is not
+            automatically a factual problem.
+          </p>
+          <div id="issues"></div>
+          <div class="actions">
+            <button id="review" class="primary">Review choices</button
+            ><button id="next" hidden>Next brief →</button
+            ><button id="reset">Start over</button>
+          </div>
+          <p id="validation" class="note" aria-live="polite"></p>
+        </section>
+        <section class="panel">
+          <h2>02 / Explain, then improve</h2>
+          <div id="feedback" aria-live="polite">
+            <p class="muted">
+              Make your choices to reveal the teaching rubric and a more
+              defensible rewrite.
+            </p>
+          </div>
+        </section>
+        <section class="panel wide">
+          <details>
+            <summary>Instructor notes / adapt the critique rubric</summary>
+            <p>
+              The brand briefs, campaign copy, evidence constraints, and answer
+              keys are fictional, hand-authored teaching examples of AI-style
+              marketing drafts. This page does not call an AI model, detect AI
+              authorship, check facts automatically, or offer a legal compliance
+              review.
+            </p>
+            <p>
+              The rubric rewards matching issues to the supplied brief, choosing
+              the stronger starting point, and avoiding unsupported accusations.
+              Each case earns one point for the campaign choice plus one for
+              each correctly identified issue; each extra issue selected
+              subtracts one issue point, down to zero issue points per case. A
+              campaign-choice point is never removed by an extra issue.
+            </p>
+            <p>
+              Students can disagree with the suggested creative direction if
+              they cite the brief. Extension ideas: add new briefs, have
+              students write their own revision, or replace the checkbox rubric
+              with an instructor discussion.
+            </p>
+          </details>
+        </section>
+      </div>
+    </main>
+    <footer>
+      <p>
+        Teaching prototype · fictional scenarios · no live data or AI service ·
+        progress resets on reload.
+      </p>
+      <nav aria-label="Other draft activities">
+        <a href="ab-test-detective.html">A/B Test Detective</a
+        ><a href="positioning-map-studio.html">Positioning Map Studio</a
+        ><a href="budget-allocation-challenge.html"
+          >Budget Allocation Challenge</a
+        >
+      </nav>
+      <p>
+        Instructor / agent: see
+        <a href="../docs/draft-activities.html">the extension guide</a> for
+        editable scenarios, model assumptions, and ideas.
+      </p>
+    </footer>
+    <script>
+      "use strict";
+      // INSTRUCTOR: Edit CASES and ISSUE_TYPES. All copy and evidence are invented examples.
+      const ISSUE_TYPES = [
+        { id: "evidence", label: "A claim exceeds the supplied evidence" },
+        {
+          id: "audience",
+          label: "The message misses the target audience or brief",
+        },
+        { id: "testimonial", label: "A testimonial or source is invented" },
+        { id: "promise", label: "A guarantee promises an untested outcome" },
+        { id: "tone", label: "A playful headline is inherently unacceptable" },
+      ];
+      const CASES = [
+        {
+          title: "The reusable cup",
+          brief:
+            "LoopCup targets commuting students. It is a reusable stainless-steel cup, priced at $18. The brief provides no lifecycle study, customer survey, or comparative emissions data. Goal: encourage repeat use.",
+          a: {
+            headline: "The planet’s first zero-impact cup.",
+            copy: "LoopCup eliminates 100% of your coffee footprint. “Nine out of ten students call it life-changing,” says our campus survey.",
+          },
+          b: {
+            headline: "Bring your cup. Keep your routine.",
+            copy: "An $18 reusable stainless-steel cup for your everyday coffee stop. Pack it alongside your keys and use it again tomorrow.",
+          },
+          stronger: "B",
+          audit: "A",
+          issues: ["evidence", "testimonial"],
+          why: {
+            evidence:
+              "“Zero impact” and “100%” emissions elimination go beyond the product facts. Reusability alone does not establish those comparisons.",
+            testimonial:
+              "No survey was supplied. A plausible-sounding statistic is still invented evidence.",
+          },
+          rewrite:
+            "Meet LoopCup: a reusable stainless-steel cup for the trip to class. $18. Bring it back for your next coffee.",
+          discussion:
+            "What evidence would you need before making a comparative environmental claim?",
+        },
+        {
+          title: "Dinner for a busy household",
+          brief:
+            "Weeknight Box serves price-conscious families looking for easy dinners. A box contains four servings for $24. Preparation takes about 25 minutes in the fictional product brief. No health or weight-change trials are available.",
+          a: {
+            headline: "Four servings. One easier weeknight.",
+            copy: "Make a four-serving dinner for $24, with ingredients and a recipe designed for about 25 minutes of prep. Check the menu for your family’s preferences.",
+          },
+          b: {
+            headline: "Your elite performance protocol.",
+            copy: "For high-income solo athletes only: our exclusive family box guarantees peak fitness in seven days. No effort required.",
+          },
+          stronger: "A",
+          audit: "B",
+          issues: ["audience", "promise"],
+          why: {
+            audience:
+              "The exclusive solo-athlete positioning conflicts with the price-conscious family audience.",
+            promise:
+              "A seven-day fitness guarantee is not supported by this brief. It also distracts from the practical dinner benefit.",
+          },
+          rewrite:
+            "A family dinner plan for a busy evening: four servings for $24, with a recipe designed for about 25 minutes of prep.",
+          discussion:
+            "Could Campaign B be a valid concept for a different product and audience? Which facts would have to change?",
+        },
+        {
+          title: "A calmer study plan",
+          brief:
+            "StudyNest is a fictional planner for first-year students. It organizes tasks and reminders. The brief supplies no university endorsement, grade-outcome study, or student testimonials. The campaign should build trust without promising academic results.",
+          a: {
+            headline: "From chaos to guaranteed A’s.",
+            copy: "“StudyNest raised my GPA overnight,” says student ambassador Maya Chen. Guaranteed top grades, whatever your workload.",
+          },
+          b: {
+            headline: "Make room for your next deadline.",
+            copy: "Put tasks and reminders in one place. Try building a weekly plan around your classes, and adjust it as your workload changes.",
+          },
+          stronger: "B",
+          audit: "A",
+          issues: ["testimonial", "promise"],
+          why: {
+            testimonial:
+              "The brief contains no student testimonial. A named fictional endorsement should not be presented as real evidence.",
+            promise:
+              "Task organization does not establish guaranteed grades. The promise exceeds what the product brief supports.",
+          },
+          rewrite:
+            "Plan the week ahead with StudyNest. Organize your tasks and reminders, then make a schedule that fits your classes.",
+          discussion:
+            "How can you make the copy specific and appealing without inventing a customer story?",
+        },
+      ];
+      const $ = (id) => document.getElementById(id);
+      let current = 0,
+        scores = [],
+        reviewed = false;
+      function render() {
+        reviewed = false;
+        const c = CASES[current];
+        $("progress").textContent =
+          `Brief ${current + 1} of ${CASES.length} · ${scores.reduce((a, b) => a + b, 0)} points so far`;
+        $("brief-title").textContent = c.title;
+        $("brief").textContent = c.brief;
+        ["a", "b"].forEach((k) => {
+          $("headline-" + k).textContent = c[k].headline;
+          $("copy-" + k).textContent = c[k].copy;
+        });
+        $("audit-title").textContent =
+          `Audit Campaign ${c.audit}: what needs revision?`;
+        $("issues").innerHTML = ISSUE_TYPES.map(
+          (t) =>
+            `<label class="choice"><input type="checkbox" value="${t.id}" name="issue">${t.label}</label>`,
+        ).join("");
+        document.querySelectorAll("[name=campaign]").forEach((e) => {
+          e.checked = false;
+          e.disabled = false;
+        });
+        $("review").disabled = false;
+        $("next").hidden = true;
+        $("next").disabled = false;
+        $("next").textContent =
+          current === CASES.length - 1
+            ? "See final reflection →"
+            : "Next brief →";
+        $("validation").textContent = "";
+        $("feedback").innerHTML =
+          '<p class="muted">Make your choices to reveal the teaching rubric and a more defensible rewrite.</p>';
+      }
+      function review() {
+        if (reviewed) return;
+        const selected = document.querySelector("[name=campaign]:checked");
+        if (!selected) {
+          $("validation").textContent =
+            "Choose Campaign A or B before reviewing.";
+          return;
+        }
+        const c = CASES[current],
+          picks = [...document.querySelectorAll("[name=issue]:checked")].map(
+            (e) => e.value,
+          ),
+          hits = picks.filter((id) => c.issues.includes(id)).length,
+          extras = picks.length - hits,
+          issuePoints = Math.max(0, hits - extras),
+          choicePoint = Number(selected.value === c.stronger),
+          score = choicePoint + issuePoints;
+        scores[current] = score;
+        reviewed = true;
+        document
+          .querySelectorAll("[name=campaign],[name=issue]")
+          .forEach((e) => (e.disabled = true));
+        $("review").disabled = true;
+        $("next").hidden = false;
+        $("validation").textContent =
+          "Choices locked for this brief. Compare your reasoning with the rubric.";
+        $("feedback").innerHTML =
+          `<p class="eyebrow">${score} / ${1 + c.issues.length} points</p><h3>Campaign ${c.stronger} is the stronger starting point.</h3><p>${choicePoint ? "Your choice matches the teaching rubric." : "Revisit the audience and evidence constraints in the brief."} You found ${hits} of ${c.issues.length} rubric issues${extras ? `, with ${extras} extra flag(s)` : ""}.</p>${c.issues.map((id) => `<p><strong>${ISSUE_TYPES.find((t) => t.id === id).label}</strong><br>${c.why[id]} ${picks.includes(id) ? "✓ You flagged this." : "You did not flag this."}</p>`).join("")}${extras ? '<p class="note">Only flag issues the brief supports. Other concerns may be reasonable discussion points, but they do not earn rubric points here.</p>' : ""}<h3>A possible rewrite</h3><blockquote style="margin:12px 0;border-left:3px solid #efc466;padding-left:16px">${c.rewrite}</blockquote><p class="feedback">${c.discussion}</p>`;
+        $("progress").textContent =
+          `Brief ${current + 1} of ${CASES.length} · ${scores.reduce((a, b) => a + b, 0)} points so far`;
+      }
+      $("review").addEventListener("click", review);
+      $("next").addEventListener("click", () => {
+        if (!reviewed) return;
+        if (current < CASES.length - 1) {
+          current++;
+          render();
+          $("brief-title").scrollIntoView({ block: "start" });
+        } else {
+          const max = CASES.reduce((n, c) => n + 1 + c.issues.length, 0);
+          $("feedback").innerHTML =
+            `<h3>Complete · ${scores.reduce((a, b) => a + b, 0)} / ${max} points</h3><p>You have reviewed claims, audience fit, testimonials, and guarantees. The strongest critique points to the specific gap between copy and evidence.</p><p class="feedback">Final reflection: write one sentence you would keep, one you would revise, and one piece of evidence you would request before publication.</p><p class="note">The score reflects this draft’s rubric, not a general measure of marketing judgment.</p>`;
+          $("next").disabled = true;
+          $("next").textContent = "All briefs complete";
+        }
+      });
+      $("reset").addEventListener("click", () => {
+        current = 0;
+        scores = [];
+        render();
+      });
+      render();
+    </script>
+  </body>
+</html>

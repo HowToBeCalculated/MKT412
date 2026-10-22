@@ -44,6 +44,8 @@
             height: 100%;
             transition: transform .3s ease, filter .2s ease;
         }
+        a:focus-visible { outline: 3px solid #e6a700; outline-offset: 6px; border-radius: 0.75rem; }
+
         .card-standard:hover {
             transform: scale(1.05);
         }
@@ -142,6 +144,41 @@
             </a>
 
         </div>
+        <section aria-labelledby="draft-heading" class="mt-16">
+            <h2 id="draft-heading" class="text-3xl font-bold text-white mb-3">Draft Studio: Four Ideas to Build On</h2>
+            <p class="text-gray-300 mb-6">Playable teaching prototypes for instructors and their agents to adapt. Fictional scenarios, simplified models, and no API keys needed.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <a href="pages/ab-test-detective.html" class="block">
+                    <div class="card-standard card-hover">
+                        <span class="text-bryant-accent text-sm font-bold mb-3">DRAFT · INSTRUCTOR PLAYGROUND</span>
+                        <h3 class="text-2xl font-bold mb-3">A/B Test Detective</h3>
+                        <p class="text-gray-300">Predict the better ad, reveal visitors in batches, and see how a small sample can mislead.</p>
+                    </div>
+                </a>
+                <a href="pages/positioning-map-studio.html" class="block">
+                    <div class="card-standard card-hover">
+                        <span class="text-bryant-accent text-sm font-bold mb-3">DRAFT · INSTRUCTOR PLAYGROUND</span>
+                        <h3 class="text-2xl font-bold mb-3">Positioning Map Studio</h3>
+                        <p class="text-gray-300">Move brands around a perceptual map and discover why empty space does not guarantee demand.</p>
+                    </div>
+                </a>
+                <a href="pages/budget-allocation-challenge.html" class="block">
+                    <div class="card-standard card-hover">
+                        <span class="text-bryant-accent text-sm font-bold mb-3">DRAFT · INSTRUCTOR PLAYGROUND</span>
+                        <h3 class="text-2xl font-bold mb-3">Budget Allocation Challenge</h3>
+                        <p class="text-gray-300">Allocate $10,000 across four channels, then see how a market event changes your results.</p>
+                    </div>
+                </a>
+                <a href="pages/ai-marketing-critique-arena.html" class="block">
+                    <div class="card-standard card-hover">
+                        <span class="text-bryant-accent text-sm font-bold mb-3">DRAFT · INSTRUCTOR PLAYGROUND</span>
+                        <h3 class="text-2xl font-bold mb-3">AI Marketing Critique Arena</h3>
+                        <p class="text-gray-300">Audit fictional campaigns for weak evidence, audience mismatch, and invented promises.</p>
+                    </div>
+                </a>
+            </div>
+            <p class="text-gray-300 mt-6"><a href="docs/draft-activities.html" class="text-bryant-accent underline">Instructor guide: assumptions, editable scenarios, and extension ideas →</a></p>
+        </section>
     </main>
 
     <!-- Footer Section -->

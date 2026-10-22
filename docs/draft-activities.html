@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Draft Studio · Instructor Extension Guide</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #151819;
+        --panel: #202627;
+        --ink: #f4f0e6;
+        --muted: #bac4c1;
+        --gold: #efc466;
+        --mint: #85d9bb;
+        --line: #3b4645;
+        --rose: #f5a1a8;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          16px/1.6 system-ui,
+          sans-serif;
+      }
+      a {
+        color: var(--gold);
+      }
+      a:hover {
+        color: #fff;
+      }
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+      button,
+      select {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #2b3434;
+        color: var(--ink);
+        padding: 0.65rem 0.9rem;
+      }
+      button {
+        cursor: pointer;
+      }
+      button:hover:not(:disabled) {
+        border-color: var(--gold);
+        background: #39423d;
+      }
+      button.primary {
+        background: var(--gold);
+        color: #211b0d;
+        border-color: var(--gold);
+        font-weight: 750;
+      }
+      button:disabled {
+        opacity: 0.45;
+        cursor: default;
+      }
+      :focus-visible {
+        outline: 3px solid var(--mint);
+        outline-offset: 4px;
+      }
+      input[type="range"] {
+        width: 100%;
+        accent-color: var(--gold);
+      }
+      input[type="checkbox"],
+      input[type="radio"] {
+        accent-color: var(--gold);
+        width: 18px;
+        height: 18px;
+        vertical-align: middle;
+        margin-right: 0.5rem;
+      }
+      label {
+        display: block;
+        margin: 0.55rem 0;
+      }
+      select {
+        max-width: 100%;
+      }
+      header,
+      main,
+      footer {
+        max-width: 1120px;
+        margin: auto;
+        padding: 24px;
+      }
+      header {
+        padding-top: 32px;
+      }
+      .top {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .badge,
+      .eyebrow {
+        font-size: 0.75rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        font-weight: 750;
+      }
+      .badge {
+        padding: 5px 12px;
+        border: 1px solid var(--gold);
+        color: var(--gold);
+        border-radius: 30px;
+      }
+      .eyebrow {
+        color: var(--mint);
+      }
+      h1 {
+        font-size: clamp(2rem, 5vw, 3.8rem);
+        line-height: 1.1;
+        letter-spacing: -0.045em;
+        margin: 26px 0 16px;
+      }
+      h2 {
+        font-size: 1.2rem;
+        line-height: 1.3;
+        margin: 0 0 14px;
+      }
+      h3 {
+        font-size: 1rem;
+        margin: 0 0 8px;
+      }
+      .intro {
+        font-size: 1.15rem;
+        color: var(--muted);
+        max-width: 780px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 24px;
+        min-width: 0;
+      }
+      .wide {
+        grid-column: 1/-1;
+      }
+      .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin: 18px 0 0;
+      }
+      .muted,
+      .note {
+        color: var(--muted);
+      }
+      .note {
+        font-size: 0.88rem;
+      }
+      .metric {
+        font-size: 2rem;
+        line-height: 1.2;
+        font-weight: 750;
+        letter-spacing: -0.04em;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+        margin: 18px 0;
+      }
+      .stat {
+        padding: 16px;
+        background: #171d1e;
+        border-radius: 10px;
+      }
+      .stat small {
+        display: block;
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+      .accent {
+        color: var(--gold);
+      }
+      .feedback {
+        border-left: 3px solid var(--mint);
+        padding: 12px 16px;
+        background: #182e28;
+        margin-top: 18px;
+      }
+      .warning {
+        border-left-color: var(--gold);
+        background: #302a1c;
+      }
+      .choice {
+        border: 1px solid var(--line);
+        padding: 12px;
+        border-radius: 8px;
+      }
+      .ad {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 20px;
+        background: #171d1e;
+      }
+      .ad h3 {
+        font-size: 1.3rem;
+      }
+      .plot {
+        width: 100%;
+        display: block;
+        background: #171d1e;
+        border-radius: 10px;
+      }
+      .legend {
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+        font-size: 0.88rem;
+      }
+      .gold {
+        color: var(--gold);
+      }
+      .mint {
+        color: var(--mint);
+      }
+      .tablewrap {
+        overflow-x: auto;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 0.9rem;
+      }
+      td,
+      th {
+        text-align: left;
+        border-bottom: 1px solid var(--line);
+        padding: 10px;
+      }
+      details {
+        margin-top: 20px;
+      }
+      summary {
+        cursor: pointer;
+        color: var(--gold);
+        font-weight: 650;
+      }
+      code {
+        color: var(--mint);
+        overflow-wrap: anywhere;
+      }
+      footer {
+        border-top: 1px solid var(--line);
+        margin-top: 30px;
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+      footer nav {
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      .track {
+        height: 12px;
+        border-radius: 6px;
+        background: #101718;
+        overflow: hidden;
+      }
+      .fill {
+        height: 100%;
+        background: var(--gold);
+        transition: width 0.25s;
+      }
+      .barrow {
+        margin: 16px 0;
+      }
+      .barrow strong {
+        float: right;
+      }
+      output {
+        font-variant-numeric: tabular-nums;
+      }
+      .steps {
+        color: var(--mint);
+        font-size: 0.88rem;
+      }
+      ul {
+        padding-left: 22px;
+      }
+      @media (max-width: 700px) {
+        header,
+        main,
+        footer {
+          padding: 18px;
+        }
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .stats {
+          grid-template-columns: 1fr;
+          gap: 8px;
+        }
+        .stat {
+          padding: 12px;
+        }
+        .panel {
+          padding: 18px;
+        }
+        .metric {
+          font-size: 1.7rem;
+        }
+        h1 {
+          margin-top: 24px;
+        }
+        .top {
+          font-size: 0.9rem;
+        }
+        button {
+          min-height: 44px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="top">
+        <a href="../index.html">← MKT 412 home</a
+        ><span class="badge">Instructor / agent guide</span>
+      </div>
+      <p class="eyebrow" style="margin-top: 32px">
+        MKT 412 / Build on the drafts
+      </p>
+      <h1>Four starting points.<br />Your next lesson.</h1>
+      <p class="intro">
+        A practical map of the teaching goals, editable data, and simplifying
+        assumptions behind Draft Studio.
+      </p>
+    </header>
+    <main>
+      <div class="grid">
+        <section class="panel wide">
+          <h2>Start with a teaching goal</h2>
+          <p>
+            These four drafts are small, functioning examples, designed to be
+            copied and changed. All scenarios are fictional. There is no build
+            step, API key, backend, external library, or saved student record in
+            these drafts. Keep the standard HTML document, change the case data,
+            and refresh the browser.
+          </p>
+          <p>
+            Give your agent the repository, then ask: “Read README.md,
+            AGENTS.md, and this guide. Adapt one draft for my course while
+            preserving existing activity URLs. Update the inventory and verify
+            the interactions.” Claude Code loads the shared guidance through
+            CLAUDE.md.
+          </p>
+        </section>
+        <section class="panel">
+          <p class="eyebrow">01 / Experimentation</p>
+          <h2>
+            <a href="../pages/ab-test-detective.html">A/B Test Detective →</a>
+          </h2>
+          <p>
+            <strong>Try:</strong> predict the better ad, reveal four
+            checkpoints, and inspect the hidden rates. Reset and replay the same
+            fictional visitors, or choose another scenario.
+          </p>
+          <p>
+            <strong>Change:</strong> <code>SCENARIOS</code> holds ad copy,
+            underlying rates, and seeds; <code>CHECKPOINTS</code> holds visitor
+            counts; <code>wilson()</code> computes approximate 95% intervals.
+            Current counts finish at 5,000 per version; update sample generation
+            and completion logic too if changing that horizon.
+          </p>
+          <p>
+            <strong>Assumptions:</strong> independent Bernoulli conversions,
+            equal traffic, no time trends or audience confounding. Intervals
+            describe each version at a fixed sample size. Repeated peeking is
+            for demonstration; this draft does not supply a sequential testing
+            rule or claim statistical significance.
+          </p>
+          <p>
+            <strong>Build next:</strong> minimum useful effect, test-plan
+            worksheet, device segments, or a revenue metric.
+            <a
+              href="https://www.itl.nist.gov/div898/handbook/prc/section2/prc241.htm"
+              >Formula reference: NIST confidence intervals.</a
+            >
+          </p>
+        </section>
+        <section class="panel">
+          <p class="eyebrow">02 / Competitive strategy</p>
+          <h2>
+            <a href="../pages/positioning-map-studio.html"
+              >Positioning Map Studio →</a
+            >
+          </h2>
+          <p>
+            <strong>Try:</strong> drag your brand and a rival. Use the sliders
+            for the same operation with a keyboard. Inspect different segments,
+            then try the empty corner.
+          </p>
+          <p>
+            <strong>Change:</strong> <code>INITIAL_BRANDS</code> defines
+            perceived positions; <code>SEGMENTS</code> defines preferred
+            positions and population weights (weights should total 1).
+            <code>TASTE_WIDTH</code> changes tolerance for distance;
+            <code>NO_PURCHASE</code> controls the outside option.
+          </p>
+          <p>
+            <strong>Assumptions:</strong> attractiveness = exp(−distance² / (2 ×
+            width²)); shares normalize attractiveness across four brands and no
+            purchase, then weight by segment size. This is an invented
+            illustrative choice model, not observed research. Perceived premium
+            positioning is not a price input, and share is not profit.
+          </p>
+          <p>
+            <strong>Build next:</strong> price and contribution margins,
+            research imports, extra segments, or repositioning costs. Keep
+            coordinates in 0–100 and outside-option attractiveness positive.
+          </p>
+        </section>
+        <section class="panel">
+          <p class="eyebrow">03 / Resource allocation</p>
+          <h2>
+            <a href="../pages/budget-allocation-challenge.html"
+              >Budget Allocation Challenge →</a
+            >
+          </h2>
+          <p>
+            <strong>Try:</strong> reduce a channel before increasing another.
+            Compare baseline results, launch a plan to reveal an event, and
+            launch a revised mix. History preserves each committed mix and its
+            event.
+          </p>
+          <p>
+            <strong>Change:</strong> <code>CHANNELS</code> holds capacity and
+            scale; <code>EVENTS</code> holds channel multipliers;
+            <code>BUDGET</code> is dollars available and <code>MARGIN</code> is
+            contribution per acquired customer.
+          </p>
+          <p>
+            <strong>Assumptions:</strong> expected customers = capacity × (1 −
+            exp(−spend / scale)); social spending adds up to 25% to email
+            capacity. Contribution after media = customers × $45 − actual spend.
+            No fixed overhead, repeat purchases, or duplicated customers across
+            channels. All coefficients are invented; predictions are
+            deterministic expectations.
+          </p>
+          <p>
+            <strong>Build next:</strong> let users hold the event constant
+            across plans, add segment-specific curves, model overlapping
+            audiences, or add more rounds. Events currently cycle in order, and
+            history comparisons across events are not controlled experiments.
+          </p>
+        </section>
+        <section class="panel">
+          <p class="eyebrow">04 / Editorial judgment</p>
+          <h2>
+            <a href="../pages/ai-marketing-critique-arena.html"
+              >AI Marketing Critique Arena →</a
+            >
+          </h2>
+          <p>
+            <strong>Try:</strong> choose the stronger campaign, audit the
+            indicated weaker draft, and compare your reasoning with the rubric.
+            Work through all three briefs and discuss a rewrite.
+          </p>
+          <p>
+            <strong>Change:</strong> <code>CASES</code> contains brief, copy,
+            stronger campaign, audited campaign, issues, explanations, rewrite,
+            and discussion question. <code>ISSUE_TYPES</code> defines checkbox
+            categories. Keep issue IDs and explanations synchronized.
+          </p>
+          <p>
+            <strong>Assumptions:</strong> these are hand-authored examples of
+            AI-style drafts, not actual model output or automated fact-checks.
+            Score = campaign-choice point + max(0, correct issue flags − extra
+            flags). Each current brief has two rubric issues. It is a discussion
+            aid, not an objective grade or a legal review.
+          </p>
+          <p>
+            <strong>Build next:</strong> ask students to write revisions, add
+            alternative defensible answers, or use a local instructor rubric.
+            Avoid supplying real student data or presenting invented
+            endorsements as genuine.
+          </p>
+        </section>
+        <section class="panel wide">
+          <h2>Preview and verify an extension</h2>
+          <p>
+            From the repository root:
+            <code>python3 -m http.server 8000 --bind 127.0.0.1</code>, then open
+            <a href="http://localhost:8000/">localhost:8000</a>. These four
+            drafts also work as local files and offline; the older homepage and
+            some original activities use CDNs.
+          </p>
+          <ul>
+            <li>Check the homepage card and the direct activity URL.</li>
+            <li>
+              Exercise primary controls, reset, zero and extreme inputs, and
+              feedback states.
+            </li>
+            <li>
+              Check the browser console, narrow screens, and keyboard access.
+            </li>
+            <li>
+              Verify model identities: segment shares sum to 1; no spend gives
+              zero modeled customers; a zero-conversion interval stays within
+              0–1.
+            </li>
+            <li>
+              Keep drafts labeled until you have reviewed them for your course.
+              Update pages/README.md when assumptions or dependencies change.
+            </li>
+          </ul>
+          <p>
+            GitHub Pages publishes main from the repository root. A push to main
+            updates the public site after its Pages deployment succeeds.
+          </p>
+        </section>
+      </div>
+    </main>
+    <footer>
+      <nav aria-label="Draft activities">
+        <a href="../pages/ab-test-detective.html">A/B Test Detective</a
+        ><a href="../pages/positioning-map-studio.html"
+          >Positioning Map Studio</a
+        ><a href="../pages/budget-allocation-challenge.html"
+          >Budget Allocation Challenge</a
+        ><a href="../pages/ai-marketing-critique-arena.html"
+          >AI Marketing Critique Arena</a
+        >
+      </nav>
+    </footer>
+  </body>
+</html>

@@ -18,13 +18,17 @@ GitHub Pages is configured to publish `main` from `/ (root)` at the address abov
 | Path | Purpose |
 | --- | --- |
 | [index.html](index.html) | Student-facing homepage; activity cards and navigation are maintained by hand. |
-| [pages/](pages/) | Seven individual HTML activities, mostly with their CSS and JavaScript in the same file. |
+| [pages/](pages/) | Eleven individual HTML activities, mostly with their CSS and JavaScript in the same file. |
 | [pages/README.md](pages/README.md) | Activity descriptions, dependencies, implementation entry points, and existing quirks. |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Human handoff and contribution guide. |
 | [AGENTS.md](AGENTS.md) | Repository-wide instructions for coding agents. |
 | [CLAUDE.md](CLAUDE.md) | Claude Code entry point importing the shared agent instructions. |
 
-The homepage currently links to six activities. The Solvix launch simulator is available by direct URL but has no homepage card. Three hidden cards refer to pages that do not yet exist; see the inventory before enabling them.
+The homepage currently links to six original activities plus four clearly labeled drafts. The Solvix launch simulator is available by direct URL but has no homepage card. Three hidden cards refer to pages that do not yet exist; see the inventory before enabling them.
+
+## Draft Studio
+
+Four playable starting points are now linked from the homepage: **A/B Test Detective**, **Positioning Map Studio**, **Budget Allocation Challenge**, and **AI Marketing Critique Arena**. They run without external dependencies or API keys. Their data and coefficients are fictional teaching examples. See the [instructor extension guide](docs/draft-activities.html) for model assumptions and ways to adapt each page.
 
 ## Preview locally
 

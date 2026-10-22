@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Positioning Map Studio · MKT 412 Draft</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #151819;
+        --panel: #202627;
+        --ink: #f4f0e6;
+        --muted: #bac4c1;
+        --gold: #efc466;
+        --mint: #85d9bb;
+        --line: #3b4645;
+        --rose: #f5a1a8;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          16px/1.6 system-ui,
+          sans-serif;
+      }
+      a {
+        color: var(--gold);
+      }
+      a:hover {
+        color: #fff;
+      }
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+      button,
+      select {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #2b3434;
+        color: var(--ink);
+        padding: 0.65rem 0.9rem;
+      }
+      button {
+        cursor: pointer;
+      }
+      button:hover:not(:disabled) {
+        border-color: var(--gold);
+        background: #39423d;
+      }
+      button.primary {
+        background: var(--gold);
+        color: #211b0d;
+        border-color: var(--gold);
+        font-weight: 750;
+      }
+      button:disabled {
+        opacity: 0.45;
+        cursor: default;
+      }
+      :focus-visible {
+        outline: 3px solid var(--mint);
+        outline-offset: 4px;
+      }
+      input[type="range"] {
+        width: 100%;
+        accent-color: var(--gold);
+      }
+      input[type="checkbox"],
+      input[type="radio"] {
+        accent-color: var(--gold);
+        width: 18px;
+        height: 18px;
+        vertical-align: middle;
+        margin-right: 0.5rem;
+      }
+      label {
+        display: block;
+        margin: 0.55rem 0;
+      }
+      select {
+        max-width: 100%;
+      }
+      header,
+      main,
+      footer {
+        max-width: 1120px;
+        margin: auto;
+        padding: 24px;
+      }
+      header {
+        padding-top: 32px;
+      }
+      .top {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .badge,
+      .eyebrow {
+        font-size: 0.75rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        font-weight: 750;
+      }
+      .badge {
+        padding: 5px 12px;
+        border: 1px solid var(--gold);
+        color: var(--gold);
+        border-radius: 30px;
+      }
+      .eyebrow {
+        color: var(--mint);
+      }
+      h1 {
+        font-size: clamp(2rem, 5vw, 3.8rem);
+        line-height: 1.1;
+        letter-spacing: -0.045em;
+        margin: 26px 0 16px;
+      }
+      h2 {
+        font-size: 1.2rem;
+        line-height: 1.3;
+        margin: 0 0 14px;
+      }
+      h3 {
+        font-size: 1rem;
+        margin: 0 0 8px;
+      }
+      .intro {
+        font-size: 1.15rem;
+        color: var(--muted);
+        max-width: 780px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 24px;
+        min-width: 0;
+      }
+      .wide {
+        grid-column: 1/-1;
+      }
+      .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin: 18px 0 0;
+      }
+      .muted,
+      .note {
+        color: var(--muted);
+      }
+      .note {
+        font-size: 0.88rem;
+      }
+      .metric {
+        font-size: 2rem;
+        line-height: 1.2;
+        font-weight: 750;
+        letter-spacing: -0.04em;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+        margin: 18px 0;
+      }
+      .stat {
+        padding: 16px;
+        background: #171d1e;
+        border-radius: 10px;
+      }
+      .stat small {
+        display: block;
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+      .accent {
+        color: var(--gold);
+      }
+      .feedback {
+        border-left: 3px solid var(--mint);
+        padding: 12px 16px;
+        background: #182e28;
+        margin-top: 18px;
+      }
+      .warning {
+        border-left-color: var(--gold);
+        background: #302a1c;
+      }
+      .choice {
+        border: 1px solid var(--line);
+        padding: 12px;
+        border-radius: 8px;
+      }
+      .ad {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 20px;
+        background: #171d1e;
+      }
+      .ad h3 {
+        font-size: 1.3rem;
+      }
+      .plot {
+        width: 100%;
+        display: block;
+        background: #171d1e;
+        border-radius: 10px;
+      }
+      .legend {
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+        font-size: 0.88rem;
+      }
+      .gold {
+        color: var(--gold);
+      }
+      .mint {
+        color: var(--mint);
+      }
+      .tablewrap {
+        overflow-x: auto;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 0.9rem;
+      }
+      td,
+      th {
+        text-align: left;
+        border-bottom: 1px solid var(--line);
+        padding: 10px;
+      }
+      details {
+        margin-top: 20px;
+      }
+      summary {
+        cursor: pointer;
+        color: var(--gold);
+        font-weight: 650;
+      }
+      code {
+        color: var(--mint);
+        overflow-wrap: anywhere;
+      }
+      footer {
+        border-top: 1px solid var(--line);
+        margin-top: 30px;
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+      footer nav {
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      .track {
+        height: 12px;
+        border-radius: 6px;
+        background: #101718;
+        overflow: hidden;
+      }
+      .fill {
+        height: 100%;
+        background: var(--gold);
+        transition: width 0.25s;
+      }
+      .barrow {
+        margin: 16px 0;
+      }
+      .barrow strong {
+        float: right;
+      }
+      output {
+        font-variant-numeric: tabular-nums;
+      }
+      .steps {
+        color: var(--mint);
+        font-size: 0.88rem;
+      }
+      ul {
+        padding-left: 22px;
+      }
+      @media (max-width: 700px) {
+        header,
+        main,
+        footer {
+          padding: 18px;
+        }
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .stats {
+          grid-template-columns: 1fr;
+          gap: 8px;
+        }
+        .stat {
+          padding: 12px;
+        }
+        .panel {
+          padding: 18px;
+        }
+        .metric {
+          font-size: 1.7rem;
+        }
+        h1 {
+          margin-top: 24px;
+        }
+        .top {
+          font-size: 0.9rem;
+        }
+        button {
+          min-height: 44px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="top">
+        <a href="../index.html">← MKT 412 home</a
+        ><span class="badge">Draft · Instructor playground</span>
+      </div>
+      <p class="eyebrow" style="margin-top: 32px">02 / Competitive strategy</p>
+      <h1>Positioning Map Studio</h1>
+      <p class="intro">
+        An empty space on a map looks tempting. Move your brand, inspect
+        customer preferences, and find out whether anyone wants to meet you
+        there.
+      </p>
+    </header>
+    <main>
+      <div class="grid">
+        <section class="panel">
+          <h2>01 / Shape the competitive landscape</h2>
+          <p class="note">
+            Drag a brand, or select it and use the sliders. Dashed circles show
+            fictional customer segments; circle size reflects segment
+            population.
+          </p>
+          <svg
+            id="map"
+            class="plot"
+            viewBox="0 0 600 440"
+            role="img"
+            aria-label="Positioning map: budget to premium horizontally, familiar to experimental vertically"
+            style="touch-action: none; user-select: none"
+          ></svg>
+          <p class="legend">
+            <span class="gold">● Your brand</span><span>● Competitors</span
+            ><span class="mint">◌ Customer segments</span>
+          </p>
+        </section>
+        <section class="panel">
+          <h2>02 / Find your audience</h2>
+          <label for="brand">Brand to move</label
+          ><select id="brand">
+            <option value="0">Your brand · Novo</option>
+            <option value="1">Everyday Co.</option>
+            <option value="2">Frontier</option>
+            <option value="3">Heritage</option></select
+          ><label for="x"
+            >Price positioning: <output id="x-out"></output> / 100</label
+          ><input id="x" type="range" min="0" max="100" step="1" /><label
+            for="y"
+            >Product positioning: <output id="y-out"></output> / 100</label
+          ><input id="y" type="range" min="0" max="100" step="1" /><label
+            for="focus"
+            >Inspect a customer segment</label
+          ><select id="focus">
+            <option value="0">Value seekers · 55% of market</option>
+            <option value="1">Curious professionals · 30%</option>
+            <option value="2">Premium traditionalists · 15%</option>
+          </select>
+          <div class="stats" style="grid-template-columns: 1fr 1fr">
+            <div class="stat">
+              <small>Your modeled market share</small
+              ><output id="share" class="metric"></output>
+            </div>
+            <div class="stat">
+              <small>Your share of selected segment</small
+              ><output id="segment-share" class="metric"></output>
+            </div>
+          </div>
+          <div id="insight" class="feedback" aria-live="polite"></div>
+          <div class="actions">
+            <button id="reset">Reset map</button
+            ><button id="gap" class="primary">Try the empty corner</button>
+          </div>
+        </section>
+        <section class="panel wide">
+          <h2>03 / Who actually chooses you?</h2>
+          <div class="tablewrap">
+            <table>
+              <caption class="note">
+                Modeled choice shares within each segment, including the option
+                to buy none.
+              </caption>
+              <thead>
+                <tr>
+                  <th>Customer segment</th>
+                  <th>Your brand</th>
+                  <th>Everyday</th>
+                  <th>Frontier</th>
+                  <th>Heritage</th>
+                  <th>None</th>
+                </tr>
+              </thead>
+              <tbody id="shares"></tbody>
+            </table>
+          </div>
+          <details>
+            <summary>Instructor notes / the model behind the map</summary>
+            <p>
+              All brands and segments are fictional. X and Y are perceived
+              positions, not actual prices or measured research. A brand's
+              attractiveness to a segment is exp(−distance² / (2 × 24²)). Each
+              segment also has a fixed no-purchase attractiveness of 0.65.
+              Divide each attractiveness by the total to get choice shares, then
+              weight segment shares by population. This is an illustrative
+              distance model, not a calibrated market forecast.
+            </p>
+            <p>
+              The empty corner button moves Novo to a location with little
+              competition and little nearby demand. A white space is a
+              hypothesis, not proof of an opportunity. There are no costs or
+              margins in this draft; market share alone is not profit.
+            </p>
+            <p>
+              Extension ideas: add segment-specific willingness to pay, let
+              students import research coordinates, or charge for repositioning.
+            </p>
+          </details>
+        </section>
+      </div>
+    </main>
+    <footer>
+      <p>
+        Teaching prototype · fictional scenarios · no live data or AI service ·
+        progress resets on reload.
+      </p>
+      <nav aria-label="Other draft activities">
+        <a href="ab-test-detective.html">A/B Test Detective</a
+        ><a href="budget-allocation-challenge.html"
+          >Budget Allocation Challenge</a
+        ><a href="ai-marketing-critique-arena.html"
+          >AI Marketing Critique Arena</a
+        >
+      </nav>
+      <p>
+        Instructor / agent: see
+        <a href="../docs/draft-activities.html">the extension guide</a> for
+        editable scenarios, model assumptions, and ideas.
+      </p>
+    </footer>
+    <script>
+      "use strict";
+      // INSTRUCTOR: Change coordinates, segment weights, and TASTE_WIDTH to create a new case.
+      const INITIAL_BRANDS = [
+        { name: "Novo", x: 48, y: 52, color: "#efc466" },
+        { name: "Everyday", x: 23, y: 25, color: "#c4bfec" },
+        { name: "Frontier", x: 72, y: 76, color: "#85c9ea" },
+        { name: "Heritage", x: 78, y: 22, color: "#eda7bc" },
+      ];
+      const SEGMENTS = [
+        { name: "Value seekers", x: 25, y: 30, weight: 0.55 },
+        { name: "Curious professionals", x: 65, y: 70, weight: 0.3 },
+        { name: "Premium traditionalists", x: 80, y: 25, weight: 0.15 },
+      ];
+      const TASTE_WIDTH = 24,
+        NO_PURCHASE = 0.65;
+      const $ = (id) => document.getElementById(id);
+      let brands = [],
+        drag = null;
+      function choiceShares(segment) {
+        const attraction = brands.map((b) =>
+          Math.exp(
+            -((b.x - segment.x) ** 2 + (b.y - segment.y) ** 2) /
+              (2 * TASTE_WIDTH ** 2),
+          ),
+        );
+        const total = attraction.reduce((a, b) => a + b, NO_PURCHASE);
+        return [...attraction.map((a) => a / total), NO_PURCHASE / total];
+      }
+      function render() {
+        const b = brands[Number($("brand").value)];
+        $("x").value = b.x;
+        $("y").value = b.y;
+        $("x-out").textContent = b.x;
+        $("y-out").textContent = b.y;
+        const shares = SEGMENTS.map(choiceShares),
+          total = shares.reduce((v, s, i) => v + s[0] * SEGMENTS[i].weight, 0),
+          focus = Number($("focus").value);
+        $("share").textContent = (total * 100).toFixed(1) + "%";
+        $("segment-share").textContent =
+          (shares[focus][0] * 100).toFixed(1) + "%";
+        $("shares").innerHTML = shares
+          .map(
+            (s, i) =>
+              `<tr><th>${SEGMENTS[i].name}</th>${s.map((v) => `<td>${(v * 100).toFixed(1)}%</td>`).join("")}</tr>`,
+          )
+          .join("");
+        const distance = Math.hypot(
+          brands[0].x - SEGMENTS[focus].x,
+          brands[0].y - SEGMENTS[focus].y,
+        );
+        $("insight").textContent =
+          distance > 40
+            ? "Novo is far from this segment’s preferred position. Little nearby competition does not guarantee customer demand."
+            : "Novo is close to this segment’s preferred position, but nearby competitors split its modeled demand. Try moving a rival and watch the shares change.";
+        draw();
+      }
+      function draw() {
+        let svg =
+          '<rect x="60" y="30" width="500" height="340" fill="#171d1e" stroke="#3b4645"/>';
+        for (let n = 25; n < 100; n += 25) {
+          svg += `<path d="M${60 + n * 5},30 V370 M60,${370 - n * 3.4} H560" stroke="#303b3a" stroke-dasharray="4 5"/>`;
+        }
+        SEGMENTS.forEach((s, i) => {
+          svg += `<circle cx="${60 + s.x * 5}" cy="${370 - s.y * 3.4}" r="${25 + Math.sqrt(s.weight) * 40}" fill="#85d9bb" fill-opacity=".05" stroke="#85d9bb" stroke-opacity="${i === Number($("focus").value) ? 1 : 0.4}" stroke-dasharray="5 5"/><text x="${60 + s.x * 5}" y="${370 - s.y * 3.4 + 38}" text-anchor="middle" font-size="12" fill="#bac4c1">${s.name}</text>`;
+        });
+        brands.forEach((b, i) => {
+          svg += `<g data-brand="${i}" style="cursor:grab"><circle cx="${60 + b.x * 5}" cy="${370 - b.y * 3.4}" r="${i === Number($("brand").value) ? 13 : 10}" stroke="#151819" stroke-width="3" fill="${b.color}"/><text x="${60 + b.x * 5}" y="${370 - b.y * 3.4 - 19}" text-anchor="middle" font-size="14" font-weight="700" fill="${b.color}">${b.name}</text></g>`;
+        });
+        svg +=
+          '<text x="60" y="398" font-size="14" fill="#bac4c1">Budget</text><text x="560" y="398" font-size="14" fill="#bac4c1" text-anchor="end">Premium →</text><text x="20" y="360" font-size="13" fill="#bac4c1" transform="rotate(-90 20 360)">Familiar → Experimental</text>';
+        $("map").innerHTML = svg;
+      }
+      function move(event) {
+        const point = $("map").createSVGPoint();
+        point.x = event.clientX;
+        point.y = event.clientY;
+        const p = point.matrixTransform($("map").getScreenCTM().inverse());
+        brands[drag].x = Math.round(Math.max(0, Math.min(100, (p.x - 60) / 5)));
+        brands[drag].y = Math.round(
+          Math.max(0, Math.min(100, (370 - p.y) / 3.4)),
+        );
+        render();
+      }
+      $("map").addEventListener("pointerdown", (e) => {
+        const target = e.target.closest("[data-brand]");
+        if (!target) return;
+        drag = Number(target.dataset.brand);
+        $("brand").value = drag;
+        $("map").setPointerCapture(e.pointerId);
+        move(e);
+      });
+      $("map").addEventListener("pointermove", (e) => {
+        if (drag !== null) move(e);
+      });
+      $("map").addEventListener("pointerup", () => (drag = null));
+      $("map").addEventListener("pointercancel", () => (drag = null));
+      ["x", "y"].forEach((axis) =>
+        $(axis).addEventListener("input", () => {
+          brands[Number($("brand").value)][axis] = Number($(axis).value);
+          render();
+        }),
+      );
+      $("brand").addEventListener("change", render);
+      $("focus").addEventListener("change", render);
+      function reset() {
+        brands = INITIAL_BRANDS.map((b) => ({ ...b }));
+        $("brand").value = "0";
+        $("focus").value = "0";
+        render();
+      }
+      $("reset").addEventListener("click", reset);
+      $("gap").addEventListener("click", () => {
+        brands[0].x = 8;
+        brands[0].y = 95;
+        $("brand").value = "0";
+        render();
+      });
+      reset();
+    </script>
+  </body>
+</html>

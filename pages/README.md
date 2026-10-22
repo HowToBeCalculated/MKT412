@@ -14,6 +14,19 @@ Each HTML file in this directory is an independent activity. The homepage is `..
 | [seo_serp_teardown_simulator.html](seo_serp_teardown_simulator.html) | Synthetic SERP scenarios and heuristic SEO scoring, predicted rank, and advice. No live search-engine data. | Visible |
 | [solvix-new-product-simulator.html](solvix-new-product-simulator.html) | Solvix case version of the launch simulator with its own defaults and implementation. | Direct link only |
 
+## New Draft Studio activities
+
+These are playable, intentionally simplified bases for another professor and agent to extend. All four have homepage cards, reset controls, inline instructor notes, and no external dependencies. See the [extension guide](../docs/draft-activities.html).
+
+| File | What it teaches | Main editable blocks |
+| --- | --- | --- |
+| [ab-test-detective.html](ab-test-detective.html) | Sampling variation and observed vs underlying conversion rates; four reveal checkpoints and Wilson intervals. | `SCENARIOS`, `CHECKPOINTS`, `wilson()`, `advance()` |
+| [positioning-map-studio.html](positioning-map-studio.html) | Customer preference, competition, and why an empty position may have little demand. Drag brands or use sliders. | `INITIAL_BRANDS`, `SEGMENTS`, `TASTE_WIDTH`, `NO_PURCHASE`, `choiceShares()` |
+| [budget-allocation-challenge.html](budget-allocation-challenge.html) | Diminishing returns, a fixed budget, channel interactions, and market events. | `CHANNELS`, `EVENTS`, `BUDGET`, `MARGIN`, `evaluate()` |
+| [ai-marketing-critique-arena.html](ai-marketing-critique-arena.html) | Critiquing fictional AI-style campaign copy against a supplied brief and evidence constraints. | `CASES`, `ISSUE_TYPES`, `review()` |
+
+No page calls an AI model or stores student data. State remains in memory and resets on reload. Budget history is per session; critique scoring is a teaching rubric. A/B intervals use the formula linked from [NIST](https://www.itl.nist.gov/div898/handbook/prc/section2/prc241.htm); the positioning and budget models are explicitly invented for classroom exploration. The default A/B experiment is seeded; budget events follow a fixed cycle rather than a random draw.
+
 ## Where to make changes
 
 - **Both launch simulators:** look for `defaults`, `state`, `applyPreset()`, and `currentParams()` for inputs; `computeDeterministic()` and `simulate()` for calculations; `render()`, chart helpers, and export handlers for outputs. They use seeded randomness. Review both files when applying a shared model correction; changing one does not update the other. In the Solvix file, CSV handlers use optional element lookup, so check which export buttons are actually present before promising an export UI.
@@ -30,7 +43,7 @@ Each HTML file in this directory is an independent activity. The homepage is `..
 | Root homepage | Tailwind CSS CDN; Google Fonts (Inter) |
 | EcoCharge TAM/SAM/SOM | Tailwind CSS CDN; Lucide icons from unpkg (`@latest`); Google Fonts (Inter) |
 | Marketing dashboard | Chart.js 4.4.3 from jsDelivr |
-| Other five activities | No external script or stylesheet URLs in the current source |
+| Other nine activities (including all four drafts) | No external script or stylesheet URLs in the current source |
 
 These dependencies load at runtime, without an install/build step. CDN changes or blocked network access can affect the dependent pages. The other activities use inline styles/scripts and native browser features, including canvas charts where applicable.
 
